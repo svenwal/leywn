@@ -88,7 +88,7 @@ defmodule Leywn.Router do
     end
   end
 
-  get "/random/uing" do
+  get "/random/uint" do
     Leywn.Respond.send(conn, 200, %{value: Leywn.Random.random_uint()}, root: "random")
   end
 
@@ -212,7 +212,7 @@ defmodule Leywn.Router do
           <li><code>GET /random</code> — sample of all random values</li>
           <li><code>GET /random/int</code> — random integer in [-32000, 32000]</li>
           <li><code>GET /random/int/{lower}/{upper}</code> — random integer in custom range</li>
-          <li><code>GET /random/uing</code> — random unsigned integer in [0, 65535]</li>
+          <li><code>GET /random/uint</code> — random unsigned integer in [0, 65535]</li>
           <li><code>GET /random/lorem-ipsum</code> — one paragraph of Lorem Ipsum</li>
           <li><code>GET /random/lorem-ipsum/{n}</code> — up to 32 paragraphs of Lorem Ipsum</li>
         </ul>

@@ -460,11 +460,11 @@ curl http://localhost:4000/random/int/-1000000/1000000
 #### Unsigned integer
 
 ```
-GET /random/uing    # range: 0 to 65535
+GET /random/uint    # range: 0 to 65535
 ```
 
 ```bash
-curl http://localhost:4000/random/uing
+curl http://localhost:4000/random/uint
 # {"value": 42817}
 ```
 

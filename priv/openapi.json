@@ -307,7 +307,7 @@
         }
       }
     },
-    "/random/uing": {
+    "/random/uint": {
       "summary": "Random unsigned integer",
       "get": {
         "summary": "Random unsigned integer in [0, 65535]",
