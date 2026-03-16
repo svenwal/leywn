@@ -176,6 +176,7 @@ defmodule Leywn.Router do
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Leywn – Last Echo You Will Need</title>
+      <link rel="icon" type="image/png" href="/image/png">
       <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
       <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
