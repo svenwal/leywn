@@ -26,8 +26,8 @@ RUN mix compile
 # The app listens on PORT (default 4000, overridable via env)
 EXPOSE 4000
 EXPOSE 4443
-ENV PORT=4000 \
-    TLS_PORT=4443
+ENV LEYWN_PORT=4000 \
+    LEYWN_TLS_PORT=4443
 
 # Run the Plug/Cowboy app
 CMD ["mix", "run", "--no-halt"]

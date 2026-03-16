@@ -11,7 +11,7 @@ defmodule Leywn.RuntimeConfig do
 end
 
 config :leywn,
-  port: Leywn.RuntimeConfig.int_env("PORT", 4000),
-  tls_port: Leywn.RuntimeConfig.int_env("TLS_PORT", 4443),
-  echo_max_body_bytes: Leywn.RuntimeConfig.int_env("ECHO_MAX_BODY_BYTES", 65_536)
+  port: Leywn.RuntimeConfig.int_env("LEYWN_PORT", 4000),
+  tls_port: Leywn.RuntimeConfig.int_env("LEYWN_TLS_PORT", 4443),
+  echo_max_body_bytes: Leywn.RuntimeConfig.int_env("LEYWN_ECHO_MAX_BODY_BYTES", 65_536)
 
