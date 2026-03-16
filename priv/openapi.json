@@ -1,0 +1,348 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Leywn",
+    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/echo": {
+      "summary": "Echo all request information",
+      "description": "Returns all details of the incoming request: method, path, query parameters, headers, host, scheme, remote IP, and body (if text/UTF-8, up to the configured byte limit).",
+      "get": { "$ref": "#/components/responses/echoMethods" },
+      "post": { "$ref": "#/components/responses/echoMethods" },
+      "put": { "$ref": "#/components/responses/echoMethods" },
+      "patch": { "$ref": "#/components/responses/echoMethods" },
+      "delete": { "$ref": "#/components/responses/echoMethods" }
+    },
+    "/echo/{path}": {
+      "summary": "Echo all request information (sub-path)",
+      "description": "Same as `/echo` but also captures the sub-path.",
+      "parameters": [
+        {
+          "name": "path",
+          "in": "path",
+          "required": true,
+          "description": "Any sub-path, e.g. `foo/bar`",
+          "schema": { "type": "string" }
+        }
+      ],
+      "get": { "$ref": "#/components/responses/echoMethods" },
+      "post": { "$ref": "#/components/responses/echoMethods" },
+      "put": { "$ref": "#/components/responses/echoMethods" },
+      "patch": { "$ref": "#/components/responses/echoMethods" },
+      "delete": { "$ref": "#/components/responses/echoMethods" }
+    },
+    "/status/{code}": {
+      "summary": "Return any HTTP status code",
+      "description": "Responds with the requested HTTP status code. Informational (1xx) and no-content (204, 304) responses have an empty body; all others include `{\"status\": <code>}`.",
+      "parameters": [
+        {
+          "name": "code",
+          "in": "path",
+          "required": true,
+          "description": "HTTP status code in the range 100–599",
+          "schema": { "type": "integer", "minimum": 100, "maximum": 599, "example": 418 }
+        }
+      ],
+      "get": {
+        "summary": "Return the given status code",
+        "responses": {
+          "default": {
+            "description": "The status code you requested",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "integer", "example": 418 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": { "$ref": "#/components/responses/statusMethods" },
+      "put": { "$ref": "#/components/responses/statusMethods" },
+      "patch": { "$ref": "#/components/responses/statusMethods" },
+      "delete": { "$ref": "#/components/responses/statusMethods" }
+    },
+    "/auth/basic-auth": {
+      "summary": "Basic Auth (default credentials)",
+      "description": "Enforces HTTP Basic Authentication with username `basic` and password `password`. Returns 401 with a `WWW-Authenticate` header if credentials are missing or wrong.",
+      "get": { "$ref": "#/components/responses/authMethods" },
+      "post": { "$ref": "#/components/responses/authMethods" },
+      "put": { "$ref": "#/components/responses/authMethods" },
+      "patch": { "$ref": "#/components/responses/authMethods" },
+      "delete": { "$ref": "#/components/responses/authMethods" }
+    },
+    "/auth/basic-auth/{username}/{password}": {
+      "summary": "Basic Auth (custom credentials)",
+      "description": "Enforces HTTP Basic Authentication with the credentials specified in the path.",
+      "parameters": [
+        {
+          "name": "username",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "example": "alice" }
+        },
+        {
+          "name": "password",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "example": "secret" }
+        }
+      ],
+      "get": { "$ref": "#/components/responses/authMethods" },
+      "post": { "$ref": "#/components/responses/authMethods" },
+      "put": { "$ref": "#/components/responses/authMethods" },
+      "patch": { "$ref": "#/components/responses/authMethods" },
+      "delete": { "$ref": "#/components/responses/authMethods" }
+    },
+    "/auth/api-key": {
+      "summary": "API key auth (default header/value)",
+      "description": "Enforces an API key by checking that the request includes the header `apikey: my-key`.",
+      "parameters": [
+        {
+          "name": "apikey",
+          "in": "header",
+          "required": true,
+          "schema": { "type": "string", "example": "my-key" }
+        }
+      ],
+      "get": { "$ref": "#/components/responses/authMethods" },
+      "post": { "$ref": "#/components/responses/authMethods" },
+      "put": { "$ref": "#/components/responses/authMethods" },
+      "patch": { "$ref": "#/components/responses/authMethods" },
+      "delete": { "$ref": "#/components/responses/authMethods" }
+    },
+    "/auth/api-key/{header_name}/{key_value}": {
+      "summary": "API key auth (custom header/value)",
+      "description": "Enforces an API key by checking that the request includes a header named `header_name` with value `key_value`.",
+      "parameters": [
+        {
+          "name": "header_name",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "example": "X-Api-Key" }
+        },
+        {
+          "name": "key_value",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "example": "supersecret" }
+        }
+      ],
+      "get": { "$ref": "#/components/responses/authMethods" },
+      "post": { "$ref": "#/components/responses/authMethods" },
+      "put": { "$ref": "#/components/responses/authMethods" },
+      "patch": { "$ref": "#/components/responses/authMethods" },
+      "delete": { "$ref": "#/components/responses/authMethods" }
+    },
+    "/auth/jwt": {
+      "summary": "JWT Bearer auth",
+      "description": "Enforces a Bearer JWT in the `Authorization` header. Validates structure and decodes header/claims — does **not** verify the signature.",
+      "parameters": [
+        {
+          "name": "Authorization",
+          "in": "header",
+          "required": true,
+          "schema": { "type": "string", "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.signature" }
+        }
+      ],
+      "get": {
+        "summary": "Validate JWT",
+        "responses": {
+          "200": {
+            "description": "Valid JWT — returns decoded header and claims",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/unauthorized" }
+        }
+      },
+      "post": { "$ref": "#/components/responses/authMethods" },
+      "put": { "$ref": "#/components/responses/authMethods" },
+      "patch": { "$ref": "#/components/responses/authMethods" },
+      "delete": { "$ref": "#/components/responses/authMethods" }
+    },
+    "/auth/mtls": {
+      "summary": "mTLS client certificate auth",
+      "description": "Validates that the client presented a certificate signed by the Leywn demo CA. Must be called on the **HTTPS port (4443)**. Download the required client cert and key first from `/auth/mtls/get-client-cert`.",
+      "get": { "$ref": "#/components/responses/authMethods" },
+      "post": { "$ref": "#/components/responses/authMethods" },
+      "put": { "$ref": "#/components/responses/authMethods" },
+      "patch": { "$ref": "#/components/responses/authMethods" },
+      "delete": { "$ref": "#/components/responses/authMethods" }
+    },
+    "/auth/mtls/get-client-cert": {
+      "summary": "Download the generated client certificate and key",
+      "description": "Returns the PEM-encoded client certificate and private key generated at startup. Use these with `curl --cert` / `--key` to authenticate against `/auth/mtls` on port 4443.\n\nA new cert/key pair is generated on every server start.",
+      "get": {
+        "summary": "Get client cert and key",
+        "responses": {
+          "200": {
+            "description": "Client certificate and key in PEM format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cert_pem": { "type": "string", "description": "PEM-encoded client certificate" },
+                    "key_pem": { "type": "string", "description": "PEM-encoded client private key" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/image/{type}": {
+      "summary": "Serve a demo image",
+      "parameters": [
+        {
+          "name": "type",
+          "in": "path",
+          "required": true,
+          "description": "Image format",
+          "schema": { "type": "string", "enum": ["png", "jpeg", "gif"] }
+        }
+      ],
+      "get": {
+        "summary": "Get the Leywn demo image",
+        "responses": {
+          "200": {
+            "description": "Image file",
+            "content": {
+              "image/png": { "schema": { "type": "string", "format": "binary" } },
+              "image/jpeg": { "schema": { "type": "string", "format": "binary" } },
+              "image/gif": { "schema": { "type": "string", "format": "binary" } }
+            }
+          },
+          "400": {
+            "description": "Unsupported image type",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EchoBody": {
+        "type": "object",
+        "properties": {
+          "present": { "type": "boolean" },
+          "bytes": { "type": "integer" },
+          "truncated": { "type": "boolean" },
+          "utf8": { "type": "boolean", "nullable": true },
+          "included": { "type": "boolean" },
+          "body": { "type": "string", "nullable": true },
+          "reason": { "type": "string", "nullable": true }
+        }
+      },
+      "EchoResponse": {
+        "type": "object",
+        "properties": {
+          "method": { "type": "string", "example": "GET" },
+          "scheme": { "type": "string", "example": "http" },
+          "host": { "type": "string", "example": "localhost" },
+          "port": { "type": "integer", "example": 4000 },
+          "path": { "type": "string", "example": "/echo" },
+          "path_info": { "type": "array", "items": { "type": "string" } },
+          "query_string": { "type": "string", "example": "foo=bar" },
+          "query_params": { "type": "object", "additionalProperties": true },
+          "headers": {
+            "type": "object",
+            "additionalProperties": { "type": "array", "items": { "type": "string" } }
+          },
+          "remote_ip": { "type": "string", "example": "127.0.0.1" },
+          "body": { "$ref": "#/components/schemas/EchoBody" },
+          "timestamp_unix_ms": { "type": "integer", "example": 1700000000000 }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "authenticated": { "type": "boolean", "example": true },
+          "auth_type": { "type": "string", "example": "basic-auth" },
+          "username": { "type": "string", "example": "basic", "description": "Present for basic-auth" },
+          "header": { "type": "string", "example": "apikey", "description": "Present for api-key" },
+          "claims": { "type": "object", "additionalProperties": true, "description": "Present for jwt" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      }
+    },
+    "responses": {
+      "echoMethods": {
+        "summary": "Echo all request information",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EchoResponse" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/EchoResponse" }
+              }
+            }
+          }
+        }
+      },
+      "statusMethods": {
+        "summary": "Return the given status code",
+        "responses": {
+          "default": {
+            "description": "The status code you requested"
+          }
+        }
+      },
+      "authMethods": {
+        "summary": "Authenticate",
+        "responses": {
+          "200": {
+            "description": "Authenticated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              },
+              "application/xml": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/unauthorized" }
+        }
+      },
+      "unauthorized": {
+        "description": "Authentication failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "authenticated": { "type": "boolean", "example": false },
+                "error": { "type": "string", "example": "unauthorized" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

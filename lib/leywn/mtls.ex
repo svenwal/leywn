@@ -1,0 +1,110 @@
+defmodule Leywn.MTLS do
+  @moduledoc """
+  Generates an in-memory CA, server certificate, and client certificate on every
+  application start using OTP's built-in :public_key module.
+  """
+
+  # OIDs
+  @ecdsa_with_sha256 {1, 2, 840, 10045, 4, 3, 2}
+  @id_ec_public_key {1, 2, 840, 10045, 2, 1}
+  @secp256r1 {1, 2, 840, 10045, 3, 1, 7}
+  @id_at_common_name {2, 5, 4, 3}
+  @id_ce_basic_constraints {2, 5, 29, 19}
+
+  # Validity window: 2024-01-01 to 2035-01-01 (generalTime format)
+  @not_before ~c"20240101000000Z"
+  @not_after ~c"20350101000000Z"
+
+  def init do
+    ca_key = :public_key.generate_key({:namedCurve, :secp256r1})
+    ca_cert_der = build_ca_cert(ca_key)
+
+    server_key = :public_key.generate_key({:namedCurve, :secp256r1})
+    server_cert_der = build_end_cert(server_key, "localhost", ca_key, ca_cert_der)
+
+    client_key = :public_key.generate_key({:namedCurve, :secp256r1})
+    client_cert_der = build_end_cert(client_key, "Leywn Demo Client", ca_key, ca_cert_der)
+
+    :persistent_term.put(:leywn_mtls, %{
+      client_cert_pem: cert_to_pem(client_cert_der),
+      client_key_pem: key_to_pem(client_key)
+    })
+
+    [
+      cert: server_cert_der,
+      key: {:ECPrivateKey, :public_key.der_encode(:ECPrivateKey, server_key)},
+      cacerts: [ca_cert_der],
+      verify: :verify_peer,
+      fail_if_no_peer_cert: false
+    ]
+  end
+
+  def client_cert_pem, do: :persistent_term.get(:leywn_mtls).client_cert_pem
+  def client_key_pem, do: :persistent_term.get(:leywn_mtls).client_key_pem
+
+  defp build_ca_cert(key) do
+    subject = rdn("Leywn Demo CA")
+    serial = :rand.uniform(1_000_000_000)
+    extensions = [basic_constraints_ext(true)]
+    tbs = otp_tbs(serial, subject, subject, ec_spki(key), extensions)
+    :public_key.pkix_sign(tbs, key)
+  end
+
+  defp build_end_cert(key, cn, ca_key, ca_cert_der) do
+    ca_cert = :public_key.pkix_decode_cert(ca_cert_der, :otp)
+    ca_subject = cert_subject(ca_cert)
+    subject = rdn(cn)
+    serial = :rand.uniform(1_000_000_000)
+    extensions = [basic_constraints_ext(false)]
+    tbs = otp_tbs(serial, ca_subject, subject, ec_spki(key), extensions)
+    :public_key.pkix_sign(tbs, ca_key)
+  end
+
+  defp otp_tbs(serial, issuer, subject, spki, extensions) do
+    {:'OTPTBSCertificate',
+     :v3,
+     serial,
+     {:'SignatureAlgorithm', @ecdsa_with_sha256, :asn1_NOVALUE},
+     issuer,
+     {:'Validity', {:generalTime, @not_before}, {:generalTime, @not_after}},
+     subject,
+     spki,
+     :asn1_NOVALUE,
+     :asn1_NOVALUE,
+     extensions}
+  end
+
+  defp ec_spki({:'ECPrivateKey', _version, _priv, _params, pub_bytes}) do
+    {:'OTPSubjectPublicKeyInfo',
+     {:'PublicKeyAlgorithm', @id_ec_public_key, {:namedCurve, @secp256r1}},
+     {:ECPoint, pub_bytes}}
+  end
+
+  # OTP 26+ adds a 6th attributes field to ECPrivateKey
+  defp ec_spki({:'ECPrivateKey', _version, _priv, _params, pub_bytes, _attrs}) do
+    {:'OTPSubjectPublicKeyInfo',
+     {:'PublicKeyAlgorithm', @id_ec_public_key, {:namedCurve, @secp256r1}},
+     {:ECPoint, pub_bytes}}
+  end
+
+  defp rdn(cn) do
+    {:rdnSequence, [[{:'AttributeTypeAndValue', @id_at_common_name, {:utf8String, cn}}]]}
+  end
+
+  defp basic_constraints_ext(is_ca) do
+    {:'Extension', @id_ce_basic_constraints, true, {:'BasicConstraints', is_ca, :asn1_NOVALUE}}
+  end
+
+  defp cert_subject({:'OTPCertificate', tbs, _, _}) do
+    {:'OTPTBSCertificate', _, _, _, _issuer, _, subject, _, _, _, _} = tbs
+    subject
+  end
+
+  defp cert_to_pem(der) do
+    :public_key.pem_encode([{:Certificate, der, :not_encrypted}])
+  end
+
+  defp key_to_pem(key) do
+    :public_key.pem_encode([:public_key.pem_entry_encode(:ECPrivateKey, key)])
+  end
+end
