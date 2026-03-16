@@ -76,9 +76,9 @@ defmodule Leywn.Auth do
   end
 
   def handle_mtls(conn) do
-    case Plug.Conn.get_peer_data(conn) do
-      %{ssl_cert: cert} when not is_nil(cert) ->
-        cert_info = extract_cert_info(cert)
+    case get_mtls_cert(conn) do
+      {:ok, cert_der} ->
+        cert_info = extract_cert_info(cert_der)
         {echo_data, conn} = build_echo(conn)
 
         Leywn.Respond.send(
@@ -88,13 +88,33 @@ defmodule Leywn.Auth do
           root: "auth"
         )
 
-      _ ->
-        Leywn.Respond.send(
-          conn,
-          401,
-          %{authenticated: false, error: "no client certificate presented"},
-          root: "auth"
-        )
+      {:error, reason} ->
+        Leywn.Respond.send(conn, 401, %{authenticated: false, error: reason}, root: "auth")
+    end
+  end
+
+  defp get_mtls_cert(conn) do
+    case System.get_env("LEYWN_MTLS_IN_HEADER") do
+      nil ->
+        case Plug.Conn.get_peer_data(conn) do
+          %{ssl_cert: cert} when not is_nil(cert) -> {:ok, cert}
+          _ -> {:error, "no client certificate presented"}
+        end
+
+      header_name ->
+        case get_req_header(conn, String.downcase(header_name)) do
+          [] ->
+            {:error, "missing certificate header #{header_name}"}
+
+          [pem | _] ->
+            pem
+            |> URI.decode()
+            |> :public_key.pem_decode()
+            |> case do
+              [{:Certificate, der, :not_encrypted} | _] -> {:ok, der}
+              _ -> {:error, "invalid PEM certificate in header #{header_name}"}
+            end
+        end
     end
   end
 

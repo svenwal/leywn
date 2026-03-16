@@ -172,7 +172,7 @@
     },
     "/auth/mtls": {
       "summary": "mTLS client certificate auth",
-      "description": "Validates that the client presented a certificate signed by the Leywn demo CA. Must be called on the **HTTPS port (4443)**. Download the required client cert and key first from `/auth/mtls/get-client-cert`.",
+      "description": "Validates that the client presented a certificate signed by the Leywn demo CA. Must be called on the **HTTPS port (4443)**. Download the required client cert and key first from `/auth/mtls/get-client-cert`.\n\nWhen the environment variable `LEYWN_MTLS_IN_HEADER` is set to a header name (e.g. `X-Client-Cert`), the certificate is read as PEM from that request header instead of the TLS handshake. This is useful when running behind a TLS-terminating load balancer or proxy that forwards the client certificate in a header.",
       "get": { "$ref": "#/components/responses/authMethods" },
       "post": { "$ref": "#/components/responses/authMethods" },
       "put": { "$ref": "#/components/responses/authMethods" },
