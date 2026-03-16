@@ -37,6 +37,76 @@ defmodule Leywn.Router do
     Leywn.Respond.send(conn, 200, data, root: "echo")
   end
 
+  match "/anything" do
+    conn = Plug.Conn.fetch_query_params(conn)
+    max_body = Application.get_env(:leywn, :echo_max_body_bytes, 65_536)
+    {body_info, conn} = Leywn.Body.read(conn, max_body)
+    data = Leywn.Echo.build(conn, body_info)
+    Leywn.Respond.send(conn, 200, data, root: "echo")
+  end
+
+  match "/anything/*_" do
+    conn = Plug.Conn.fetch_query_params(conn)
+    max_body = Application.get_env(:leywn, :echo_max_body_bytes, 65_536)
+    {body_info, conn} = Leywn.Body.read(conn, max_body)
+    data = Leywn.Echo.build(conn, body_info)
+    Leywn.Respond.send(conn, 200, data, root: "echo")
+  end
+
+  get "/uuid" do
+    Leywn.Respond.send(conn, 200, %{uuid: Leywn.Random.uuid()}, root: "uuid")
+  end
+
+  get "/guuid" do
+    Leywn.Respond.send(conn, 200, %{guuid: Leywn.Random.guuid()}, root: "guuid")
+  end
+
+  get "/random" do
+    data = %{
+      int: Leywn.Random.random_int(),
+      uint: Leywn.Random.random_uint(),
+      uuid: Leywn.Random.uuid(),
+      guuid: Leywn.Random.guuid(),
+      lorem_ipsum: hd(Leywn.Random.lorem_ipsum(1))
+    }
+    Leywn.Respond.send(conn, 200, data, root: "random")
+  end
+
+  get "/random/int" do
+    Leywn.Respond.send(conn, 200, %{value: Leywn.Random.random_int()}, root: "random")
+  end
+
+  get "/random/int/:lower/:upper" do
+    with {lo, ""} <- Integer.parse(lower),
+         {hi, ""} <- Integer.parse(upper),
+         true <- lo <= hi do
+      Leywn.Respond.send(conn, 200, %{value: Leywn.Random.random_int(lo, hi)}, root: "random")
+    else
+      _ ->
+        Leywn.Respond.send(conn, 400,
+          %{error: "invalid_range", lower: lower, upper: upper}, root: "error")
+    end
+  end
+
+  get "/random/uing" do
+    Leywn.Respond.send(conn, 200, %{value: Leywn.Random.random_uint()}, root: "random")
+  end
+
+  get "/random/lorem-ipsum" do
+    paragraphs = Leywn.Random.lorem_ipsum(1)
+    Leywn.Respond.send(conn, 200, %{paragraphs: paragraphs}, root: "lorem_ipsum")
+  end
+
+  get "/random/lorem-ipsum/:count" do
+    case Integer.parse(count) do
+      {n, ""} when n >= 1 ->
+        paragraphs = Leywn.Random.lorem_ipsum(n)
+        Leywn.Respond.send(conn, 200, %{paragraphs: paragraphs}, root: "lorem_ipsum")
+      _ ->
+        Leywn.Respond.send(conn, 400, %{error: "invalid_count", provided: count}, root: "error")
+    end
+  end
+
   match "/status/:code" do
     case Integer.parse(code) do
       {status, ""} when status in 100..599 ->
@@ -136,6 +206,15 @@ defmodule Leywn.Router do
           <li><code>ANY /auth/jwt</code> — Bearer JWT (validates structure, not signature)</li>
           <li><code>ANY /auth/mtls</code> — mTLS client certificate (HTTPS port 4443)</li>
           <li><code>GET /auth/mtls/get-client-cert</code> — download the generated client cert + key</li>
+          <li><code>ANY /anything</code> — alias for <code>/echo</code></li>
+          <li><code>GET /uuid</code> — random UUID v4</li>
+          <li><code>GET /guuid</code> — random GUID (UUID v4 in curly braces)</li>
+          <li><code>GET /random</code> — sample of all random values</li>
+          <li><code>GET /random/int</code> — random integer in [-32000, 32000]</li>
+          <li><code>GET /random/int/{lower}/{upper}</code> — random integer in custom range</li>
+          <li><code>GET /random/uing</code> — random unsigned integer in [0, 65535]</li>
+          <li><code>GET /random/lorem-ipsum</code> — one paragraph of Lorem Ipsum</li>
+          <li><code>GET /random/lorem-ipsum/{n}</code> — up to 32 paragraphs of Lorem Ipsum</li>
         </ul>
       </div>
       <div id="swagger-ui"></div>

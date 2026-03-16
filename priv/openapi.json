@@ -202,6 +202,163 @@
         }
       }
     },
+    "/anything": {
+      "summary": "Echo all request information (alias)",
+      "description": "Identical to `/echo` — returns all details of the incoming request. Provided as a convenience alias.",
+      "get": { "$ref": "#/components/responses/echoMethods" },
+      "post": { "$ref": "#/components/responses/echoMethods" },
+      "put": { "$ref": "#/components/responses/echoMethods" },
+      "patch": { "$ref": "#/components/responses/echoMethods" },
+      "delete": { "$ref": "#/components/responses/echoMethods" }
+    },
+    "/anything/{path}": {
+      "summary": "Echo all request information – alias sub-path",
+      "parameters": [
+        { "name": "path", "in": "path", "required": true, "schema": { "type": "string" } }
+      ],
+      "get": { "$ref": "#/components/responses/echoMethods" },
+      "post": { "$ref": "#/components/responses/echoMethods" },
+      "put": { "$ref": "#/components/responses/echoMethods" },
+      "patch": { "$ref": "#/components/responses/echoMethods" },
+      "delete": { "$ref": "#/components/responses/echoMethods" }
+    },
+    "/uuid": {
+      "summary": "Generate a UUID v4",
+      "get": {
+        "summary": "Random UUID v4",
+        "responses": {
+          "200": {
+            "description": "A random UUID v4",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "uuid": { "type": "string", "example": "550e8400-e29b-41d4-a716-446655440000" } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/guuid": {
+      "summary": "Generate a GUID",
+      "get": {
+        "summary": "Random GUID (UUID v4 in curly braces)",
+        "responses": {
+          "200": {
+            "description": "A random GUID",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "guuid": { "type": "string", "example": "{550e8400-e29b-41d4-a716-446655440000}" } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/random": {
+      "summary": "Sample of all random values",
+      "get": {
+        "summary": "Returns one of each random type",
+        "responses": {
+          "200": {
+            "description": "A random int, uint, UUID, GUID and lorem-ipsum paragraph",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RandomAll" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/random/int": {
+      "summary": "Random signed integer",
+      "get": {
+        "summary": "Random integer in [-32000, 32000]",
+        "responses": {
+          "200": {
+            "description": "Random integer",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "value": { "type": "integer", "example": 12345 } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/random/int/{lower}/{upper}": {
+      "summary": "Random signed integer in custom range",
+      "parameters": [
+        { "name": "lower", "in": "path", "required": true, "schema": { "type": "integer", "example": -100 } },
+        { "name": "upper", "in": "path", "required": true, "schema": { "type": "integer", "example": 100 } }
+      ],
+      "get": {
+        "summary": "Random integer between lower and upper (inclusive)",
+        "responses": {
+          "200": {
+            "description": "Random integer",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "value": { "type": "integer" } } }
+              }
+            }
+          },
+          "400": { "description": "Invalid range", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/random/uing": {
+      "summary": "Random unsigned integer",
+      "get": {
+        "summary": "Random unsigned integer in [0, 65535]",
+        "responses": {
+          "200": {
+            "description": "Random unsigned integer",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "value": { "type": "integer", "minimum": 0, "example": 42000 } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/random/lorem-ipsum": {
+      "summary": "One paragraph of Lorem Ipsum",
+      "get": {
+        "summary": "Returns one Lorem Ipsum paragraph",
+        "responses": {
+          "200": {
+            "description": "Lorem Ipsum text",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoremIpsum" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/random/lorem-ipsum/{count}": {
+      "summary": "Multiple Lorem Ipsum paragraphs",
+      "parameters": [
+        { "name": "count", "in": "path", "required": true, "description": "Number of paragraphs (1–32)", "schema": { "type": "integer", "minimum": 1, "maximum": 32, "example": 3 } }
+      ],
+      "get": {
+        "summary": "Returns up to 32 Lorem Ipsum paragraphs",
+        "responses": {
+          "200": {
+            "description": "Lorem Ipsum paragraphs",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoremIpsum" }
+              }
+            }
+          },
+          "400": { "description": "Invalid count", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
     "/image/{type}": {
       "summary": "Serve a demo image",
       "parameters": [
@@ -278,6 +435,22 @@
           "username": { "type": "string", "example": "basic", "description": "Present for basic-auth" },
           "header": { "type": "string", "example": "apikey", "description": "Present for api-key" },
           "claims": { "type": "object", "additionalProperties": true, "description": "Present for jwt" }
+        }
+      },
+      "RandomAll": {
+        "type": "object",
+        "properties": {
+          "int": { "type": "integer" },
+          "uint": { "type": "integer", "minimum": 0 },
+          "uuid": { "type": "string" },
+          "guuid": { "type": "string" },
+          "lorem_ipsum": { "type": "string" }
+        }
+      },
+      "LoremIpsum": {
+        "type": "object",
+        "properties": {
+          "paragraphs": { "type": "array", "items": { "type": "string" } }
         }
       },
       "Error": {
