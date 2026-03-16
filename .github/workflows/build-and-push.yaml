@@ -34,3 +34,11 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/leywn:${{ github.ref_name }}
             ${{ secrets.DOCKERHUB_USERNAME }}/leywn:latest
           platforms: linux/amd64,linux/arm64
+      -
+        name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/leywn
+          readme-filepath: ./README.md
