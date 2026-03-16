@@ -5,7 +5,11 @@ defmodule Leywn.RuntimeConfig do
     case System.get_env(var) do
       nil -> default
       "" -> default
-      value -> String.to_integer(value)
+      value ->
+        case Integer.parse(value) do
+          {n, ""} -> n
+          _ -> default
+        end
     end
   end
 end
