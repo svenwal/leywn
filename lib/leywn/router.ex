@@ -6,6 +6,20 @@ defmodule Leywn.Router do
   plug :dispatch
 
   get "/" do
+    if System.get_env("LEYWN_ECHO_ON_HOME") == "true" do
+      conn = Plug.Conn.fetch_query_params(conn)
+      max_body = Application.get_env(:leywn, :echo_max_body_bytes, 65_536)
+      {body_info, conn} = Leywn.Body.read(conn, max_body)
+      data = Leywn.Echo.build(conn, body_info)
+      Leywn.Respond.send(conn, 200, data, root: "echo")
+    else
+      conn
+      |> Plug.Conn.put_resp_content_type("text/html")
+      |> Plug.Conn.send_resp(200, home_html())
+    end
+  end
+
+  get "/docs" do
     conn
     |> Plug.Conn.put_resp_content_type("text/html")
     |> Plug.Conn.send_resp(200, home_html())
@@ -141,6 +155,10 @@ defmodule Leywn.Router do
     Leywn.Auth.handle_jwt(conn)
   end
 
+  match "/auth/jwt/exchange" do
+    Leywn.Auth.handle_jwt_exchange(conn)
+  end
+
   match "/auth/mtls" do
     Leywn.Auth.handle_mtls(conn)
   end
@@ -150,6 +168,46 @@ defmodule Leywn.Router do
       cert_pem: Leywn.MTLS.client_cert_pem(),
       key_pem: Leywn.MTLS.client_key_pem()
     }, root: "client_cert")
+  end
+
+  get "/ip" do
+    Leywn.Respond.send(conn, 200, Leywn.Info.ip_data(conn), root: "ip")
+  end
+
+  get "/ip/v4" do
+    Leywn.Respond.send(conn, 200, Leywn.Info.ipv4_data(conn), root: "ip")
+  end
+
+  get "/ip/v6" do
+    Leywn.Respond.send(conn, 200, Leywn.Info.ipv6_data(conn), root: "ip")
+  end
+
+  get "/date" do
+    Leywn.Respond.send(conn, 200, Leywn.Info.date_utc(), root: "date")
+  end
+
+  get "/date/*timezone_parts" do
+    tz = Enum.join(timezone_parts, "/")
+    case Leywn.Info.date_tz(tz) do
+      {:ok, data} ->
+        Leywn.Respond.send(conn, 200, data, root: "date")
+      {:error, :not_found} ->
+        Leywn.Respond.send(conn, 404, %{error: "unknown_timezone", timezone: tz}, root: "error")
+    end
+  end
+
+  get "/time" do
+    Leywn.Respond.send(conn, 200, Leywn.Info.time_utc(), root: "time")
+  end
+
+  get "/time/*timezone_parts" do
+    tz = Enum.join(timezone_parts, "/")
+    case Leywn.Info.time_tz(tz) do
+      {:ok, data} ->
+        Leywn.Respond.send(conn, 200, data, root: "time")
+      {:error, :not_found} ->
+        Leywn.Respond.send(conn, 404, %{error: "unknown_timezone", timezone: tz}, root: "error")
+    end
   end
 
   get "/image/:type" do
@@ -216,6 +274,14 @@ defmodule Leywn.Router do
           <li><code>GET /random/uint</code> — random unsigned integer in [0, 65535]</li>
           <li><code>GET /random/lorem-ipsum</code> — one paragraph of Lorem Ipsum</li>
           <li><code>GET /random/lorem-ipsum/{n}</code> — up to 32 paragraphs of Lorem Ipsum</li>
+          <li><code>GET /ip</code> — caller's IPv4 and IPv6 (set <code>LEYWN_TRUST_FORWARD=true</code> to use <code>X-Forwarded-For</code>)</li>
+          <li><code>GET /ip/v4</code> — caller's IPv4</li>
+          <li><code>GET /ip/v6</code> — caller's IPv6</li>
+          <li><code>GET /date</code> — current date in UTC (ISO 8601)</li>
+          <li><code>GET /date/{timezone}</code> — current date in given timezone (e.g. <code>America/New_York</code>)</li>
+          <li><code>GET /time</code> — current time in UTC (ISO 8601)</li>
+          <li><code>GET /time/{timezone}</code> — current time in given timezone</li>
+          <li><code>ANY /auth/jwt/exchange</code> — exchange a Bearer JWT for a Leywn-signed HS256 JWT</li>
         </ul>
       </div>
       <div id="swagger-ui"></div>

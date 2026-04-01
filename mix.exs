@@ -4,7 +4,7 @@ defmodule Leywn.MixProject do
   def project do
     [
       app: :leywn,
-      version: "0.1.0",
+      version: "0.4.0",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -24,7 +24,8 @@ defmodule Leywn.MixProject do
     [
       {:plug_cowboy, "~> 2.8"},
       {:jason, "~> 1.4"},
-      {:xml_builder_ex, "~> 3.1"}
+      {:xml_builder_ex, "~> 3.1"},
+      {:tzdata, "~> 1.1"}
     ]
   end
 end

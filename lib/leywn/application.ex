@@ -8,6 +8,7 @@ defmodule Leywn.Application do
   @impl true
   def start(_type, _args) do
     _ = Leywn.Logos.ensure()
+    Application.put_env(:leywn, :jwt_signing_key, :crypto.strong_rand_bytes(32))
 
     port = Application.get_env(:leywn, :port, 4000)
     tls_port = Application.get_env(:leywn, :tls_port, 4443)

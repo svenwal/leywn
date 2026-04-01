@@ -75,6 +75,48 @@ defmodule Leywn.Auth do
     end
   end
 
+  def handle_jwt_exchange(conn) do
+    case check_jwt(conn) do
+      {:ok, %{claims: incoming_claims}} ->
+        key = Application.get_env(:leywn, :jwt_signing_key)
+        now = System.system_time(:second)
+
+        header = %{"alg" => "HS256", "typ" => "JWT"}
+
+        new_claims =
+          Map.merge(incoming_claims, %{
+            "iss" => "leywn",
+            "iat" => now,
+            "jti" => Leywn.Random.uuid()
+          })
+
+        header_b64 = Base.url_encode64(Jason.encode!(header), padding: false)
+        payload_b64 = Base.url_encode64(Jason.encode!(new_claims), padding: false)
+        signing_input = header_b64 <> "." <> payload_b64
+        sig = :crypto.mac(:hmac, :sha256, key, signing_input)
+        token = signing_input <> "." <> Base.url_encode64(sig, padding: false)
+
+        {echo_data, conn} = build_echo(conn)
+
+        Leywn.Respond.send(
+          conn,
+          200,
+          Map.merge(echo_data, %{
+            authenticated: true,
+            auth_type: "jwt",
+            exchanged_token: token,
+            claims: new_claims
+          }),
+          root: "auth"
+        )
+
+      {:error, _} ->
+        conn
+        |> put_resp_header("www-authenticate", ~s(Bearer realm="Leywn"))
+        |> Leywn.Respond.send(401, %{authenticated: false, error: "unauthorized"}, root: "auth")
+    end
+  end
+
   def handle_mtls(conn) do
     case get_mtls_cert(conn) do
       {:ok, cert_der} ->
