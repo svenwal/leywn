@@ -20,11 +20,15 @@ Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives yo
   - [/auth/basic-auth — Basic authentication](#authbasic-auth--basic-authentication)
   - [/auth/api-key — API key authentication](#authapikey--api-key-authentication)
   - [/auth/jwt — JWT Bearer authentication](#authjwt--jwt-bearer-authentication)
+  - [/auth/jwt/exchange — JWT exchange](#authjwtexchange--jwt-exchange)
   - [/auth/mtls — mTLS client certificate authentication](#authmtls--mtls-client-certificate-authentication)
   - [/uuid — UUID v4](#uuid--uuid-v4)
   - [/guuid — GUID](#guuid--guid)
   - [/image/{type} — Demo images](#imagetype--demo-images)
   - [/random — Random data](#random--random-data)
+  - [/ip — Caller IP address](#ip--caller-ip-address)
+  - [/date — Current date](#date--current-date)
+  - [/time — Current time](#time--current-time)
 - [Content negotiation](#content-negotiation)
 - [Use cases](#use-cases)
 - [Code structure](#code-structure)
@@ -111,7 +115,11 @@ All settings are controlled through environment variables.
 | `LEYWN_PORT` | `4000` | HTTP listen port |
 | `LEYWN_TLS_PORT` | `4443` | HTTPS / mTLS listen port |
 | `LEYWN_ECHO_MAX_BODY_BYTES` | `65536` | Maximum request body size echoed back (64 KB) |
+| `LEYWN_ECHO_ON_HOME` | _(unset)_ | When set to `true`, serve echo output on `/` instead of the HTML home page |
 | `LEYWN_MTLS_IN_HEADER` | _(unset)_ | When set to a header name, read the client certificate PEM from that header instead of the TLS handshake (see [proxy mode](#proxy--load-balancer-mode)) |
+| `LEYWN_MTLS_CERT` | _(unset)_ | PEM-encoded server certificate to use instead of the generated one |
+| `LEYWN_MTLS_KEY` | _(unset)_ | PEM-encoded private key for `LEYWN_MTLS_CERT` |
+| `LEYWN_TRUST_FORWARD` | _(unset)_ | When set to `true`, derive the caller IP from the `X-Forwarded-For` header instead of the socket address |
 
 Example with custom ports:
 
@@ -321,6 +329,34 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:4000/auth/jwt
 
 ---
 
+### /auth/jwt/exchange — JWT exchange
+
+```
+ANY /auth/jwt/exchange
+```
+
+Validates the incoming `Authorization: Bearer <token>` JWT (structure only, signature not verified), then issues a new HS256-signed token with the original claims merged with `iss: "leywn"`, `iat` (issued-at), and a fresh `jti` (JWT ID).
+
+```bash
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.signature"
+curl -H "Authorization: Bearer $TOKEN" http://localhost:4000/auth/jwt/exchange
+```
+
+**Success response** includes `exchanged_token` (the new signed JWT) and the updated `claims` alongside the echo payload:
+
+```json
+{
+  "authenticated": true,
+  "auth_type": "jwt",
+  "exchanged_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "claims": { "sub": "user123", "iss": "leywn", "iat": 1700000000, "jti": "..." },
+  "method": "POST",
+  ...
+}
+```
+
+---
+
 ### /auth/mtls — mTLS client certificate authentication
 
 ```
@@ -484,6 +520,70 @@ curl http://localhost:4000/random/lorem-ipsum/5
 
 ---
 
+### /ip — Caller IP address
+
+```
+GET /ip         # both IPv4 and IPv6
+GET /ip/v4      # IPv4 only
+GET /ip/v6      # IPv6 only
+```
+
+Returns the caller's IP address(es). When `LEYWN_TRUST_FORWARD=true` is set, the first value from the `X-Forwarded-For` header is used instead of the socket address (useful behind a proxy or load balancer).
+
+```bash
+curl http://localhost:4000/ip
+# {"ipv4":"127.0.0.1","ipv6":null}
+
+curl http://localhost:4000/ip/v4
+# {"ipv4":"127.0.0.1"}
+
+curl http://localhost:4000/ip/v6
+# {"ipv6":null}
+```
+
+---
+
+### /date — Current date
+
+```
+GET /date                   # UTC
+GET /date/{timezone}        # any IANA timezone, e.g. America/New_York
+```
+
+Returns the current date in ISO 8601 format. Unknown timezones return HTTP 404.
+
+```bash
+curl http://localhost:4000/date
+# {"date":"2026-04-01","timezone":"UTC"}
+
+curl http://localhost:4000/date/Europe/Berlin
+# {"date":"2026-04-01","timezone":"Europe/Berlin"}
+
+# Unknown timezone → 404
+curl -i http://localhost:4000/date/Invalid/Zone
+```
+
+---
+
+### /time — Current time
+
+```
+GET /time                   # UTC
+GET /time/{timezone}        # any IANA timezone, e.g. Asia/Tokyo
+```
+
+Returns the current time as a full ISO 8601 datetime string. Unknown timezones return HTTP 404.
+
+```bash
+curl http://localhost:4000/time
+# {"time":"2026-04-01T12:34:56.789Z","timezone":"UTC"}
+
+curl http://localhost:4000/time/Asia/Tokyo
+# {"time":"2026-04-01T21:34:56.789+09:00","timezone":"Asia/Tokyo"}
+```
+
+---
+
 ## Content negotiation
 
 Every endpoint defaults to JSON. Pass `Accept: application/xml` to receive an XML response instead.
@@ -592,6 +692,7 @@ lib/
 │   ├── mtls.ex          # Generates CA / server / client certificates at startup
 │   ├── random.ex        # UUID, integer, and Lorem Ipsum generators
 │   ├── logos.ex         # Resolves image file paths
+│   ├── info.ex          # IP address, date, and time helpers
 │   └── respond.ex       # Content negotiation and JSON/XML serialisation
 └── leywn.ex
 
@@ -614,6 +715,7 @@ priv/
 | `plug_cowboy` | HTTP/HTTPS server |
 | `jason` | JSON encoding/decoding |
 | `xml_builder_ex` | XML serialisation |
+| `tzdata` | IANA timezone database for `/date` and `/time` |
 
 Certificate generation uses Erlang's built-in `:public_key` and `:crypto` modules — no external PKI dependencies.
 
