@@ -2,13 +2,13 @@
 
 All notable changes to Leywn are documented in this file.
 
-## [0.5.2.1] - 2026-04-08
+## [0.5.3] - 2026-04-08
 
 ### Fixed
 - **mTLS handshake** — replaced `partial_chain` (client-side only in OTP SSL, silently ignored on server) with `verify_fun` so that the self-signed demo CA is accepted when verifying client certificates on OTP 26+
 
 ### Changed
-- Version bumped to `0.5.2.1` in `mix.exs`
+- Version bumped to `0.5.3` in `mix.exs`
 
 ---
 
