@@ -23,12 +23,24 @@ defmodule Leywn.MTLS do
 
     {extra_cacerts} = load_or_store_client_cert(ca_key, ca_cert_der)
 
+    ca_certs = [ca_cert_der | extra_cacerts]
+
+    # OTP 26+ requires an explicit partial_chain callback when using a self-signed CA
+    # with verify: :verify_peer. Without it, the handshake fails with :selfsigned_peer.
+    partial_chain = fn chain ->
+      case Enum.find(chain, fn cert -> Enum.member?(ca_certs, cert) end) do
+        nil  -> :unknown_ca
+        cert -> {:trusted_ca, cert}
+      end
+    end
+
     [
       cert: server_cert_der,
       key: server_key_opt,
-      cacerts: [ca_cert_der | extra_cacerts],
+      cacerts: ca_certs,
       verify: :verify_peer,
-      fail_if_no_peer_cert: false
+      fail_if_no_peer_cert: false,
+      partial_chain: partial_chain
     ]
   end
 

@@ -2,6 +2,16 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [0.5.2] - 2026-04-08
+
+### Fixed
+- **mTLS handshake** — added `partial_chain` callback so OTP 26+ accepts the self-signed demo CA when verifying client certificates (previously failed with `:selfsigned_peer`)
+
+### Changed
+- Version bumped to `0.5.2` in `mix.exs`
+
+---
+
 ## [0.5.1] - 2026-04-08
 
 ### Added
