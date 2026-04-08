@@ -25,14 +25,18 @@ defmodule Leywn.MTLS do
 
     ca_certs = [ca_cert_der | extra_cacerts]
 
-    # OTP 26+ requires an explicit partial_chain callback when using a self-signed CA
-    # with verify: :verify_peer. Without it, the handshake fails with :selfsigned_peer.
-    partial_chain = fn chain ->
-      case Enum.find(chain, fn cert -> Enum.member?(ca_certs, cert) end) do
-        nil  -> :unknown_ca
-        cert -> {:trusted_ca, cert}
-      end
-    end
+    # partial_chain is client-side only in OTP SSL and is silently ignored on the server.
+    # verify_fun is the correct server-side hook for customising peer certificate verification.
+    # We accept any cert whose chain fails solely because our demo CA is self-signed
+    # (:selfsigned_peer) or not in the system trust store (:unknown_ca).
+    verify_fun = {fn
+      _cert, {:bad_cert, :selfsigned_peer}, state -> {:valid, state}
+      _cert, {:bad_cert, :unknown_ca},      state -> {:valid, state}
+      _cert, {:extension, _},               state -> {:unknown, state}
+      _cert, :valid,                        state -> {:valid, state}
+      _cert, :valid_peer,                   state -> {:valid, state}
+      _cert, error,                        _state -> {:fail, error}
+    end, nil}
 
     [
       cert: server_cert_der,
@@ -40,7 +44,7 @@ defmodule Leywn.MTLS do
       cacerts: ca_certs,
       verify: :verify_peer,
       fail_if_no_peer_cert: false,
-      partial_chain: partial_chain
+      verify_fun: verify_fun
     ]
   end
 

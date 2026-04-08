@@ -3,7 +3,7 @@
   "info": {
     "title": "Leywn",
     "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON.",
-    "version": "0.5.2"
+    "version": "0.5.2.1"
   },
   "tags": [
     { "name": "Echo", "description": "Request echo and inspection endpoints" },
