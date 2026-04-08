@@ -117,6 +117,8 @@ All settings are controlled through environment variables.
 | `LEYWN_ECHO_MAX_BODY_BYTES` | `65536` | Maximum request body size echoed back (64 KB) |
 | `LEYWN_ECHO_ON_HOME` | _(unset)_ | When set to `true`, serve echo output on `/` instead of the HTML home page |
 | `LEYWN_MTLS_IN_HEADER` | _(unset)_ | When set to a header name, read the client certificate PEM from that header instead of the TLS handshake (see [proxy mode](#proxy--load-balancer-mode)) |
+| `LEYWN_TLS_SERVER_CRT` | _(unset)_ | PEM-encoded server certificate for the HTTPS listener; if set together with `LEYWN_TLS_SERVER_KEY`, used instead of the auto-generated one (expired → warning, invalid → error) |
+| `LEYWN_TLS_SERVER_KEY` | _(unset)_ | PEM-encoded private key matching `LEYWN_TLS_SERVER_CRT` |
 | `LEYWN_MTLS_CERT` | _(unset)_ | PEM-encoded server certificate to use instead of the generated one |
 | `LEYWN_MTLS_KEY` | _(unset)_ | PEM-encoded private key for `LEYWN_MTLS_CERT` |
 | `LEYWN_TRUST_FORWARD` | _(unset)_ | When set to `true`, derive the caller IP from the `X-Forwarded-For` header instead of the socket address |

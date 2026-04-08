@@ -1,34 +1,41 @@
-FROM hexpm/elixir:1.18.4-erlang-27.3.4.7-debian-bullseye-20260223-slim
+# ---- Build Stage ----
+FROM hexpm/elixir:1.18.4-erlang-27.3.4.7-debian-bullseye-20260223-slim AS builder
 
 ENV MIX_ENV=prod \
     LANG=C.UTF-8
 
 WORKDIR /app
 
-# Install Hex and Rebar locally in the image
 RUN mix local.hex --force && \
     mix local.rebar --force
 
-# Copy mix configuration and fetch dependencies
 COPY mix.exs mix.lock ./
-COPY .formatter.exs ./
 COPY config ./config
+
+RUN mix deps.get --only prod
+
 COPY priv ./priv
-
-RUN mix deps.get --only ${MIX_ENV}
-
-# Copy application code
 COPY lib ./lib
 
-# Compile in prod
-RUN mix compile
+RUN mix release
 
-# The app listens on PORT (default 4000, overridable via env)
-EXPOSE 4000
-EXPOSE 4443
-ENV LEYWN_PORT=4000 \
+# ---- Runtime Stage ----
+FROM debian:bullseye-slim
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends libssl1.1 libncurses5 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV LANG=C.UTF-8 \
+    LEYWN_PORT=4000 \
     LEYWN_TLS_PORT=4443
 
-# Run the Plug/Cowboy app
-CMD ["mix", "run", "--no-halt"]
+WORKDIR /app
 
+COPY --from=builder /app/_build/prod/rel/leywn ./
+
+EXPOSE 4000
+EXPOSE 4443
+
+CMD ["/app/bin/leywn", "start"]

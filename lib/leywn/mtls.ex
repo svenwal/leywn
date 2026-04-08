@@ -19,8 +19,7 @@ defmodule Leywn.MTLS do
     ca_key = :public_key.generate_key({:namedCurve, :secp256r1})
     ca_cert_der = build_ca_cert(ca_key)
 
-    server_key = :public_key.generate_key({:namedCurve, :secp256r1})
-    server_cert_der = build_end_cert(server_key, "localhost", ca_key, ca_cert_der)
+    {server_cert_der, server_key_opt} = load_or_generate_server_cert(ca_key, ca_cert_der)
 
     client_key = :public_key.generate_key({:namedCurve, :secp256r1})
     client_cert_der = build_end_cert(client_key, "Leywn Demo Client", ca_key, ca_cert_der)
@@ -32,11 +31,95 @@ defmodule Leywn.MTLS do
 
     [
       cert: server_cert_der,
-      key: {:ECPrivateKey, :public_key.der_encode(:ECPrivateKey, server_key)},
+      key: server_key_opt,
       cacerts: [ca_cert_der],
       verify: :verify_peer,
       fail_if_no_peer_cert: false
     ]
+  end
+
+  defp load_or_generate_server_cert(ca_key, ca_cert_der) do
+    key_pem = System.get_env("LEYWN_TLS_SERVER_KEY")
+    cert_pem = System.get_env("LEYWN_TLS_SERVER_CRT")
+
+    if key_pem && cert_pem do
+      cert_der = validate_and_load_cert!(cert_pem)
+      key_opt = parse_key_pem!(key_pem)
+      {cert_der, key_opt}
+    else
+      server_key = :public_key.generate_key({:namedCurve, :secp256r1})
+      server_cert_der = build_end_cert(server_key, "localhost", ca_key, ca_cert_der)
+      {server_cert_der, {:ECPrivateKey, :public_key.der_encode(:ECPrivateKey, server_key)}}
+    end
+  end
+
+  defp validate_and_load_cert!(pem_string) do
+    entries = :public_key.pem_decode(pem_string)
+
+    cert_entry = Enum.find(entries, fn {type, _, _} -> type == :Certificate end)
+
+    if cert_entry == nil do
+      IO.puts("ERROR: LEYWN_TLS_SERVER_CRT does not contain a valid PEM certificate — aborting")
+      System.halt(1)
+    end
+
+    {:Certificate, der, _} = cert_entry
+
+    cert =
+      try do
+        :public_key.pkix_decode_cert(der, :otp)
+      rescue
+        _ ->
+          IO.puts("ERROR: LEYWN_TLS_SERVER_CRT contains an invalid certificate — aborting")
+          System.halt(1)
+      end
+
+    check_cert_expiry(cert)
+    der
+  end
+
+  defp check_cert_expiry(cert) do
+    {:'OTPCertificate', tbs, _, _} = cert
+    {:'OTPTBSCertificate', _, _, _, _, validity, _, _, _, _, _} = tbs
+    {:'Validity', _not_before, not_after} = validity
+
+    cert_secs = not_after |> asn1_time_to_datetime() |> :calendar.datetime_to_gregorian_seconds()
+    now_secs = :calendar.universal_time() |> :calendar.datetime_to_gregorian_seconds()
+
+    if cert_secs < now_secs do
+      IO.puts("WARNING: LEYWN_TLS_SERVER_CRT certificate has expired but will still be used")
+    end
+  end
+
+  defp asn1_time_to_datetime({:utcTime, t}) do
+    t = to_string(t)
+    <<y2::binary-2, mo::binary-2, d::binary-2, h::binary-2, mi::binary-2, s::binary-2, _::binary>> = t
+    year = String.to_integer(y2)
+    year = if year >= 50, do: 1900 + year, else: 2000 + year
+    {{year, String.to_integer(mo), String.to_integer(d)},
+     {String.to_integer(h), String.to_integer(mi), String.to_integer(s)}}
+  end
+
+  defp asn1_time_to_datetime({:generalTime, t}) do
+    t = to_string(t)
+    <<year::binary-4, mo::binary-2, d::binary-2, h::binary-2, mi::binary-2, s::binary-2, _::binary>> = t
+    {{String.to_integer(year), String.to_integer(mo), String.to_integer(d)},
+     {String.to_integer(h), String.to_integer(mi), String.to_integer(s)}}
+  end
+
+  defp parse_key_pem!(pem_string) do
+    entries = :public_key.pem_decode(pem_string)
+
+    key_types = [:RSAPrivateKey, :ECPrivateKey, :PrivateKeyInfo, :"DSAPrivateKey"]
+    key_entry = Enum.find(entries, fn {type, _, _} -> type in key_types end)
+
+    if key_entry == nil do
+      IO.puts("ERROR: LEYWN_TLS_SERVER_KEY does not contain a valid PEM private key — aborting")
+      System.halt(1)
+    end
+
+    {type, der, _} = key_entry
+    {type, der}
   end
 
   def client_cert_pem, do: :persistent_term.get(:leywn_mtls).client_cert_pem

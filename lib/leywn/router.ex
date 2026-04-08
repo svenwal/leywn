@@ -1,7 +1,7 @@
 defmodule Leywn.Router do
   use Plug.Router
 
-  plug Plug.Logger
+  plug Leywn.RequestLogger
   plug :match
   plug :dispatch
 
@@ -26,11 +26,21 @@ defmodule Leywn.Router do
   end
 
   get "/openapi.json" do
-    spec = Application.app_dir(:leywn, "priv/openapi.json") |> File.read!()
+    port = Application.get_env(:leywn, :port, 4000)
+    tls_port = Application.get_env(:leywn, :tls_port, 4443)
+
+    spec =
+      Application.app_dir(:leywn, "priv/openapi.json")
+      |> File.read!()
+      |> Jason.decode!()
+      |> Map.put("servers", [
+        %{"url" => "http://localhost:#{port}", "description" => "HTTP"},
+        %{"url" => "https://localhost:#{tls_port}", "description" => "HTTPS / mTLS"}
+      ])
 
     conn
     |> Plug.Conn.put_resp_content_type("application/json")
-    |> Plug.Conn.send_resp(200, spec)
+    |> Plug.Conn.send_resp(200, Jason.encode!(spec))
   end
 
   match "/echo" do

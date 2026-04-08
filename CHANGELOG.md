@@ -2,6 +2,19 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [0.5.0] - 2026-04-08
+
+### Added
+- **`LEYWN_TLS_SERVER_KEY` / `LEYWN_TLS_SERVER_CRT`** — supply a custom PEM-encoded private key and certificate for the HTTPS listener instead of the auto-generated one; expired certificates log a warning and are still accepted, syntactically invalid certificates stop the server with an error
+- **Request logging** — every request is now logged to stdout as a single line: `timestamp METHOD /path remote=IP status=CODE duration=Xms`
+- **Dynamic OpenAPI `servers`** — the `/openapi.json` response now injects a `servers` array reflecting the actual `LEYWN_PORT` and `LEYWN_TLS_PORT` values instead of hardcoded defaults
+- Slimmed down the Docker image size by removing unneeded source files
+
+### Changed
+- Version bumped to `0.5.0` in `mix.exs`
+
+---
+
 ## [0.4.0] - 2026-04-01
 
 ### Added
