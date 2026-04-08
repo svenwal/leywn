@@ -21,18 +21,12 @@ defmodule Leywn.MTLS do
 
     {server_cert_der, server_key_opt} = load_or_generate_server_cert(ca_key, ca_cert_der)
 
-    client_key = :public_key.generate_key({:namedCurve, :secp256r1})
-    client_cert_der = build_end_cert(client_key, "Leywn Demo Client", ca_key, ca_cert_der)
-
-    :persistent_term.put(:leywn_mtls, %{
-      client_cert_pem: cert_to_pem(client_cert_der),
-      client_key_pem: key_to_pem(client_key)
-    })
+    {extra_cacerts} = load_or_store_client_cert(ca_key, ca_cert_der)
 
     [
       cert: server_cert_der,
       key: server_key_opt,
-      cacerts: [ca_cert_der],
+      cacerts: [ca_cert_der | extra_cacerts],
       verify: :verify_peer,
       fail_if_no_peer_cert: false
     ]
@@ -51,6 +45,47 @@ defmodule Leywn.MTLS do
       server_cert_der = build_end_cert(server_key, "localhost", ca_key, ca_cert_der)
       {server_cert_der, {:ECPrivateKey, :public_key.der_encode(:ECPrivateKey, server_key)}}
     end
+  end
+
+  # Returns {extra_cacerts} — any certs from LEYWN_MTLS_CERT that the server must trust.
+  defp load_or_store_client_cert(ca_key, ca_cert_der) do
+    cert_pem = System.get_env("LEYWN_MTLS_CERT")
+    key_pem  = System.get_env("LEYWN_MTLS_KEY")
+
+    if cert_pem && key_pem do
+      cert_ders = parse_cert_ders!(cert_pem, "LEYWN_MTLS_CERT")
+      _key_opt  = parse_key_pem!(key_pem)   # validates the key PEM
+
+      :persistent_term.put(:leywn_mtls, %{
+        client_cert_pem: cert_pem,
+        client_key_pem: key_pem
+      })
+
+      # Trust all certs from the provided PEM (leaf + any chain/CA certs) so that
+      # verify: :verify_peer accepts this client certificate during the TLS handshake.
+      {cert_ders}
+    else
+      client_key = :public_key.generate_key({:namedCurve, :secp256r1})
+      client_cert_der = build_end_cert(client_key, "Leywn Demo Client", ca_key, ca_cert_der)
+
+      :persistent_term.put(:leywn_mtls, %{
+        client_cert_pem: cert_to_pem(client_cert_der),
+        client_key_pem: key_to_pem(client_key)
+      })
+
+      {[]}
+    end
+  end
+
+  defp parse_cert_ders!(pem_string, env_var) do
+    ders = for {:Certificate, der, _} <- :public_key.pem_decode(pem_string), do: der
+
+    if ders == [] do
+      IO.puts("ERROR: #{env_var} does not contain a valid PEM certificate — aborting")
+      System.halt(1)
+    end
+
+    ders
   end
 
   defp validate_and_load_cert!(pem_string) do

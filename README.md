@@ -68,6 +68,8 @@ docker run -p 4000:4000 -p 4443:4443 leywn
 
 Port `4000` serves plain HTTP. Port `4443` serves HTTPS with a self-signed server certificate and mTLS support (client certificate optional except on `/auth/mtls`).
 
+The image uses a multi-stage build: only the compiled OTP release is included in the final layer — no Mix, Hex, or source code at runtime (~97 MB).
+
 ### Docker Compose
 
 Create a `docker-compose.yml`:
@@ -119,8 +121,8 @@ All settings are controlled through environment variables.
 | `LEYWN_MTLS_IN_HEADER` | _(unset)_ | When set to a header name, read the client certificate PEM from that header instead of the TLS handshake (see [proxy mode](#proxy--load-balancer-mode)) |
 | `LEYWN_TLS_SERVER_CRT` | _(unset)_ | PEM-encoded server certificate for the HTTPS listener; if set together with `LEYWN_TLS_SERVER_KEY`, used instead of the auto-generated one (expired → warning, invalid → error) |
 | `LEYWN_TLS_SERVER_KEY` | _(unset)_ | PEM-encoded private key matching `LEYWN_TLS_SERVER_CRT` |
-| `LEYWN_MTLS_CERT` | _(unset)_ | PEM-encoded server certificate to use instead of the generated one |
-| `LEYWN_MTLS_KEY` | _(unset)_ | PEM-encoded private key for `LEYWN_MTLS_CERT` |
+| `LEYWN_MTLS_CERT` | _(unset)_ | PEM-encoded client certificate (and optional CA chain) to use instead of the auto-generated one; served at `/auth/mtls/get-client-cert` and automatically trusted by the mTLS listener |
+| `LEYWN_MTLS_KEY` | _(unset)_ | PEM-encoded private key matching `LEYWN_MTLS_CERT` |
 | `LEYWN_TRUST_FORWARD` | _(unset)_ | When set to `true`, derive the caller IP from the `X-Forwarded-For` header instead of the socket address |
 
 Example with custom ports:
@@ -367,6 +369,8 @@ GET /auth/mtls/get-client-cert
 ```
 
 A fresh CA, server certificate, and client certificate are generated on every startup and kept in memory. The `/auth/mtls` endpoint validates that the caller presents a certificate signed by that CA.
+
+To use your own client certificate instead of the generated one, set `LEYWN_MTLS_CERT` (PEM, optionally a full chain) and `LEYWN_MTLS_KEY`. Leywn will serve those at `/auth/mtls/get-client-cert` and automatically add the cert's issuing CA to its trusted list.
 
 #### Direct TLS handshake
 

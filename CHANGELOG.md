@@ -2,6 +2,17 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [0.5.1] - 2026-04-08
+
+### Added
+- **`LEYWN_MTLS_CERT` / `LEYWN_MTLS_KEY`** — supply a custom PEM-encoded client certificate and private key for mTLS; when set, the provided cert+key are served at `/auth/mtls/get-client-cert` and the server automatically trusts the issuing CA so the TLS handshake succeeds
+- **Multi-stage Docker build** — the runtime image now uses a minimal `debian:bullseye-slim` base (~97 MB) with only the compiled OTP release copied in; build toolchain, source code, and Mix are no longer present at runtime
+
+### Changed
+- Version bumped to `0.5.1` in `mix.exs`
+
+---
+
 ## [0.5.0] - 2026-04-08
 
 ### Added
