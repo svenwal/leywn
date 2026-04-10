@@ -2,6 +2,7 @@ defmodule Leywn.Router do
   use Plug.Router
 
   plug Leywn.RequestLogger
+  plug :set_server_header
   plug :match
   plug :dispatch
 
@@ -234,6 +235,10 @@ defmodule Leywn.Router do
 
   match _ do
     Leywn.Respond.send(conn, 404, %{error: "not_found"}, root: "error")
+  end
+
+  defp set_server_header(conn, _opts) do
+    Plug.Conn.put_resp_header(conn, "server", "leywn")
   end
 
   defp home_html do

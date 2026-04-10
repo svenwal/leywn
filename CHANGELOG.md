@@ -2,6 +2,21 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [0.5.4] - 2026-04-10
+
+### Fixed
+- **mTLS security** — `/auth/mtls` previously accepted any client certificate; the server-side `verify_fun` now rejects certificates not issued by the Leywn CA (or the CA behind `LEYWN_MTLS_CERT`), so only the correct client certificate is accepted
+
+### Added
+- **mTLS ExUnit tests** — `test/mtls_test.exs` covers three scenarios: no certificate (expect HTTP 401), wrong self-signed certificate (expect TLS handshake rejection), and the correct certificate (expect HTTP 200 with `authenticated: true`)
+
+### Changed
+
+- Version bumped to `0.5.4` in `mix.exs`
+- `Server` response header changed from `Cowboy` to `leywn`
+
+---
+
 ## [0.5.3] - 2026-04-08
 
 ### Fixed

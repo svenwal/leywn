@@ -24,18 +24,25 @@ defmodule Leywn.MTLS do
     {extra_cacerts} = load_or_store_client_cert(ca_key, ca_cert_der)
 
     ca_certs = [ca_cert_der | extra_cacerts]
+    trusted_set = MapSet.new(ca_certs)
 
-    # partial_chain is client-side only in OTP SSL and is silently ignored on the server.
-    # verify_fun is the correct server-side hook for customising peer certificate verification.
-    # We accept any cert whose chain fails solely because our demo CA is self-signed
-    # (:selfsigned_peer) or not in the system trust store (:unknown_ca).
+    # verify_fun is the server-side hook for customising peer certificate verification.
+    # :selfsigned_peer is raised for the CA cert at the top of the chain (it is self-signed).
+    # We accept it only when it is one of our own known CA certs; any other self-signed or
+    # unknown-CA cert is rejected, so only clients presenting our CA-issued cert are let through.
     verify_fun = {fn
-      _cert, {:bad_cert, :selfsigned_peer}, state -> {:valid, state}
-      _cert, {:bad_cert, :unknown_ca},      state -> {:valid, state}
-      _cert, {:extension, _},               state -> {:unknown, state}
-      _cert, :valid,                        state -> {:valid, state}
-      _cert, :valid_peer,                   state -> {:valid, state}
-      _cert, error,                        _state -> {:fail, error}
+      cert, {:bad_cert, :selfsigned_peer}, state ->
+        cert_der = :public_key.pkix_encode(:'OTPCertificate', cert, :otp)
+        if MapSet.member?(trusted_set, cert_der) do
+          {:valid, state}
+        else
+          {:fail, {:bad_cert, :selfsigned_peer}}
+        end
+      _cert, {:bad_cert, :unknown_ca},      _state -> {:fail, {:bad_cert, :unknown_ca}}
+      _cert, {:extension, _},                state -> {:unknown, state}
+      _cert, :valid,                         state -> {:valid, state}
+      _cert, :valid_peer,                    state -> {:valid, state}
+      _cert, error,                         _state -> {:fail, error}
     end, nil}
 
     [
@@ -73,6 +80,7 @@ defmodule Leywn.MTLS do
       _key_opt  = parse_key_pem!(key_pem)   # validates the key PEM
 
       :persistent_term.put(:leywn_mtls, %{
+        ca_cert_der: ca_cert_der,
         client_cert_pem: cert_pem,
         client_key_pem: key_pem
       })
@@ -85,6 +93,7 @@ defmodule Leywn.MTLS do
       client_cert_der = build_end_cert(client_key, "Leywn Demo Client", ca_key, ca_cert_der)
 
       :persistent_term.put(:leywn_mtls, %{
+        ca_cert_der: ca_cert_der,
         client_cert_pem: cert_to_pem(client_cert_der),
         client_key_pem: key_to_pem(client_key)
       })
@@ -173,8 +182,9 @@ defmodule Leywn.MTLS do
     {type, der}
   end
 
+  def ca_cert_der,     do: :persistent_term.get(:leywn_mtls).ca_cert_der
   def client_cert_pem, do: :persistent_term.get(:leywn_mtls).client_cert_pem
-  def client_key_pem, do: :persistent_term.get(:leywn_mtls).client_key_pem
+  def client_key_pem,  do: :persistent_term.get(:leywn_mtls).client_key_pem
 
   defp build_ca_cert(key) do
     subject = rdn("Leywn Demo CA")
