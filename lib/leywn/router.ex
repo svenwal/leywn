@@ -221,21 +221,104 @@ defmodule Leywn.Router do
     end
   end
 
+  get "/image/color/:rgb" do
+    handle_color_image(conn, rgb, 64, 64)
+  end
+
+  get "/image/color/:rgb/:width/:height" do
+    with {w, ""} <- Integer.parse(width),
+         {h, ""} <- Integer.parse(height) do
+      handle_color_image(conn, rgb, w, h)
+    else
+      _ ->
+        Leywn.Respond.send(conn, 400,
+          %{error: "invalid_dimensions", width: width, height: height}, root: "error")
+    end
+  end
+
   get "/image/:type" do
     case Leywn.Logos.path_for(type) do
-      {:ok, path, content_type} ->
+      {:ok, :file, path, content_type} ->
         conn
         |> Plug.Conn.put_resp_content_type(content_type)
         |> Plug.Conn.send_file(200, path)
+
+      {:ok, :inline, data, content_type} ->
+        conn
+        |> Plug.Conn.put_resp_content_type(content_type)
+        |> Plug.Conn.send_resp(200, data)
 
       {:error, reason} ->
         Leywn.Respond.send(conn, 400, %{error: reason}, root: "error")
     end
   end
 
+  # ---- Format endpoints (POST only) ----------------------------------------
+
+  post "/format/json",           do: handle_format(conn, &Leywn.Format.json/1)
+  post "/format/yaml",           do: handle_format(conn, &Leywn.Format.yaml/1)
+  post "/format/xml",            do: handle_format(conn, &Leywn.Format.xml/1)
+  post "/format/camelCase",      do: handle_format(conn, &Leywn.Format.camel_case/1)
+  post "/format/kebab-case",     do: handle_format(conn, &Leywn.Format.kebab_case/1)
+  post "/format/snake-case",     do: handle_format(conn, &Leywn.Format.snake_case/1)
+  post "/format/toUpper",        do: handle_format(conn, &Leywn.Format.to_upper/1)
+  post "/format/toLower",        do: handle_format(conn, &Leywn.Format.to_lower/1)
+  post "/format/collapse-lines", do: handle_format(conn, &Leywn.Format.collapse_lines/1)
+
+  # ---- Codec endpoints (POST only) -----------------------------------------
+
+  post "/encode/base64", do: handle_codec(conn, &Leywn.Codec.base64_encode/1)
+  post "/decode/base64", do: handle_codec(conn, &Leywn.Codec.base64_decode/1)
+  post "/encode/url",    do: handle_codec(conn, &Leywn.Codec.url_encode/1)
+  post "/decode/url",    do: handle_codec(conn, &Leywn.Codec.url_decode/1)
+  post "/encode/rot13",  do: handle_codec(conn, &Leywn.Codec.rot13/1)
+  post "/decode/rot13",  do: handle_codec(conn, &Leywn.Codec.rot13/1)
+  post "/decode/jwt",    do: handle_codec(conn, &Leywn.Codec.jwt_decode/1)
+
   match _ do
     Leywn.Respond.send(conn, 404, %{error: "not_found"}, root: "error")
   end
+
+  # ---------------------------------------------------------------------------
+  # Private helpers
+  # ---------------------------------------------------------------------------
+
+  defp handle_color_image(conn, rgb, width, height) do
+    case Leywn.Logos.color_png(rgb, width, height) do
+      {:ok, png} ->
+        conn
+        |> Plug.Conn.put_resp_content_type("image/png")
+        |> Plug.Conn.send_resp(200, png)
+
+      {:error, reason} ->
+        Leywn.Respond.send(conn, 400, %{error: reason}, root: "error")
+    end
+  end
+
+  defp handle_format(conn, fun) do
+    max_body = Application.get_env(:leywn, :echo_max_body_bytes, 65_536)
+
+    case Plug.Conn.read_body(conn, length: max_body) do
+      {:ok, body, conn} ->
+        case fun.(body) do
+          {:ok, content_type, result} ->
+            conn
+            |> Plug.Conn.put_resp_content_type(content_type)
+            |> Plug.Conn.send_resp(200, result)
+
+          {:error, msg} ->
+            Leywn.Respond.send(conn, 422, %{error: msg}, root: "error")
+        end
+
+      {:more, _partial, conn} ->
+        Leywn.Respond.send(conn, 413, %{error: "payload_too_large"}, root: "error")
+
+      {:error, reason} ->
+        Leywn.Respond.send(conn, 400, %{error: inspect(reason)}, root: "error")
+    end
+  end
+
+  defp handle_codec(conn, fun), do: handle_format(conn, fun)
 
   defp set_server_header(conn, _opts) do
     Plug.Conn.put_resp_header(conn, "server", "leywn")
@@ -253,51 +336,21 @@ defmodule Leywn.Router do
       <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
       <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        .leywn-header { background: #ffffff ; color: #1a1a2e; padding: 1rem 3rem; }
-        .leywn-hero { background: #1a1a2e; color: #e0e0e0; padding: 2.5rem 3rem; }
-        .leywn-hero h1 { margin: 0 0 0.5rem; font-size: 2.2rem; letter-spacing: -0.5px; }
-        .leywn-hero p { margin: 0 0 1rem; opacity: 0.8; font-size: 1.05rem; }
+        .leywn-header { background: #1a1a2e; color: #e0e0e0; padding: 1rem 3rem; display: flex; align-items: center; gap: 1.5rem; }
+        .leywn-header span { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.5px; }
+        .leywn-hero { background: #1a1a2e; color: #e0e0e0; padding: 1.5rem 3rem 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
+        .leywn-hero p { margin: 0 0 0.6rem; opacity: 0.85; font-size: 1.05rem; }
         .leywn-hero code { background: rgba(255,255,255,0.12); padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9em; }
-        .leywn-hero ul { margin: 0.5rem 0 0; padding-left: 1.4rem; opacity: 0.75; line-height: 1.9; }
       </style>
     </head>
     <body>
       <div class="leywn-header">
-        <img src="/image/png" alt="Leywn logo" style="height:72px;margin-bottom:1rem;display:block;">
+        <img src="/image/png" alt="Leywn logo" style="height:56px;">
+        <span>Last Echo You Will Need</span>
       </div>
       <div class="leywn-hero">
-        <h1>Leywn</h1>
-        <p><em>Last Echo You Will Need</em> — an all-in-one demo backend for APIs and services.</p>
-        <ul>
-          <li><code>GET /echo</code> — echoes back all request details (headers, body, query params, …)</li>
-          <li><code>ANY /echo/{path}</code> — same, for any sub-path</li>
-          <li><code>ANY /status/{code}</code> — respond with any HTTP status code</li>
-          <li><code>GET /image/{type}</code> — serve a demo image (<code>png</code>, <code>jpeg</code>, <code>gif</code>)</li>
-          <li><code>ANY /auth/basic-auth</code> — Basic Auth (username: <code>basic</code>, password: <code>password</code>)</li>
-          <li><code>ANY /auth/basic-auth/{user}/{pass}</code> — Basic Auth with custom credentials</li>
-          <li><code>ANY /auth/api-key</code> — API key (header: <code>apikey: my-key</code>)</li>
-          <li><code>ANY /auth/api-key/{header}/{value}</code> — API key with custom header and value</li>
-          <li><code>ANY /auth/jwt</code> — Bearer JWT (validates structure, not signature)</li>
-          <li><code>ANY /auth/mtls</code> — mTLS client certificate (HTTPS port 4443)</li>
-          <li><code>GET /auth/mtls/get-client-cert</code> — download the generated client cert + key</li>
-          <li><code>ANY /anything</code> — alias for <code>/echo</code></li>
-          <li><code>GET /uuid</code> — random UUID v4</li>
-          <li><code>GET /guuid</code> — random GUID (UUID v4 in curly braces)</li>
-          <li><code>GET /random</code> — sample of all random values</li>
-          <li><code>GET /random/int</code> — random integer in [-32000, 32000]</li>
-          <li><code>GET /random/int/{lower}/{upper}</code> — random integer in custom range</li>
-          <li><code>GET /random/uint</code> — random unsigned integer in [0, 65535]</li>
-          <li><code>GET /random/lorem-ipsum</code> — one paragraph of Lorem Ipsum</li>
-          <li><code>GET /random/lorem-ipsum/{n}</code> — up to 32 paragraphs of Lorem Ipsum</li>
-          <li><code>GET /ip</code> — caller's IPv4 and IPv6 (set <code>LEYWN_TRUST_FORWARD=true</code> to use <code>X-Forwarded-For</code>)</li>
-          <li><code>GET /ip/v4</code> — caller's IPv4</li>
-          <li><code>GET /ip/v6</code> — caller's IPv6</li>
-          <li><code>GET /date</code> — current date in UTC (ISO 8601)</li>
-          <li><code>GET /date/{timezone}</code> — current date in given timezone (e.g. <code>America/New_York</code>)</li>
-          <li><code>GET /time</code> — current time in UTC (ISO 8601)</li>
-          <li><code>GET /time/{timezone}</code> — current time in given timezone</li>
-          <li><code>ANY /auth/jwt/exchange</code> — exchange a Bearer JWT for a Leywn-signed HS256 JWT</li>
-        </ul>
+        <p>A complete selection of echo, auth, random, format, and codec endpoints — all in one lightweight, fast, highly customisable service.</p>
+        <p>Configure everything with <code>LEYWN_xxx</code> environment variables. Set <code>LEYWN_ONLY_JSON=true</code> to disable XML content negotiation.</p>
       </div>
       <div id="swagger-ui"></div>
       <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>

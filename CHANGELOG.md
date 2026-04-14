@@ -2,6 +2,41 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [0.6.0] - 2026-04-14
+
+### Added
+- **`LEYWN_ONLY_JSON`** — set to `true` to disable XML content negotiation and always return JSON
+- **Format endpoints** (`POST /format/*`) — prettify / transform a POST body:
+  - `/format/json` — pretty-print JSON
+  - `/format/yaml` — convert JSON to YAML
+  - `/format/xml` — convert JSON to XML
+  - `/format/camelCase` — recursively convert all JSON keys to camelCase
+  - `/format/kebab-case` — recursively convert all JSON keys to kebab-case
+  - `/format/snake-case` — recursively convert all JSON keys to snake_case
+  - `/format/toUpper` — uppercase the body text
+  - `/format/toLower` — lowercase the body text
+  - `/format/collapse-lines` — collapse multiple consecutive blank lines into one
+- **Codec endpoints** (`POST /encode/*` and `POST /decode/*`) — encode/decode a POST body:
+  - `/encode/base64`, `/decode/base64`
+  - `/encode/url`, `/decode/url`
+  - `/encode/rot13`, `/decode/rot13`
+  - `/decode/jwt` — decode JWT header and payload (no signature verification)
+- **Extended image endpoints**:
+  - `jpg` accepted as alias for `jpeg`
+  - `/image/svg` — dynamic SVG with Leywn branding
+  - `/image/webp` — Leywn logo re-encoded as WebP (converted from PNG at startup using `cwebp`)
+  - `/image/color/{rgb}` — 64×64 PNG solid-colour image (3-char, 6-char, or 8-char hex)
+  - `/image/color/{rgb}/{width}/{height}` — solid-colour PNG at custom size (max 4096×4096)
+- **ExUnit test suites** for all new endpoints: `format_test.exs`, `codec_test.exs`, `image_test.exs`
+
+### Changed
+- Home page header redesigned: `#1a1a2e` background with logo + "Last Echo You Will Need" text
+- Home page description updated to highlight lightweight, fast, customisable nature
+- Dockerfile runtime image now includes `webp` package for WebP generation
+- Version bumped to `0.6.0` in `mix.exs`
+
+---
+
 ## [0.5.4] - 2026-04-10
 
 ### Fixed

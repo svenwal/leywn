@@ -124,6 +124,7 @@ All settings are controlled through environment variables.
 | `LEYWN_MTLS_CERT` | _(unset)_ | PEM-encoded client certificate (and optional CA chain) to use instead of the auto-generated one; served at `/auth/mtls/get-client-cert` and automatically trusted by the mTLS listener |
 | `LEYWN_MTLS_KEY` | _(unset)_ | PEM-encoded private key matching `LEYWN_MTLS_CERT` |
 | `LEYWN_TRUST_FORWARD` | _(unset)_ | When set to `true`, derive the caller IP from the `X-Forwarded-For` header instead of the socket address |
+| `LEYWN_ONLY_JSON` | _(unset)_ | When set to `true`, disable XML content negotiation and always return JSON regardless of the `Accept` header |
 
 Example with custom ports:
 
@@ -455,15 +456,29 @@ curl http://localhost:4000/guuid
 
 ```
 GET /image/png
-GET /image/jpeg
+GET /image/jpeg   (jpg is accepted as alias)
 GET /image/gif
+GET /image/svg    # dynamic SVG with Leywn branding
+GET /image/webp   # PNG re-encoded as WebP (requires cwebp at startup)
 ```
-
-Serves the Leywn demo image in the requested format. Useful for testing image rendering, CDN caching headers, or client-side image loading.
 
 ```bash
 curl -o logo.png http://localhost:4000/image/png
-open http://localhost:4000/image/gif
+curl -o logo.svg http://localhost:4000/image/svg
+```
+
+### /image/color — Solid-colour images
+
+```
+GET /image/color/{rgb}                  # 64×64 PNG
+GET /image/color/{rgb}/{width}/{height} # custom size, max 4096×4096
+```
+
+`{rgb}` accepts 3-char (`f00`), 6-char (`ff0000`), or 8-char RGBA (`ff0000cc`) hex strings.
+
+```bash
+curl -o red.png http://localhost:4000/image/color/ff0000
+curl -o blue.png http://localhost:4000/image/color/0000ff/200/100
 ```
 
 ---
@@ -571,7 +586,64 @@ curl -i http://localhost:4000/date/Invalid/Zone
 
 ---
 
-### /time — Current time
+### /format/* — Format and prettify
+
+```
+POST /format/json           # pretty-print JSON body
+POST /format/yaml           # convert JSON body to YAML
+POST /format/xml            # convert JSON body to XML
+POST /format/camelCase      # convert all JSON keys to camelCase
+POST /format/kebab-case     # convert all JSON keys to kebab-case
+POST /format/snake-case     # convert all JSON keys to snake_case
+POST /format/toUpper        # uppercase the body text
+POST /format/toLower        # lowercase the body text
+POST /format/collapse-lines # collapse multiple blank lines into one
+```
+
+All format endpoints accept a POST body (limited to `LEYWN_ECHO_MAX_BODY_BYTES`). JSON-transforming endpoints return 422 if the body is not valid JSON.
+
+```bash
+# Pretty-print JSON
+curl -s -X POST http://localhost:4000/format/json \
+  -H "Content-Type: application/json" \
+  -d '{"b":2,"a":1}'
+
+# Convert JSON to YAML
+curl -s -X POST http://localhost:4000/format/yaml \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Alice","roles":["admin","user"]}'
+
+# Convert camelCase keys to snake_case
+curl -s -X POST http://localhost:4000/format/snake-case \
+  -H "Content-Type: application/json" \
+  -d '{"firstName":"Alice","lastName":"Smith"}'
+```
+
+---
+
+### /encode and /decode — Codec
+
+```
+POST /encode/base64   POST /decode/base64
+POST /encode/url      POST /decode/url
+POST /encode/rot13    POST /decode/rot13
+POST /decode/jwt      # decode JWT header + payload (no sig verification)
+```
+
+```bash
+curl -s -X POST http://localhost:4000/encode/base64 -d "hello world"
+# aGVsbG8gd29ybGQ=
+
+curl -s -X POST http://localhost:4000/decode/base64 -d "aGVsbG8gd29ybGQ="
+# hello world
+
+TOKEN="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMSJ9.sig"
+curl -s -X POST http://localhost:4000/decode/jwt -d "$TOKEN"
+```
+
+---
+
+### /image/{type} — Demo images
 
 ```
 GET /time                   # UTC
@@ -697,8 +769,11 @@ lib/
 │   ├── auth.ex          # All authentication handlers (basic, api-key, jwt, mtls)
 │   ├── mtls.ex          # Generates CA / server / client certificates at startup
 │   ├── random.ex        # UUID, integer, and Lorem Ipsum generators
-│   ├── logos.ex         # Resolves image file paths
+│   ├── logos.ex         # Image serving: file lookup, SVG, WebP, solid-colour PNG generator
 │   ├── info.ex          # IP address, date, and time helpers
+│   ├── format.ex        # POST body format/prettify transformations
+│   ├── codec.ex         # POST body encode/decode operations
+│   ├── yaml.ex          # Minimal pure-Elixir YAML emitter
 │   └── respond.ex       # Content negotiation and JSON/XML serialisation
 └── leywn.ex
 

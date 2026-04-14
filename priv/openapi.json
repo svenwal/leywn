@@ -2,15 +2,17 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Leywn",
-    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON.",
-    "version": "0.5.4"
+    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.",
+    "version": "0.6.0"
   },
   "tags": [
-    { "name": "Echo", "description": "Request echo and inspection endpoints" },
-    { "name": "Auth", "description": "Authentication demo endpoints (Basic Auth, API Key, JWT, mTLS)" },
+    { "name": "Echo",   "description": "Request echo and inspection endpoints" },
+    { "name": "Auth",   "description": "Authentication demo endpoints (Basic Auth, API Key, JWT, mTLS)" },
     { "name": "Random", "description": "Random value generators (integers, UUIDs, Lorem Ipsum)" },
-    { "name": "Info", "description": "Caller information and server time endpoints" },
-    { "name": "Utility", "description": "Utility endpoints (status codes, images)" }
+    { "name": "Info",   "description": "Caller information and server time endpoints" },
+    { "name": "Utility","description": "Utility endpoints (status codes, images)" },
+    { "name": "Format", "description": "POST body prettify / transform endpoints" },
+    { "name": "Codec",  "description": "POST body encode / decode endpoints" }
   ],
   "paths": {
     "/echo": {
@@ -382,17 +384,64 @@
     "/image/{type}": {
       "summary": "Serve a demo image",
       "parameters": [
-        { "name": "type", "in": "path", "required": true, "description": "Image format", "schema": { "type": "string", "enum": ["png", "jpeg", "gif"] } }
+        { "name": "type", "in": "path", "required": true, "description": "Image format: png, jpeg, jpg (alias for jpeg), gif, svg, webp", "schema": { "type": "string", "enum": ["png", "jpeg", "jpg", "gif", "svg", "webp"] } }
       ],
       "get": {
         "tags": ["Utility"],
         "summary": "Get the Leywn demo image",
         "responses": {
-          "200": { "description": "Image file", "content": { "image/png": { "schema": { "type": "string", "format": "binary" } }, "image/jpeg": { "schema": { "type": "string", "format": "binary" } }, "image/gif": { "schema": { "type": "string", "format": "binary" } } } },
+          "200": { "description": "Image file", "content": { "image/png": {}, "image/jpeg": {}, "image/gif": {}, "image/svg+xml": {}, "image/webp": {} } },
           "400": { "description": "Unsupported image type", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
-    }
+    },
+    "/image/color/{rgb}": {
+      "summary": "Solid-colour PNG image (64×64)",
+      "description": "Returns a 64×64 PNG filled with the specified colour. Accepts 3-char (`f00`), 6-char (`ff0000`), or 8-char RGBA (`ff0000cc`) hex strings.",
+      "parameters": [
+        { "name": "rgb", "in": "path", "required": true, "description": "Hex colour: 3, 6, or 8 chars", "schema": { "type": "string", "example": "1a2b3c" } }
+      ],
+      "get": {
+        "tags": ["Utility"],
+        "summary": "64×64 solid-colour PNG",
+        "responses": {
+          "200": { "description": "PNG image", "content": { "image/png": {} } },
+          "400": { "description": "Invalid colour string", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/image/color/{rgb}/{width}/{height}": {
+      "summary": "Solid-colour PNG image at custom size",
+      "parameters": [
+        { "name": "rgb",    "in": "path", "required": true, "schema": { "type": "string", "example": "1a2b3c" } },
+        { "name": "width",  "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1, "maximum": 4096, "example": 200 } },
+        { "name": "height", "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1, "maximum": 4096, "example": 100 } }
+      ],
+      "get": {
+        "tags": ["Utility"],
+        "summary": "Custom-size solid-colour PNG",
+        "responses": {
+          "200": { "description": "PNG image", "content": { "image/png": {} } },
+          "400": { "description": "Invalid colour or dimensions", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/format/json":          { "post": { "tags": ["Format"], "summary": "Pretty-print a JSON body",                  "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Formatted JSON",    "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/yaml":          { "post": { "tags": ["Format"], "summary": "Convert JSON body to YAML",                 "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "YAML output",        "content": { "application/yaml": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/xml":           { "post": { "tags": ["Format"], "summary": "Convert JSON body to XML",                  "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "XML output",         "content": { "application/xml": {} } },  "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/camelCase":     { "post": { "tags": ["Format"], "summary": "Convert JSON keys to camelCase",            "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",    "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/kebab-case":    { "post": { "tags": ["Format"], "summary": "Convert JSON keys to kebab-case",           "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",    "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/snake-case":    { "post": { "tags": ["Format"], "summary": "Convert JSON keys to snake_case",           "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",    "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/toUpper":       { "post": { "tags": ["Format"], "summary": "Uppercase the body text",                   "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Uppercased text",   "content": { "text/plain": {} } } } } },
+    "/format/toLower":       { "post": { "tags": ["Format"], "summary": "Lowercase the body text",                   "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Lowercased text",   "content": { "text/plain": {} } } } } },
+    "/format/collapse-lines":{ "post": { "tags": ["Format"], "summary": "Collapse multiple blank lines into one",    "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Collapsed text",    "content": { "text/plain": {} } } } } },
+    "/encode/base64": { "post": { "tags": ["Codec"], "summary": "Base64-encode the body",        "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Base64 string",     "content": { "text/plain": {} } } } } },
+    "/decode/base64": { "post": { "tags": ["Codec"], "summary": "Base64-decode the body",        "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded bytes",     "content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/encode/url":    { "post": { "tags": ["Codec"], "summary": "URL-encode the body",           "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Encoded string",    "content": { "text/plain": {} } } } } },
+    "/decode/url":    { "post": { "tags": ["Codec"], "summary": "URL-decode the body",           "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded string",    "content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/encode/rot13":  { "post": { "tags": ["Codec"], "summary": "Apply ROT13 to the body",       "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "ROT13 string",      "content": { "text/plain": {} } } } } },
+    "/decode/rot13":  { "post": { "tags": ["Codec"], "summary": "Apply ROT13 to the body (symmetric)", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "ROT13 string", "content": { "text/plain": {} } } } } },
+    "/decode/jwt":    { "post": { "tags": ["Codec"], "summary": "Decode JWT header and payload", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded JWT",       "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } }
   },
   "components": {
     "securitySchemes": {
@@ -495,6 +544,13 @@
         }
       }
     },
+    "requestBodies": {
+      "PlainBody": {
+        "description": "Raw text or JSON body to transform",
+        "required": false,
+        "content": { "text/plain": { "schema": { "type": "string" } }, "application/json": { "schema": {} } }
+      }
+    },
     "responses": {
       "unauthorized": {
         "description": "Authentication failed",
@@ -508,6 +564,12 @@
               }
             }
           }
+        }
+      },
+      "unprocessable": {
+        "description": "Input could not be parsed / transformed",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
         }
       }
     }

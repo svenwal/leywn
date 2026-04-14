@@ -23,7 +23,7 @@ RUN mix release
 FROM debian:bullseye-slim
 
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends libssl1.1 libncurses5 && \
+    apt-get install -y --no-install-recommends libssl1.1 libncurses5 webp && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

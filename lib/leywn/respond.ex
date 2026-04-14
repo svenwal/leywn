@@ -11,18 +11,22 @@ defmodule Leywn.Respond do
   end
 
   defp negotiate(conn) do
-    accept =
-      conn
-      |> get_req_header("accept")
-      |> Enum.join(",")
-      |> String.downcase()
+    if System.get_env("LEYWN_ONLY_JSON") == "true" do
+      :json
+    else
+      accept =
+        conn
+        |> get_req_header("accept")
+        |> Enum.join(",")
+        |> String.downcase()
 
-    cond do
-      accept == "" -> :json
-      String.contains?(accept, "application/xml") -> :xml
-      String.contains?(accept, "text/xml") -> :xml
-      String.contains?(accept, "+xml") -> :xml
-      true -> :json
+      cond do
+        accept == "" -> :json
+        String.contains?(accept, "application/xml") -> :xml
+        String.contains?(accept, "text/xml") -> :xml
+        String.contains?(accept, "+xml") -> :xml
+        true -> :json
+      end
     end
   end
 
