@@ -23,5 +23,5 @@ jobs:
           docker build \
             --target test \
             --progress=plain \
-            -f Leywn/leywn/Dockerfile \
+            -f Dockerfile \
             Leywn/leywn
