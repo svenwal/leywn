@@ -36,4 +36,3 @@ defmodule Leywn.Echo do
 
   defp ip_to_string(other), do: inspect(other)
 end
-

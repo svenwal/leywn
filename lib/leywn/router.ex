@@ -1,11 +1,11 @@
 defmodule Leywn.Router do
   use Plug.Router
 
-  plug Leywn.CORS
-  plug Leywn.RequestLogger
-  plug :set_server_header
-  plug :match
-  plug :dispatch
+  plug(Leywn.CORS)
+  plug(Leywn.RequestLogger)
+  plug(:set_server_header)
+  plug(:match)
+  plug(:dispatch)
 
   get "/" do
     if System.get_env("LEYWN_ECHO_ON_HOME") == "true" do
@@ -68,9 +68,9 @@ defmodule Leywn.Router do
 
     conn
     |> Plug.Conn.put_resp_header(
-         "content-disposition",
-         ~s(attachment; filename="leywn.insomnia.json")
-       )
+      "content-disposition",
+      ~s(attachment; filename="leywn.insomnia.json")
+    )
     |> Plug.Conn.put_resp_content_type("application/json")
     |> Plug.Conn.send_resp(200, Jason.encode!(collection, pretty: true))
   end
@@ -81,11 +81,16 @@ defmodule Leywn.Router do
     started_at = Application.get_env(:leywn, :started_at, System.monotonic_time(:second))
     uptime = System.monotonic_time(:second) - started_at
 
-    Leywn.Respond.send(conn, 200, %{
-      status: "ok",
-      version: Application.spec(:leywn, :vsn) |> to_string(),
-      uptime_seconds: uptime
-    }, root: "health")
+    Leywn.Respond.send(
+      conn,
+      200,
+      %{
+        status: "ok",
+        version: Application.spec(:leywn, :vsn) |> to_string(),
+        uptime_seconds: uptime
+      },
+      root: "health"
+    )
   end
 
   # ---- Echo ------------------------------------------------------------------
@@ -144,9 +149,11 @@ defmodule Leywn.Router do
     case Leywn.Chaos.from_path(error_pct, mangled_pct, latency_pct, max_latency) do
       {:ok, params} ->
         Leywn.Chaos.apply_chaos(conn, params, echo_data)
+
       {:error, field, msg} ->
-        Leywn.Respond.send(conn, 400,
-          %{error: "invalid_chaos_params", field: field, detail: msg}, root: "error")
+        Leywn.Respond.send(conn, 400, %{error: "invalid_chaos_params", field: field, detail: msg},
+          root: "error"
+        )
     end
   end
 
@@ -159,7 +166,12 @@ defmodule Leywn.Router do
         Leywn.Respond.send(conn, 200, %{requested_ms: delay, delayed_ms: delay}, root: "delay")
 
       {delay, ""} when delay > 30_000 ->
-        Leywn.Respond.send(conn, 400, %{error: "delay_too_large", maximum_ms: 30_000, provided_ms: delay}, root: "error")
+        Leywn.Respond.send(
+          conn,
+          400,
+          %{error: "delay_too_large", maximum_ms: 30_000, provided_ms: delay},
+          root: "error"
+        )
 
       _ ->
         Leywn.Respond.send(conn, 400, %{error: "invalid_delay", provided: ms}, root: "error")
@@ -191,7 +203,9 @@ defmodule Leywn.Router do
         end)
 
       {count, ""} when count > 100 ->
-        Leywn.Respond.send(conn, 400, %{error: "count_too_large", maximum: 100, provided: count}, root: "error")
+        Leywn.Respond.send(conn, 400, %{error: "count_too_large", maximum: 100, provided: count},
+          root: "error"
+        )
 
       _ ->
         Leywn.Respond.send(conn, 400, %{error: "invalid_count", provided: n}, root: "error")
@@ -221,6 +235,7 @@ defmodule Leywn.Router do
       email: Leywn.Random.random_email(),
       color: Leywn.Random.random_color()
     }
+
     Leywn.Respond.send(conn, 200, data, root: "random")
   end
 
@@ -235,8 +250,9 @@ defmodule Leywn.Router do
       Leywn.Respond.send(conn, 200, %{value: Leywn.Random.random_int(lo, hi)}, root: "random")
     else
       _ ->
-        Leywn.Respond.send(conn, 400,
-          %{error: "invalid_range", lower: lower, upper: upper}, root: "error")
+        Leywn.Respond.send(conn, 400, %{error: "invalid_range", lower: lower, upper: upper},
+          root: "error"
+        )
     end
   end
 
@@ -254,8 +270,12 @@ defmodule Leywn.Router do
       {n, ""} when n >= 1 and n <= 32 ->
         paragraphs = Leywn.Random.lorem_ipsum(n)
         Leywn.Respond.send(conn, 200, %{paragraphs: paragraphs}, root: "lorem_ipsum")
+
       {n, ""} when n > 32 ->
-        Leywn.Respond.send(conn, 400, %{error: "count_too_large", maximum: 32, provided: n}, root: "error")
+        Leywn.Respond.send(conn, 400, %{error: "count_too_large", maximum: 32, provided: n},
+          root: "error"
+        )
+
       _ ->
         Leywn.Respond.send(conn, 400, %{error: "invalid_count", provided: count}, root: "error")
     end
@@ -285,7 +305,9 @@ defmodule Leywn.Router do
         end
 
       _ ->
-        Leywn.Respond.send(conn, 400, %{error: "invalid_status_code", provided: code}, root: "error")
+        Leywn.Respond.send(conn, 400, %{error: "invalid_status_code", provided: code},
+          root: "error"
+        )
     end
   end
 
@@ -320,10 +342,15 @@ defmodule Leywn.Router do
   end
 
   get "/auth/mtls/get-client-cert" do
-    Leywn.Respond.send(conn, 200, %{
-      cert_pem: Leywn.MTLS.client_cert_pem(),
-      key_pem: Leywn.MTLS.client_key_pem()
-    }, root: "client_cert")
+    Leywn.Respond.send(
+      conn,
+      200,
+      %{
+        cert_pem: Leywn.MTLS.client_cert_pem(),
+        key_pem: Leywn.MTLS.client_key_pem()
+      },
+      root: "client_cert"
+    )
   end
 
   # ---- Info ------------------------------------------------------------------
@@ -346,9 +373,11 @@ defmodule Leywn.Router do
 
   get "/date/*timezone_parts" do
     tz = Enum.join(timezone_parts, "/")
+
     case Leywn.Info.date_tz(tz) do
       {:ok, data} ->
         Leywn.Respond.send(conn, 200, data, root: "date")
+
       {:error, :not_found} ->
         Leywn.Respond.send(conn, 404, %{error: "unknown_timezone", timezone: tz}, root: "error")
     end
@@ -360,9 +389,11 @@ defmodule Leywn.Router do
 
   get "/time/*timezone_parts" do
     tz = Enum.join(timezone_parts, "/")
+
     case Leywn.Info.time_tz(tz) do
       {:ok, data} ->
         Leywn.Respond.send(conn, 200, data, root: "time")
+
       {:error, :not_found} ->
         Leywn.Respond.send(conn, 404, %{error: "unknown_timezone", timezone: tz}, root: "error")
     end
@@ -380,8 +411,12 @@ defmodule Leywn.Router do
       handle_color_image(conn, rgb, w, h)
     else
       _ ->
-        Leywn.Respond.send(conn, 400,
-          %{error: "invalid_dimensions", width: width, height: height}, root: "error")
+        Leywn.Respond.send(
+          conn,
+          400,
+          %{error: "invalid_dimensions", width: width, height: height},
+          root: "error"
+        )
     end
   end
 
@@ -404,32 +439,32 @@ defmodule Leywn.Router do
 
   # ---- Format endpoints (POST only) ----------------------------------------
 
-  post "/format/json",           do: handle_format(conn, &Leywn.Format.json/1)
-  post "/format/yaml",           do: handle_format(conn, &Leywn.Format.yaml/1)
-  post "/format/xml",            do: handle_format(conn, &Leywn.Format.xml/1)
-  post "/format/camelCase",      do: handle_format(conn, &Leywn.Format.camel_case/1)
-  post "/format/kebab-case",     do: handle_format(conn, &Leywn.Format.kebab_case/1)
-  post "/format/snake-case",     do: handle_format(conn, &Leywn.Format.snake_case/1)
-  post "/format/toUpper",        do: handle_format(conn, &Leywn.Format.to_upper/1)
-  post "/format/toLower",        do: handle_format(conn, &Leywn.Format.to_lower/1)
-  post "/format/collapse-lines", do: handle_format(conn, &Leywn.Format.collapse_lines/1)
+  post("/format/json", do: handle_format(conn, &Leywn.Format.json/1))
+  post("/format/yaml", do: handle_format(conn, &Leywn.Format.yaml/1))
+  post("/format/xml", do: handle_format(conn, &Leywn.Format.xml/1))
+  post("/format/camelCase", do: handle_format(conn, &Leywn.Format.camel_case/1))
+  post("/format/kebab-case", do: handle_format(conn, &Leywn.Format.kebab_case/1))
+  post("/format/snake-case", do: handle_format(conn, &Leywn.Format.snake_case/1))
+  post("/format/toUpper", do: handle_format(conn, &Leywn.Format.to_upper/1))
+  post("/format/toLower", do: handle_format(conn, &Leywn.Format.to_lower/1))
+  post("/format/collapse-lines", do: handle_format(conn, &Leywn.Format.collapse_lines/1))
 
   # ---- Codec endpoints (POST only) -----------------------------------------
 
-  post "/encode/base64", do: handle_codec(conn, &Leywn.Codec.base64_encode/1)
-  post "/decode/base64", do: handle_codec(conn, &Leywn.Codec.base64_decode/1)
-  post "/encode/url",    do: handle_codec(conn, &Leywn.Codec.url_encode/1)
-  post "/decode/url",    do: handle_codec(conn, &Leywn.Codec.url_decode/1)
-  post "/encode/rot13",  do: handle_codec(conn, &Leywn.Codec.rot13/1)
-  post "/decode/rot13",  do: handle_codec(conn, &Leywn.Codec.rot13/1)
-  post "/decode/jwt",    do: handle_codec(conn, &Leywn.Codec.jwt_decode/1)
-  post "/encode/hex",    do: handle_codec(conn, &Leywn.Codec.hex_encode/1)
-  post "/decode/hex",    do: handle_codec(conn, &Leywn.Codec.hex_decode/1)
+  post("/encode/base64", do: handle_codec(conn, &Leywn.Codec.base64_encode/1))
+  post("/decode/base64", do: handle_codec(conn, &Leywn.Codec.base64_decode/1))
+  post("/encode/url", do: handle_codec(conn, &Leywn.Codec.url_encode/1))
+  post("/decode/url", do: handle_codec(conn, &Leywn.Codec.url_decode/1))
+  post("/encode/rot13", do: handle_codec(conn, &Leywn.Codec.rot13/1))
+  post("/decode/rot13", do: handle_codec(conn, &Leywn.Codec.rot13/1))
+  post("/decode/jwt", do: handle_codec(conn, &Leywn.Codec.jwt_decode/1))
+  post("/encode/hex", do: handle_codec(conn, &Leywn.Codec.hex_encode/1))
+  post("/decode/hex", do: handle_codec(conn, &Leywn.Codec.hex_decode/1))
 
   # ---- Hash endpoints (POST only) ------------------------------------------
 
-  post "/hash/sha256", do: handle_codec(conn, &Leywn.Hash.sha256/1)
-  post "/hash/md5",    do: handle_codec(conn, &Leywn.Hash.md5/1)
+  post("/hash/sha256", do: handle_codec(conn, &Leywn.Hash.sha256/1))
+  post("/hash/md5", do: handle_codec(conn, &Leywn.Hash.md5/1))
 
   match _ do
     Leywn.Respond.send(conn, 404, %{error: "not_found"}, root: "error")
@@ -496,12 +531,13 @@ defmodule Leywn.Router do
     # the user is actually on.
     base =
       System.get_env("LEYWN_EXTERNAL_HTTPS_URL") ||
-      System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
-      (fn ->
-        scheme = if conn.scheme == :https, do: "https", else: "http"
-        host = safe_host(conn, "localhost:#{port}")
-        "#{scheme}://#{host}"
-      end).()
+        System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
+        (fn ->
+           scheme = if conn.scheme == :https, do: "https", else: "http"
+           host = safe_host(conn, "localhost:#{port}")
+           "#{scheme}://#{host}"
+         end).()
+
     base <> "/request-collection"
   end
 

@@ -64,6 +64,7 @@ defmodule Leywn.Codec do
 
   def hex_decode(body) do
     input = body |> String.trim() |> String.upcase()
+
     case Base.decode16(input) do
       {:ok, decoded} -> {:ok, "text/plain", decoded}
       :error -> {:error, "invalid hex input"}

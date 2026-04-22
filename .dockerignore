@@ -1,0 +1,7 @@
+_build/
+deps/
+.git/
+.github/
+priv/static/
+*.md
+.dockerignore

@@ -1,8 +1,7 @@
 defmodule LeywnTest do
   use ExUnit.Case
-  doctest Leywn
 
-  test "greets the world" do
-    assert Leywn.hello() == :world
+  test "application module exists" do
+    assert Code.ensure_loaded?(Leywn.Router)
   end
 end

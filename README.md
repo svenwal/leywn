@@ -1,5 +1,8 @@
 # Leywn — Last Echo You Will Need
 
+[![CI](https://github.com/svenwal/leywn/actions/workflows/ci.yml/badge.svg)](https://github.com/svenwal/leywn/actions/workflows/ci.yml)
+[![Docker Hub](https://img.shields.io/docker/pulls/svenwal/leywn)](https://hub.docker.com/r/svenwal/leywn)
+
 Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives you a single deployable service that echoes requests, enforces every common authentication scheme, returns arbitrary HTTP status codes, generates random data, and serves a live Swagger UI — so you can test clients, proxies, load balancers, and API gateways without standing up any real backend.
 
 ---
@@ -40,7 +43,7 @@ Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives yo
 ## Quick start
 
 ```bash
-docker run -p 4000:4000 -p 4443:4443 ghcr.io/svenwal/leywn:latest
+docker run -p 4000:4000 -p 4443:4443 svenwal/leywn:latest
 ```
 
 Open <http://localhost:4000> in your browser for the Swagger UI.
@@ -54,7 +57,7 @@ Open <http://localhost:4000> in your browser for the Swagger UI.
 **Pull and run the latest image:**
 
 ```bash
-docker run -p 4000:4000 -p 4443:4443 ghcr.io/svenwal/leywn:latest
+docker run -p 4000:4000 -p 4443:4443 svenwal/leywn:latest
 ```
 
 **Build from source:**
@@ -77,7 +80,7 @@ Create a `docker-compose.yml`:
 ```yaml
 services:
   leywn:
-    image: ghcr.io/svenwal/leywn:latest
+    image: svenwal/leywn:latest
     ports:
       - "4000:4000"
       - "4443:4443"

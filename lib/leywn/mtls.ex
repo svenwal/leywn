@@ -30,20 +30,32 @@ defmodule Leywn.MTLS do
     # :selfsigned_peer is raised for the CA cert at the top of the chain (it is self-signed).
     # We accept it only when it is one of our own known CA certs; any other self-signed or
     # unknown-CA cert is rejected, so only clients presenting our CA-issued cert are let through.
-    verify_fun = {fn
-      cert, {:bad_cert, :selfsigned_peer}, state ->
-        cert_der = :public_key.pkix_encode(:'OTPCertificate', cert, :otp)
-        if MapSet.member?(trusted_set, cert_der) do
-          {:valid, state}
-        else
-          {:fail, {:bad_cert, :selfsigned_peer}}
-        end
-      _cert, {:bad_cert, :unknown_ca},      _state -> {:fail, {:bad_cert, :unknown_ca}}
-      _cert, {:extension, _},                state -> {:unknown, state}
-      _cert, :valid,                         state -> {:valid, state}
-      _cert, :valid_peer,                    state -> {:valid, state}
-      _cert, error,                         _state -> {:fail, error}
-    end, nil}
+    verify_fun =
+      {fn
+         cert, {:bad_cert, :selfsigned_peer}, state ->
+           cert_der = :public_key.pkix_encode(:OTPCertificate, cert, :otp)
+
+           if MapSet.member?(trusted_set, cert_der) do
+             {:valid, state}
+           else
+             {:fail, {:bad_cert, :selfsigned_peer}}
+           end
+
+         _cert, {:bad_cert, :unknown_ca}, _state ->
+           {:fail, {:bad_cert, :unknown_ca}}
+
+         _cert, {:extension, _}, state ->
+           {:unknown, state}
+
+         _cert, :valid, state ->
+           {:valid, state}
+
+         _cert, :valid_peer, state ->
+           {:valid, state}
+
+         _cert, error, _state ->
+           {:fail, error}
+       end, nil}
 
     [
       cert: server_cert_der,
@@ -73,11 +85,12 @@ defmodule Leywn.MTLS do
   # Returns {extra_cacerts} — any certs from LEYWN_MTLS_CERT that the server must trust.
   defp load_or_store_client_cert(ca_key, ca_cert_der) do
     cert_pem = System.get_env("LEYWN_MTLS_CERT")
-    key_pem  = System.get_env("LEYWN_MTLS_KEY")
+    key_pem = System.get_env("LEYWN_MTLS_KEY")
 
     if cert_pem && key_pem do
       cert_ders = parse_cert_ders!(cert_pem, "LEYWN_MTLS_CERT")
-      _key_opt  = parse_key_pem!(key_pem)   # validates the key PEM
+      # validates the key PEM
+      _key_opt = parse_key_pem!(key_pem)
 
       :persistent_term.put(:leywn_mtls, %{
         ca_cert_der: ca_cert_der,
@@ -139,9 +152,9 @@ defmodule Leywn.MTLS do
   end
 
   defp check_cert_expiry(cert) do
-    {:'OTPCertificate', tbs, _, _} = cert
-    {:'OTPTBSCertificate', _, _, _, _, validity, _, _, _, _, _} = tbs
-    {:'Validity', _not_before, not_after} = validity
+    {:OTPCertificate, tbs, _, _} = cert
+    {:OTPTBSCertificate, _, _, _, _, validity, _, _, _, _, _} = tbs
+    {:Validity, _not_before, not_after} = validity
 
     cert_secs = not_after |> asn1_time_to_datetime() |> :calendar.datetime_to_gregorian_seconds()
     now_secs = :calendar.universal_time() |> :calendar.datetime_to_gregorian_seconds()
@@ -153,16 +166,23 @@ defmodule Leywn.MTLS do
 
   defp asn1_time_to_datetime({:utcTime, t}) do
     t = to_string(t)
-    <<y2::binary-2, mo::binary-2, d::binary-2, h::binary-2, mi::binary-2, s::binary-2, _::binary>> = t
+
+    <<y2::binary-2, mo::binary-2, d::binary-2, h::binary-2, mi::binary-2, s::binary-2, _::binary>> =
+      t
+
     year = String.to_integer(y2)
     year = if year >= 50, do: 1900 + year, else: 2000 + year
+
     {{year, String.to_integer(mo), String.to_integer(d)},
      {String.to_integer(h), String.to_integer(mi), String.to_integer(s)}}
   end
 
   defp asn1_time_to_datetime({:generalTime, t}) do
     t = to_string(t)
-    <<year::binary-4, mo::binary-2, d::binary-2, h::binary-2, mi::binary-2, s::binary-2, _::binary>> = t
+
+    <<year::binary-4, mo::binary-2, d::binary-2, h::binary-2, mi::binary-2, s::binary-2,
+      _::binary>> = t
+
     {{String.to_integer(year), String.to_integer(mo), String.to_integer(d)},
      {String.to_integer(h), String.to_integer(mi), String.to_integer(s)}}
   end
@@ -170,7 +190,7 @@ defmodule Leywn.MTLS do
   defp parse_key_pem!(pem_string) do
     entries = :public_key.pem_decode(pem_string)
 
-    key_types = [:RSAPrivateKey, :ECPrivateKey, :PrivateKeyInfo, :"DSAPrivateKey"]
+    key_types = [:RSAPrivateKey, :ECPrivateKey, :PrivateKeyInfo, :DSAPrivateKey]
     key_entry = Enum.find(entries, fn {type, _, _} -> type in key_types end)
 
     if key_entry == nil do
@@ -182,9 +202,9 @@ defmodule Leywn.MTLS do
     {type, der}
   end
 
-  def ca_cert_der,     do: :persistent_term.get(:leywn_mtls).ca_cert_der
+  def ca_cert_der, do: :persistent_term.get(:leywn_mtls).ca_cert_der
   def client_cert_pem, do: :persistent_term.get(:leywn_mtls).client_cert_pem
-  def client_key_pem,  do: :persistent_term.get(:leywn_mtls).client_key_pem
+  def client_key_pem, do: :persistent_term.get(:leywn_mtls).client_key_pem
 
   defp build_ca_cert(key) do
     subject = rdn("Leywn Demo CA")
@@ -205,42 +225,32 @@ defmodule Leywn.MTLS do
   end
 
   defp otp_tbs(serial, issuer, subject, spki, extensions) do
-    {:'OTPTBSCertificate',
-     :v3,
-     serial,
-     {:'SignatureAlgorithm', @ecdsa_with_sha256, :asn1_NOVALUE},
-     issuer,
-     {:'Validity', {:generalTime, @not_before}, {:generalTime, @not_after}},
-     subject,
-     spki,
-     :asn1_NOVALUE,
-     :asn1_NOVALUE,
-     extensions}
+    {:OTPTBSCertificate, :v3, serial, {:SignatureAlgorithm, @ecdsa_with_sha256, :asn1_NOVALUE},
+     issuer, {:Validity, {:generalTime, @not_before}, {:generalTime, @not_after}}, subject, spki,
+     :asn1_NOVALUE, :asn1_NOVALUE, extensions}
   end
 
-  defp ec_spki({:'ECPrivateKey', _version, _priv, _params, pub_bytes}) do
-    {:'OTPSubjectPublicKeyInfo',
-     {:'PublicKeyAlgorithm', @id_ec_public_key, {:namedCurve, @secp256r1}},
-     {:ECPoint, pub_bytes}}
+  defp ec_spki({:ECPrivateKey, _version, _priv, _params, pub_bytes}) do
+    {:OTPSubjectPublicKeyInfo,
+     {:PublicKeyAlgorithm, @id_ec_public_key, {:namedCurve, @secp256r1}}, {:ECPoint, pub_bytes}}
   end
 
   # OTP 26+ adds a 6th attributes field to ECPrivateKey
-  defp ec_spki({:'ECPrivateKey', _version, _priv, _params, pub_bytes, _attrs}) do
-    {:'OTPSubjectPublicKeyInfo',
-     {:'PublicKeyAlgorithm', @id_ec_public_key, {:namedCurve, @secp256r1}},
-     {:ECPoint, pub_bytes}}
+  defp ec_spki({:ECPrivateKey, _version, _priv, _params, pub_bytes, _attrs}) do
+    {:OTPSubjectPublicKeyInfo,
+     {:PublicKeyAlgorithm, @id_ec_public_key, {:namedCurve, @secp256r1}}, {:ECPoint, pub_bytes}}
   end
 
   defp rdn(cn) do
-    {:rdnSequence, [[{:'AttributeTypeAndValue', @id_at_common_name, {:utf8String, cn}}]]}
+    {:rdnSequence, [[{:AttributeTypeAndValue, @id_at_common_name, {:utf8String, cn}}]]}
   end
 
   defp basic_constraints_ext(is_ca) do
-    {:'Extension', @id_ce_basic_constraints, true, {:'BasicConstraints', is_ca, :asn1_NOVALUE}}
+    {:Extension, @id_ce_basic_constraints, true, {:BasicConstraints, is_ca, :asn1_NOVALUE}}
   end
 
-  defp cert_subject({:'OTPCertificate', tbs, _, _}) do
-    {:'OTPTBSCertificate', _, _, _, _issuer, _, subject, _, _, _, _} = tbs
+  defp cert_subject({:OTPCertificate, tbs, _, _}) do
+    {:OTPTBSCertificate, _, _, _, _issuer, _, subject, _, _, _, _} = tbs
     subject
   end
 

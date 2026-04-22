@@ -21,7 +21,9 @@ defmodule Leywn.Auth do
         Leywn.Respond.send(conn, 200, Map.merge(echo_data, auth_data), root: "auth")
 
       {:error, _} ->
-        Leywn.Respond.send(conn, 401, %{authenticated: false, error: "unauthorized"}, root: "auth")
+        Leywn.Respond.send(conn, 401, %{authenticated: false, error: "unauthorized"},
+          root: "auth"
+        )
     end
   end
 
@@ -178,8 +180,8 @@ defmodule Leywn.Auth do
 
   defp extract_cert_info(der) do
     try do
-      {:'OTPCertificate', tbs, _, _} = :public_key.pkix_decode_cert(der, :otp)
-      {:'OTPTBSCertificate', _, _, _, issuer, _, subject, _, _, _, _} = tbs
+      {:OTPCertificate, tbs, _, _} = :public_key.pkix_decode_cert(der, :otp)
+      {:OTPTBSCertificate, _, _, _, issuer, _, subject, _, _, _, _} = tbs
       %{client_dn: format_rdn(subject), client_ca: format_rdn(issuer)}
     rescue
       _ -> %{}
@@ -189,7 +191,7 @@ defmodule Leywn.Auth do
   defp format_rdn({:rdnSequence, rdns}) do
     rdns
     |> Enum.flat_map(fn attrs ->
-      Enum.map(attrs, fn {:'AttributeTypeAndValue', oid, value} ->
+      Enum.map(attrs, fn {:AttributeTypeAndValue, oid, value} ->
         "#{oid_name(oid)}=#{rdn_value(value)}"
       end)
     end)

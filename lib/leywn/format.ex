@@ -164,12 +164,14 @@ defmodule Leywn.Format do
       :error
     else
       result = lines |> Enum.reverse() |> Enum.join("\n")
+
       formatted =
         if String.starts_with?(result, "<?xml") do
           result
         else
           ~s(<?xml version="1.0" encoding="UTF-8"?>\n) <> result
         end
+
       {:ok, formatted}
     end
   rescue

@@ -9,7 +9,7 @@ WORKDIR /app
 RUN mix local.hex --force && \
     mix local.rebar --force
 
-COPY mix.exs mix.lock ./
+COPY mix.exs mix.lock .formatter.exs ./
 COPY config ./config
 
 RUN mix deps.get
@@ -17,6 +17,8 @@ RUN mix deps.get
 COPY priv ./priv
 COPY lib ./lib
 COPY test ./test
+
+RUN mix format --check-formatted
 
 CMD ["mix", "test"]
 

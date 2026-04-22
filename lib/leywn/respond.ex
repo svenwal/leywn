@@ -93,4 +93,3 @@ defmodule Leywn.Respond do
     defp key_name(k), do: to_string(k)
   end
 end
-

@@ -73,6 +73,7 @@ defmodule Leywn.DelayStreamHealthTest do
     assert get_resp_header(conn, "content-type") |> hd() =~ "application/x-ndjson"
     lines = conn.resp_body |> String.split("\n", trim: true)
     assert length(lines) == 5
+
     Enum.each(lines, fn line ->
       {:ok, obj} = Jason.decode(line)
       assert Map.has_key?(obj, "line")
@@ -151,9 +152,12 @@ defmodule Leywn.DelayStreamHealthTest do
   test "/request-collection covers all endpoint groups" do
     conn = get("/request-collection")
     {:ok, body} = Jason.decode(conn.resp_body)
-    folder_names = body["resources"]
-    |> Enum.filter(&(&1["_type"] == "request_group"))
-    |> Enum.map(& &1["name"])
+
+    folder_names =
+      body["resources"]
+      |> Enum.filter(&(&1["_type"] == "request_group"))
+      |> Enum.map(& &1["name"])
+
     for group <- ~w(Utility Echo Auth Random Info Format Codec Hash) do
       assert group in folder_names, "Missing folder: #{group}"
     end

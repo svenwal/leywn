@@ -34,11 +34,12 @@ defmodule Leywn.MTLSTest do
   # The TLS handshake must succeed and the endpoint must return 200 with authenticated: true.
   test "correct client certificate returns 200 with authenticated true" do
     cert_pem = Leywn.MTLS.client_cert_pem()
-    key_pem  = Leywn.MTLS.client_key_pem()
+    key_pem = Leywn.MTLS.client_key_pem()
 
     [{:Certificate, cert_der, _} | _] = :public_key.pem_decode(cert_pem)
 
-    key_types = [:ECPrivateKey, :RSAPrivateKey, :PrivateKeyInfo, :"DSAPrivateKey"]
+    key_types = [:ECPrivateKey, :RSAPrivateKey, :PrivateKeyInfo, :DSAPrivateKey]
+
     {key_type, key_der, _} =
       Enum.find(:public_key.pem_decode(key_pem), fn {t, _, _} -> t in key_types end)
 
@@ -78,9 +79,9 @@ defmodule Leywn.MTLSTest do
 
   defp recv_all(sock, acc) do
     case :ssl.recv(sock, 0, 2_000) do
-      {:ok, data}       -> recv_all(sock, acc <> IO.iodata_to_binary(data))
+      {:ok, data} -> recv_all(sock, acc <> IO.iodata_to_binary(data))
       {:error, :closed} -> acc
-      {:error, _}       -> acc
+      {:error, _} -> acc
     end
   end
 
@@ -99,38 +100,31 @@ defmodule Leywn.MTLSTest do
   # Builds a minimal self-signed EC cert that is NOT issued by the Leywn CA.
   defp build_self_signed_cert(key, cn) do
     ecdsa_sha256 = {1, 2, 840, 10045, 4, 3, 2}
-    id_ec_pk     = {1, 2, 840, 10045, 2, 1}
-    secp256r1    = {1, 2, 840, 10045, 3, 1, 7}
-    id_at_cn     = {2, 5, 4, 3}
-    id_ce_bc     = {2, 5, 29, 19}
+    id_ec_pk = {1, 2, 840, 10045, 2, 1}
+    secp256r1 = {1, 2, 840, 10045, 3, 1, 7}
+    id_at_cn = {2, 5, 4, 3}
+    id_ce_bc = {2, 5, 29, 19}
 
     pub_bytes = ec_pub_bytes(key)
 
     spki =
-      {:'OTPSubjectPublicKeyInfo',
-       {:'PublicKeyAlgorithm', id_ec_pk, {:namedCurve, secp256r1}},
+      {:OTPSubjectPublicKeyInfo, {:PublicKeyAlgorithm, id_ec_pk, {:namedCurve, secp256r1}},
        {:ECPoint, pub_bytes}}
 
-    subject = {:rdnSequence, [[{:'AttributeTypeAndValue', id_at_cn, {:utf8String, cn}}]]}
-    serial  = :rand.uniform(1_000_000_000)
+    subject = {:rdnSequence, [[{:AttributeTypeAndValue, id_at_cn, {:utf8String, cn}}]]}
+    serial = :rand.uniform(1_000_000_000)
 
     tbs =
-      {:'OTPTBSCertificate',
-       :v3,
-       serial,
-       {:'SignatureAlgorithm', ecdsa_sha256, :asn1_NOVALUE},
+      {:OTPTBSCertificate, :v3, serial, {:SignatureAlgorithm, ecdsa_sha256, :asn1_NOVALUE},
        subject,
-       {:'Validity', {:generalTime, ~c"20240101000000Z"}, {:generalTime, ~c"20350101000000Z"}},
-       subject,
-       spki,
-       :asn1_NOVALUE,
-       :asn1_NOVALUE,
-       [{:'Extension', id_ce_bc, true, {:'BasicConstraints', false, :asn1_NOVALUE}}]}
+       {:Validity, {:generalTime, ~c"20240101000000Z"}, {:generalTime, ~c"20350101000000Z"}},
+       subject, spki, :asn1_NOVALUE, :asn1_NOVALUE,
+       [{:Extension, id_ce_bc, true, {:BasicConstraints, false, :asn1_NOVALUE}}]}
 
     :public_key.pkix_sign(tbs, key)
   end
 
   # OTP 26+ adds a 6th attributes field to ECPrivateKey
-  defp ec_pub_bytes({:'ECPrivateKey', _v, _priv, _params, pub, _attrs}), do: pub
-  defp ec_pub_bytes({:'ECPrivateKey', _v, _priv, _params, pub}),          do: pub
+  defp ec_pub_bytes({:ECPrivateKey, _v, _priv, _params, pub, _attrs}), do: pub
+  defp ec_pub_bytes({:ECPrivateKey, _v, _priv, _params, pub}), do: pub
 end

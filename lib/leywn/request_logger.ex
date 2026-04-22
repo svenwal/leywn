@@ -21,7 +21,10 @@ defmodule Leywn.RequestLogger do
       remote_ip = conn.remote_ip |> :inet.ntoa() |> to_string()
       ts = DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
 
-      IO.puts("#{ts} #{conn.method} #{conn.request_path} remote=#{remote_ip} status=#{conn.status} duration=#{duration_ms}ms")
+      IO.puts(
+        "#{ts} #{conn.method} #{conn.request_path} remote=#{remote_ip} status=#{conn.status} duration=#{duration_ms}ms"
+      )
+
       conn
     end)
   end

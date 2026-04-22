@@ -58,12 +58,14 @@ defmodule Leywn.ChaosTest do
   # ---- header params ---------------------------------------------------------
 
   test "/chaos-engineering X-Chaos-* headers override defaults" do
-    conn = call(:get, "/chaos-engineering", [
-      {"x-chaos-error-percentage",   "0"},
-      {"x-chaos-mangled-percentage", "0"},
-      {"x-chaos-latency-percentage", "0"},
-      {"x-chaos-maximum-latency",    "500"}
-    ])
+    conn =
+      call(:get, "/chaos-engineering", [
+        {"x-chaos-error-percentage", "0"},
+        {"x-chaos-mangled-percentage", "0"},
+        {"x-chaos-latency-percentage", "0"},
+        {"x-chaos-maximum-latency", "500"}
+      ])
+
     assert conn.status == 200
     {:ok, body} = Jason.decode(conn.resp_body)
     assert body["_chaos"]["error_percentage"] == 0

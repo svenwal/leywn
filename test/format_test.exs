@@ -88,7 +88,13 @@ defmodule Leywn.FormatTest do
   # ---- /format/camelCase -----------------------------------------------------
 
   test "format/camelCase converts snake_case keys" do
-    conn = post("/format/camelCase", ~s({"first_name":"Alice","last_name":"Smith"}), "application/json")
+    conn =
+      post(
+        "/format/camelCase",
+        ~s({"first_name":"Alice","last_name":"Smith"}),
+        "application/json"
+      )
+
     assert conn.status == 200
     assert conn.resp_body =~ "firstName"
     assert conn.resp_body =~ "lastName"
@@ -103,7 +109,9 @@ defmodule Leywn.FormatTest do
   # ---- /format/kebab-case ----------------------------------------------------
 
   test "format/kebab-case converts camelCase keys" do
-    conn = post("/format/kebab-case", ~s({"firstName":"Alice","lastName":"Smith"}), "application/json")
+    conn =
+      post("/format/kebab-case", ~s({"firstName":"Alice","lastName":"Smith"}), "application/json")
+
     assert conn.status == 200
     assert conn.resp_body =~ "first-name"
     assert conn.resp_body =~ "last-name"
@@ -118,7 +126,9 @@ defmodule Leywn.FormatTest do
   # ---- /format/snake-case ----------------------------------------------------
 
   test "format/snake-case converts camelCase keys" do
-    conn = post("/format/snake-case", ~s({"firstName":"Alice","lastName":"Smith"}), "application/json")
+    conn =
+      post("/format/snake-case", ~s({"firstName":"Alice","lastName":"Smith"}), "application/json")
+
     assert conn.status == 200
     assert conn.resp_body =~ "first_name"
     assert conn.resp_body =~ "last_name"

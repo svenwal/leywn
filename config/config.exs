@@ -7,4 +7,3 @@ config :leywn,
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 config :tzdata, :autoupdate, :disabled
-
