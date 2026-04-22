@@ -1,6 +1,6 @@
 # Leywn — Last Echo You Will Need
 
-[![CI](https://github.com/svenwal/leywn/actions/workflows/ci.yml/badge.svg)](https://github.com/svenwal/leywn/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/svenwal/leywn/ci.yml?label=CI)](https://github.com/svenwal/leywn/actions/workflows/ci.yml)
 [![Docker Hub](https://img.shields.io/docker/pulls/svenwal/leywn)](https://hub.docker.com/r/svenwal/leywn)
 
 Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives you a single deployable service that echoes requests, enforces every common authentication scheme, returns arbitrary HTTP status codes, generates random data, and serves a live Swagger UI — so you can test clients, proxies, load balancers, and API gateways without standing up any real backend.
