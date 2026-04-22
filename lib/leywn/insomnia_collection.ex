@@ -6,7 +6,8 @@ defmodule Leywn.InsomniaCollection do
                  ".fakesignature"
 
   def build(port) do
-    base_url = "http://localhost:#{port}"
+    base_url =
+      System.get_env("LEYWN_EXTERNAL_HTTP_URL") || "http://localhost:#{port}"
 
     %{
       "_type" => "export",

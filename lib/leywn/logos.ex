@@ -3,12 +3,9 @@ defmodule Leywn.Logos do
   @default_size 64
 
   @doc """
-  Called at application startup. Generates cached assets (WebP).
+  Called at application startup. No-op — WebP is pre-generated at build time.
   """
-  def ensure do
-    generate_webp()
-    :ok
-  end
+  def ensure, do: :ok
 
   @doc """
   Returns image data for the given type string.
@@ -20,19 +17,13 @@ defmodule Leywn.Logos do
   """
   def path_for(type) when is_binary(type) do
     case String.downcase(type) do
-      ext when ext in ["png", "jpeg", "jpg", "gif"] ->
+      ext when ext in ["png", "jpeg", "jpg", "gif", "webp"] ->
         real_ext = if ext == "jpg", do: "jpeg", else: ext
         path = Application.app_dir(:leywn, "priv/images/leywn.#{real_ext}")
         {:ok, :file, path, mime(real_ext)}
 
       "svg" ->
         {:ok, :inline, svg_content(), "image/svg+xml"}
-
-      "webp" ->
-        case :persistent_term.get(:leywn_webp_path, nil) do
-          nil -> {:error, "webp_not_available"}
-          path -> {:ok, :file, path, "image/webp"}
-        end
 
       _ ->
         {:error, "unsupported_image_type"}
@@ -54,28 +45,6 @@ defmodule Leywn.Logos do
   # ---------------------------------------------------------------------------
   # Private helpers
   # ---------------------------------------------------------------------------
-
-  defp generate_webp do
-    png_path = Application.app_dir(:leywn, "priv/images/leywn.png")
-    webp_path = Path.join(System.tmp_dir!(), "leywn_cached.webp")
-
-    try do
-      case System.cmd("cwebp", ["-quiet", png_path, "-o", webp_path],
-             stderr_to_stdout: true
-           ) do
-        {_, 0} ->
-          :persistent_term.put(:leywn_webp_path, webp_path)
-
-        {msg, _} ->
-          IO.puts(
-            "WARNING: WebP generation failed: #{String.trim(msg)}"
-          )
-      end
-    rescue
-      ErlangError ->
-        IO.puts("WARNING: cwebp not found — /image/webp will return 400")
-    end
-  end
 
   defp svg_content do
     """
@@ -177,4 +146,5 @@ defmodule Leywn.Logos do
   defp mime("png"), do: "image/png"
   defp mime("jpeg"), do: "image/jpeg"
   defp mime("gif"), do: "image/gif"
+  defp mime("webp"), do: "image/webp"
 end

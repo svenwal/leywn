@@ -17,27 +17,30 @@ defmodule Leywn.Router do
     else
       conn
       |> Plug.Conn.put_resp_content_type("text/html")
-      |> Plug.Conn.send_resp(200, home_html())
+      |> Plug.Conn.send_resp(200, home_html(collection_url()))
     end
   end
 
   get "/docs" do
     conn
     |> Plug.Conn.put_resp_content_type("text/html")
-    |> Plug.Conn.send_resp(200, home_html())
+    |> Plug.Conn.send_resp(200, home_html(collection_url()))
   end
 
   get "/openapi.json" do
     port = Application.get_env(:leywn, :port, 4000)
     tls_port = Application.get_env(:leywn, :tls_port, 4443)
 
+    http_url = System.get_env("LEYWN_EXTERNAL_HTTP_URL") || "http://localhost:#{port}"
+    https_url = System.get_env("LEYWN_EXTERNAL_HTTPS_URL") || "https://localhost:#{tls_port}"
+
     spec =
       Application.app_dir(:leywn, "priv/openapi.json")
       |> File.read!()
       |> Jason.decode!()
       |> Map.put("servers", [
-        %{"url" => "http://localhost:#{port}", "description" => "HTTP"},
-        %{"url" => "https://localhost:#{tls_port}", "description" => "HTTPS / mTLS"}
+        %{"url" => http_url, "description" => "HTTP"},
+        %{"url" => https_url, "description" => "HTTPS / mTLS"}
       ])
 
     conn
@@ -434,7 +437,16 @@ defmodule Leywn.Router do
     Plug.Conn.put_resp_header(conn, "server", "leywn")
   end
 
-  defp home_html do
+  defp collection_url do
+    port = Application.get_env(:leywn, :port, 4000)
+    base = System.get_env("LEYWN_EXTERNAL_HTTP_URL") || "http://localhost:#{port}"
+    base <> "/request-collection"
+  end
+
+  defp home_html(collection_url) do
+    encoded_url = URI.encode_www_form(collection_url)
+    insomnia_href = "https://insomnia.rest/run/?label=Leywn&uri=#{encoded_url}"
+
     """
     <!DOCTYPE html>
     <html lang="en">
@@ -448,6 +460,7 @@ defmodule Leywn.Router do
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
         .leywn-header { background: #1a1a2e; color: #e0e0e0; padding: 1rem 3rem; display: flex; align-items: center; gap: 1.5rem; }
         .leywn-header span { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.5px; }
+        .leywn-header .leywn-actions { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
         .leywn-hero { background: #1a1a2e; color: #e0e0e0; padding: 1.5rem 3rem 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
         .leywn-hero p { margin: 0 0 0.6rem; opacity: 0.85; font-size: 1.05rem; }
         .leywn-hero code { background: rgba(255,255,255,0.12); padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9em; }
@@ -457,10 +470,15 @@ defmodule Leywn.Router do
       <div class="leywn-header">
         <img src="/image/png" alt="Leywn logo" style="height:56px;">
         <span>Last Echo You Will Need</span>
+        <div class="leywn-actions">
+          <a href="#{insomnia_href}" target="_blank" rel="noopener">
+            <img src="https://insomnia.rest/images/run.svg" alt="Run in Insomnia">
+          </a>
+        </div>
       </div>
       <div class="leywn-hero">
-        <p>A complete selection of echo, auth, random, format, codec, hash, delay, and stream endpoints — all in one lightweight, fast, highly customisable service.</p>
-        <p>Configure everything with <code>LEYWN_xxx</code> environment variables. Set <code>LEYWN_ONLY_JSON=true</code> to disable XML content negotiation.</p>
+        <p>Leywn is the last demo backend you will ever need. Whether you are building a new API client, stress-testing a retry strategy, demonstrating an integration, or just need a quick echo server for a workshop — Leywn has you covered with a single <code>docker run</code>.</p>
+        <p>Every endpoint is purposefully designed: mirror your requests with <code>/echo</code>, simulate network latency with <code>/delay</code>, stream chunked responses with <code>/stream</code>, test all your auth flows, generate random data, hash and encode payloads, and more. Zero dependencies to manage, zero state to worry about, and everything tunable via <code>LEYWN_</code> environment variables.</p>
       </div>
       <div id="swagger-ui"></div>
       <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>

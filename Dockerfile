@@ -28,6 +28,11 @@ ENV MIX_ENV=prod \
 
 WORKDIR /app
 
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends webp && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN mix local.hex --force && \
     mix local.rebar --force
 
@@ -39,13 +44,15 @@ RUN mix deps.get --only prod
 COPY priv ./priv
 COPY lib ./lib
 
+RUN cwebp -quiet priv/images/leywn.png -o priv/images/leywn.webp
+
 RUN mix release
 
 # ---- Runtime Stage ----
 FROM debian:bullseye-slim
 
 RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends libssl1.1 libncurses5 webp && \
+    apt-get install -y --no-install-recommends libssl1.1 libncurses5 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
