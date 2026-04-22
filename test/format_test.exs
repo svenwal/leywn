@@ -28,31 +28,60 @@ defmodule Leywn.FormatTest do
 
   # ---- /format/yaml ----------------------------------------------------------
 
-  test "format/yaml converts valid JSON to YAML" do
-    conn = post("/format/yaml", ~s({"name":"Alice","age":30}), "application/json")
+  test "format/yaml pretty-formats valid YAML" do
+    conn = post("/format/yaml", "name: Alice\nage: 30\n")
     assert conn.status == 200
-    assert conn.resp_body =~ "name: Alice"
-    assert conn.resp_body =~ "age: 30"
+    assert conn.resp_body =~ "name:"
+    assert conn.resp_body =~ "Alice"
+    assert conn.resp_body =~ "age:"
+    assert conn.resp_body =~ "30"
     assert get_resp_header(conn, "content-type") |> hd() =~ "yaml"
   end
 
-  test "format/yaml returns 422 for invalid JSON" do
-    conn = post("/format/yaml", "not json")
+  test "format/yaml normalises nested YAML indentation" do
+    input = "person:\n    name: Bob\n    age: 25\n"
+    conn = post("/format/yaml", input)
+    assert conn.status == 200
+    # Re-emitted with 2-space indentation
+    assert conn.resp_body =~ "person:"
+    assert conn.resp_body =~ "name:"
+    assert conn.resp_body =~ "Bob"
+  end
+
+  test "format/yaml returns 422 for invalid YAML" do
+    conn = post("/format/yaml", "key: [\nunclosed")
     assert conn.status == 422
   end
 
   # ---- /format/xml -----------------------------------------------------------
 
-  test "format/xml converts valid JSON to XML" do
-    conn = post("/format/xml", ~s({"key":"value"}), "application/json")
+  test "format/xml pretty-formats valid XML" do
+    conn = post("/format/xml", "<root><child>hello</child></root>")
     assert conn.status == 200
-    assert conn.resp_body =~ "<key>"
-    assert conn.resp_body =~ "value"
+    assert conn.resp_body =~ "<root>"
+    assert conn.resp_body =~ "<child>"
+    assert conn.resp_body =~ "hello"
+    assert conn.resp_body =~ "</child>"
+    assert String.contains?(conn.resp_body, "\n")
     assert get_resp_header(conn, "content-type") |> hd() =~ "xml"
   end
 
-  test "format/xml returns 422 for invalid JSON" do
-    conn = post("/format/xml", "<invalid>not json")
+  test "format/xml adds xml declaration" do
+    conn = post("/format/xml", "<a/>")
+    assert conn.status == 200
+    assert conn.resp_body =~ ~s(<?xml version="1.0")
+  end
+
+  test "format/xml indents nested elements" do
+    conn = post("/format/xml", "<r><a><b>v</b></a></r>")
+    assert conn.status == 200
+    assert conn.resp_body =~ "  <a>"
+    assert conn.resp_body =~ "    <b>"
+    assert conn.resp_body =~ "      v"
+  end
+
+  test "format/xml returns 422 for invalid XML" do
+    conn = post("/format/xml", "<unclosed>")
     assert conn.status == 422
   end
 

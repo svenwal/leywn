@@ -2,19 +2,54 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Leywn",
-    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.",
-    "version": "0.6.0"
+    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).",
+    "version": "1.0.0"
   },
   "tags": [
-    { "name": "Echo",   "description": "Request echo and inspection endpoints" },
-    { "name": "Auth",   "description": "Authentication demo endpoints (Basic Auth, API Key, JWT, mTLS)" },
-    { "name": "Random", "description": "Random value generators (integers, UUIDs, Lorem Ipsum)" },
-    { "name": "Info",   "description": "Caller information and server time endpoints" },
-    { "name": "Utility","description": "Utility endpoints (status codes, images)" },
-    { "name": "Format", "description": "POST body prettify / transform endpoints" },
-    { "name": "Codec",  "description": "POST body encode / decode endpoints" }
+    { "name": "Echo",    "description": "Request echo and inspection endpoints" },
+    { "name": "Auth",    "description": "Authentication demo endpoints (Basic Auth, API Key, JWT, mTLS)" },
+    { "name": "Random",  "description": "Random value generators (integers, UUIDs, Lorem Ipsum, names, emails, colors)" },
+    { "name": "Info",    "description": "Caller information and server time endpoints" },
+    { "name": "Utility", "description": "Utility endpoints (status codes, images, delay, stream, health)" },
+    { "name": "Format",  "description": "POST body prettify / transform endpoints" },
+    { "name": "Codec",   "description": "POST body encode / decode endpoints" },
+    { "name": "Hash",    "description": "POST body hashing endpoints" }
   ],
   "paths": {
+    "/request-collection": {
+      "summary": "Insomnia request collection",
+      "description": "Returns an Insomnia v4 export JSON containing all Leywn endpoints with example requests. Import directly into Insomnia. The `base_url` environment variable defaults to the running server's HTTP port.",
+      "get": {
+        "tags": ["Utility"],
+        "summary": "Download Insomnia collection",
+        "responses": {
+          "200": {
+            "description": "Insomnia v4 export JSON",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/health": {
+      "summary": "Server health check",
+      "description": "Returns the server status, version, and uptime. Suitable for use as a Kubernetes liveness/readiness probe.",
+      "get": {
+        "tags": ["Utility"],
+        "summary": "Health status",
+        "responses": {
+          "200": {
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthResponse" },
+                "example": { "status": "ok", "version": "0.6.0", "uptime_seconds": 3742 }
+              },
+              "application/xml": { "schema": { "$ref": "#/components/schemas/HealthResponse" } }
+            }
+          }
+        }
+      }
+    },
     "/echo": {
       "summary": "Echo all request information",
       "description": "Returns all details of the incoming request: method, path, query parameters, headers, host, scheme, remote IP, and body (if text/UTF-8, up to the configured byte limit). The `path` property always starts with a leading `/`.",
@@ -67,6 +102,40 @@
       "put": { "tags": ["Echo"], "summary": "Echo request details – alias sub-path", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
       "patch": { "tags": ["Echo"], "summary": "Echo request details – alias sub-path", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
       "delete": { "tags": ["Echo"], "summary": "Echo request details – alias sub-path", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } }
+    },
+    "/delay/{ms}": {
+      "summary": "Delayed response",
+      "description": "Waits the requested number of milliseconds before responding. Useful for testing timeouts and retry logic. The delay is clamped to 30 000 ms.",
+      "parameters": [
+        { "name": "ms", "in": "path", "required": true, "description": "Milliseconds to wait (0–30000; values above 30000 are clamped)", "schema": { "type": "integer", "minimum": 0, "maximum": 30000, "example": 500 } }
+      ],
+      "get": {
+        "tags": ["Utility"],
+        "summary": "Delay the response",
+        "responses": {
+          "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" }, "example": { "requested_ms": 500, "delayed_ms": 500 } }, "application/xml": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } },
+          "400": { "description": "Invalid delay value", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": { "tags": ["Utility"], "summary": "Delay the response", "responses": { "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } }, "400": { "$ref": "#/components/responses/badrequest" } } },
+      "put": { "tags": ["Utility"], "summary": "Delay the response", "responses": { "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } }, "400": { "$ref": "#/components/responses/badrequest" } } },
+      "patch": { "tags": ["Utility"], "summary": "Delay the response", "responses": { "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } }, "400": { "$ref": "#/components/responses/badrequest" } } },
+      "delete": { "tags": ["Utility"], "summary": "Delay the response", "responses": { "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } }, "400": { "$ref": "#/components/responses/badrequest" } } }
+    },
+    "/stream/{n}": {
+      "summary": "Chunked newline-delimited JSON stream",
+      "description": "Returns a chunked HTTP response with `n` newline-delimited JSON objects (`application/x-ndjson`). Each line is flushed individually. Maximum 100 lines.",
+      "parameters": [
+        { "name": "n", "in": "path", "required": true, "description": "Number of lines to stream (1–100)", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "example": 10 } }
+      ],
+      "get": {
+        "tags": ["Utility"],
+        "summary": "Stream n ndjson lines",
+        "responses": {
+          "200": { "description": "ndjson stream", "content": { "application/x-ndjson": { "schema": { "type": "string" }, "example": "{\"line\":1,\"total\":10,\"timestamp_unix_ms\":1700000000000}\n" } } },
+          "400": { "description": "Invalid count", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
     },
     "/status/{code}": {
       "summary": "Return any HTTP status code",
@@ -167,7 +236,7 @@
     },
     "/auth/jwt/exchange": {
       "summary": "Exchange a JWT for a Leywn-signed JWT",
-      "description": "Accepts a structurally valid Bearer JWT. Validates the structure (not the signature), then issues a new JWT signed with the server's HS256 key. The new token inherits the incoming claims and adds `iss: leywn`, `iat`, and `jti`.",
+      "description": "Accepts a structurally valid Bearer JWT. Validates the structure (not the signature), then issues a new JWT signed with the server's HS256 key.",
       "parameters": [
         { "name": "Authorization", "in": "header", "required": true, "schema": { "type": "string", "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.signature" } }
       ],
@@ -175,7 +244,7 @@
         "tags": ["Auth"],
         "summary": "Exchange JWT for a Leywn-signed token",
         "responses": {
-          "200": { "description": "A new HS256 JWT signed by Leywn", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" }, "example": { "authenticated": true, "auth_type": "jwt", "exchanged_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0IiwiaXNzIjoibGV5d24ifQ.sig", "claims": { "sub": "1234", "iss": "leywn", "iat": 1700000000 } } }, "application/xml": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } } } },
+          "200": { "description": "A new HS256 JWT signed by Leywn", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } } } },
           "401": { "$ref": "#/components/responses/unauthorized" }
         }
       },
@@ -186,8 +255,8 @@
     },
     "/auth/mtls": {
       "summary": "mTLS client certificate auth",
-      "description": "Validates that the client presented a certificate signed by the Leywn demo CA. Must be called on the **HTTPS port (4443)**. Download the required client cert and key first from `/auth/mtls/get-client-cert`.\n\nWhen the environment variable `LEYWN_MTLS_IN_HEADER` is set to a header name (e.g. `X-Client-Cert`), the certificate is read as PEM from that request header instead of the TLS handshake.",
-      "get": { "tags": ["Auth"], "summary": "Authenticate with mTLS client certificate", "responses": { "200": { "description": "Authenticated — includes DN and CA info", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
+      "description": "Validates that the client presented a certificate signed by the Leywn demo CA. Must be called on the **HTTPS port**.",
+      "get": { "tags": ["Auth"], "summary": "Authenticate with mTLS client certificate", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
       "post": { "tags": ["Auth"], "summary": "Authenticate with mTLS", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
       "put": { "tags": ["Auth"], "summary": "Authenticate with mTLS", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
       "patch": { "tags": ["Auth"], "summary": "Authenticate with mTLS", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
@@ -195,17 +264,11 @@
     },
     "/auth/mtls/get-client-cert": {
       "summary": "Download the generated client certificate and key",
-      "description": "Returns the PEM-encoded client certificate and private key generated at startup. Use these with `curl --cert` / `--key` to authenticate against `/auth/mtls` on port 4443.",
       "get": {
         "tags": ["Auth"],
         "summary": "Get client cert and key",
         "responses": {
-          "200": {
-            "description": "Client certificate and key in PEM format",
-            "content": {
-              "application/json": { "schema": { "type": "object", "properties": { "cert_pem": { "type": "string", "description": "PEM-encoded client certificate" }, "key_pem": { "type": "string", "description": "PEM-encoded client private key" } } } }
-            }
-          }
+          "200": { "description": "Client certificate and key in PEM format", "content": { "application/json": { "schema": { "type": "object", "properties": { "cert_pem": { "type": "string" }, "key_pem": { "type": "string" } } } } } }
         }
       }
     },
@@ -215,7 +278,7 @@
         "tags": ["Random"],
         "summary": "Random UUID v4",
         "responses": {
-          "200": { "description": "A random UUID v4", "content": { "application/json": { "schema": { "type": "object", "properties": { "uuid": { "type": "string", "example": "550e8400-e29b-41d4-a716-446655440000" } } }, "example": { "uuid": "550e8400-e29b-41d4-a716-446655440000" } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": { "description": "A random UUID v4", "content": { "application/json": { "schema": { "type": "object", "properties": { "uuid": { "type": "string", "example": "550e8400-e29b-41d4-a716-446655440000" } } } }, "application/xml": { "schema": { "type": "object" } } } }
         }
       }
     },
@@ -225,7 +288,7 @@
         "tags": ["Random"],
         "summary": "Random GUID (UUID v4 in curly braces)",
         "responses": {
-          "200": { "description": "A random GUID", "content": { "application/json": { "schema": { "type": "object", "properties": { "guuid": { "type": "string", "example": "{550e8400-e29b-41d4-a716-446655440000}" } } }, "example": { "guuid": "{550e8400-e29b-41d4-a716-446655440000}" } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": { "description": "A random GUID", "content": { "application/json": { "schema": { "type": "object", "properties": { "guuid": { "type": "string", "example": "{550e8400-e29b-41d4-a716-446655440000}" } } } }, "application/xml": { "schema": { "type": "object" } } } }
         }
       }
     },
@@ -235,7 +298,7 @@
         "tags": ["Random"],
         "summary": "Returns one of each random type",
         "responses": {
-          "200": { "description": "A random int, uint, UUID, GUID and lorem-ipsum paragraph", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RandomAll" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/RandomAll" } } } }
+          "200": { "description": "A bundle of all random types", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RandomAll" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/RandomAll" } } } }
         }
       }
     },
@@ -245,7 +308,7 @@
         "tags": ["Random"],
         "summary": "Random integer in [-32000, 32000]",
         "responses": {
-          "200": { "description": "Random integer", "content": { "application/json": { "schema": { "type": "object", "properties": { "value": { "type": "integer", "example": 12345 } } }, "example": { "value": 12345 } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": { "description": "Random integer", "content": { "application/json": { "schema": { "type": "object", "properties": { "value": { "type": "integer", "example": 12345 } } } }, "application/xml": { "schema": { "type": "object" } } } }
         }
       }
     },
@@ -270,7 +333,7 @@
         "tags": ["Random"],
         "summary": "Random unsigned integer in [0, 65535]",
         "responses": {
-          "200": { "description": "Random unsigned integer", "content": { "application/json": { "schema": { "type": "object", "properties": { "value": { "type": "integer", "minimum": 0, "example": 42000 } } }, "example": { "value": 42000 } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": { "description": "Random unsigned integer", "content": { "application/json": { "schema": { "type": "object", "properties": { "value": { "type": "integer", "minimum": 0, "example": 42000 } } } }, "application/xml": { "schema": { "type": "object" } } } }
         }
       }
     },
@@ -298,36 +361,67 @@
         }
       }
     },
+    "/random/name": {
+      "summary": "Random first name",
+      "description": "Returns a random name from `priv/names.txt`. Override the source file with `LEYWN_NAMES_FILE`.",
+      "get": {
+        "tags": ["Random"],
+        "summary": "Random name",
+        "responses": {
+          "200": { "description": "A random name", "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string", "example": "Alice" } } }, "example": { "name": "Alice" } }, "application/xml": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/random/email": {
+      "summary": "Random email address",
+      "description": "Returns a randomly generated email address. Names from `priv/names.txt`, domains from `priv/email_domains.txt`. Override with `LEYWN_NAMES_FILE` / `LEYWN_EMAIL_DOMAINS_FILE`.",
+      "get": {
+        "tags": ["Random"],
+        "summary": "Random email",
+        "responses": {
+          "200": { "description": "A random email address", "content": { "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string", "example": "alice42@example.com" } } }, "example": { "email": "alice42@example.com" } }, "application/xml": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/random/color": {
+      "summary": "Random RGB colour",
+      "description": "Returns a random colour as a hex string and R/G/B component values.",
+      "get": {
+        "tags": ["Random"],
+        "summary": "Random color",
+        "responses": {
+          "200": { "description": "A random colour", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ColorResponse" }, "example": { "hex": "#3a7fc1", "r": 58, "g": 127, "b": 193 } }, "application/xml": { "schema": { "$ref": "#/components/schemas/ColorResponse" } } } }
+        }
+      }
+    },
     "/ip": {
       "summary": "Caller's IP addresses",
-      "description": "Returns the caller's IPv4 and/or IPv6 address as seen by the server. When the environment variable `LEYWN_TRUST_FORWARD` is set to `true`, the first value from the `X-Forwarded-For` header is used instead of the socket address.",
+      "description": "Returns the caller's IPv4 and/or IPv6 address. When `LEYWN_TRUST_FORWARD=true`, uses `X-Forwarded-For`.",
       "get": {
         "tags": ["Info"],
         "summary": "Caller's IPv4 and IPv6",
         "responses": {
-          "200": { "description": "IP address information", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/IpResponse" }, "example": { "ipv4": "203.0.113.42", "ipv6": null } }, "application/xml": { "schema": { "$ref": "#/components/schemas/IpResponse" } } } }
+          "200": { "description": "IP address information", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/IpResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/IpResponse" } } } }
         }
       }
     },
     "/ip/v4": {
       "summary": "Caller's IPv4 address",
-      "description": "Returns the caller's IPv4 address. Respects `LEYWN_TRUST_FORWARD=true` (uses `X-Forwarded-For`).",
       "get": {
         "tags": ["Info"],
         "summary": "Returns the caller's IPv4 address",
         "responses": {
-          "200": { "description": "IPv4 address", "content": { "application/json": { "schema": { "type": "object", "properties": { "ipv4": { "type": "string", "nullable": true, "example": "203.0.113.42" } } }, "example": { "ipv4": "203.0.113.42" } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": { "description": "IPv4 address", "content": { "application/json": { "schema": { "type": "object", "properties": { "ipv4": { "type": "string", "nullable": true } } } }, "application/xml": { "schema": { "type": "object" } } } }
         }
       }
     },
     "/ip/v6": {
       "summary": "Caller's IPv6 address",
-      "description": "Returns the caller's IPv6 address. Respects `LEYWN_TRUST_FORWARD=true` (uses `X-Forwarded-For`).",
       "get": {
         "tags": ["Info"],
         "summary": "Returns the caller's IPv6 address",
         "responses": {
-          "200": { "description": "IPv6 address", "content": { "application/json": { "schema": { "type": "object", "properties": { "ipv6": { "type": "string", "nullable": true, "example": "2001:db8::1" } } }, "example": { "ipv6": null } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": { "description": "IPv6 address", "content": { "application/json": { "schema": { "type": "object", "properties": { "ipv6": { "type": "string", "nullable": true } } } }, "application/xml": { "schema": { "type": "object" } } } }
         }
       }
     },
@@ -337,13 +431,12 @@
         "tags": ["Info"],
         "summary": "Current date in UTC (ISO 8601)",
         "responses": {
-          "200": { "description": "Current date", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DateResponse" }, "example": { "date": "2024-11-14", "timezone": "UTC" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/DateResponse" } } } }
+          "200": { "description": "Current date", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DateResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/DateResponse" } } } }
         }
       }
     },
     "/date/{timezone}": {
       "summary": "Current date in a given timezone",
-      "description": "Returns the current date in the requested IANA timezone (e.g. `America/New_York`, `Europe/Berlin`). Returns 404 if the timezone is unknown.",
       "parameters": [
         { "name": "timezone", "in": "path", "required": true, "description": "IANA timezone name, e.g. `America/New_York`", "schema": { "type": "string", "example": "America/New_York" } }
       ],
@@ -351,8 +444,8 @@
         "tags": ["Info"],
         "summary": "Current date in the given timezone",
         "responses": {
-          "200": { "description": "Current date in given timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DateResponse" }, "example": { "date": "2024-11-14", "timezone": "America/New_York" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/DateResponse" } } } },
-          "404": { "description": "Unknown timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "unknown_timezone", "timezone": "Foo/Bar" } } } }
+          "200": { "description": "Current date in given timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DateResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/DateResponse" } } } },
+          "404": { "description": "Unknown timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
     },
@@ -362,13 +455,12 @@
         "tags": ["Info"],
         "summary": "Current time in UTC (ISO 8601)",
         "responses": {
-          "200": { "description": "Current time", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeResponse" }, "example": { "time": "2024-11-14T15:30:00Z", "timezone": "UTC" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/TimeResponse" } } } }
+          "200": { "description": "Current time", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/TimeResponse" } } } }
         }
       }
     },
     "/time/{timezone}": {
       "summary": "Current time in a given timezone",
-      "description": "Returns the current time in the requested IANA timezone. Returns 404 if the timezone is unknown.",
       "parameters": [
         { "name": "timezone", "in": "path", "required": true, "description": "IANA timezone name, e.g. `Europe/Berlin`", "schema": { "type": "string", "example": "Europe/Berlin" } }
       ],
@@ -376,7 +468,7 @@
         "tags": ["Info"],
         "summary": "Current time in the given timezone",
         "responses": {
-          "200": { "description": "Current time in given timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeResponse" }, "example": { "time": "2024-11-14T16:30:00+01:00", "timezone": "Europe/Berlin" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/TimeResponse" } } } },
+          "200": { "description": "Current time in given timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/TimeResponse" } } } },
           "404": { "description": "Unknown timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
@@ -384,7 +476,7 @@
     "/image/{type}": {
       "summary": "Serve a demo image",
       "parameters": [
-        { "name": "type", "in": "path", "required": true, "description": "Image format: png, jpeg, jpg (alias for jpeg), gif, svg, webp", "schema": { "type": "string", "enum": ["png", "jpeg", "jpg", "gif", "svg", "webp"] } }
+        { "name": "type", "in": "path", "required": true, "description": "Image format: png, jpeg, jpg, gif, svg, webp", "schema": { "type": "string", "enum": ["png", "jpeg", "jpg", "gif", "svg", "webp"] } }
       ],
       "get": {
         "tags": ["Utility"],
@@ -397,7 +489,6 @@
     },
     "/image/color/{rgb}": {
       "summary": "Solid-colour PNG image (64×64)",
-      "description": "Returns a 64×64 PNG filled with the specified colour. Accepts 3-char (`f00`), 6-char (`ff0000`), or 8-char RGBA (`ff0000cc`) hex strings.",
       "parameters": [
         { "name": "rgb", "in": "path", "required": true, "description": "Hex colour: 3, 6, or 8 chars", "schema": { "type": "string", "example": "1a2b3c" } }
       ],
@@ -426,22 +517,26 @@
         }
       }
     },
-    "/format/json":          { "post": { "tags": ["Format"], "summary": "Pretty-print a JSON body",                  "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Formatted JSON",    "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/yaml":          { "post": { "tags": ["Format"], "summary": "Convert JSON body to YAML",                 "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "YAML output",        "content": { "application/yaml": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/xml":           { "post": { "tags": ["Format"], "summary": "Convert JSON body to XML",                  "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "XML output",         "content": { "application/xml": {} } },  "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/camelCase":     { "post": { "tags": ["Format"], "summary": "Convert JSON keys to camelCase",            "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",    "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/kebab-case":    { "post": { "tags": ["Format"], "summary": "Convert JSON keys to kebab-case",           "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",    "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/snake-case":    { "post": { "tags": ["Format"], "summary": "Convert JSON keys to snake_case",           "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",    "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/toUpper":       { "post": { "tags": ["Format"], "summary": "Uppercase the body text",                   "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Uppercased text",   "content": { "text/plain": {} } } } } },
-    "/format/toLower":       { "post": { "tags": ["Format"], "summary": "Lowercase the body text",                   "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Lowercased text",   "content": { "text/plain": {} } } } } },
-    "/format/collapse-lines":{ "post": { "tags": ["Format"], "summary": "Collapse multiple blank lines into one",    "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Collapsed text",    "content": { "text/plain": {} } } } } },
-    "/encode/base64": { "post": { "tags": ["Codec"], "summary": "Base64-encode the body",        "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Base64 string",     "content": { "text/plain": {} } } } } },
-    "/decode/base64": { "post": { "tags": ["Codec"], "summary": "Base64-decode the body",        "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded bytes",     "content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/encode/url":    { "post": { "tags": ["Codec"], "summary": "URL-encode the body",           "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Encoded string",    "content": { "text/plain": {} } } } } },
-    "/decode/url":    { "post": { "tags": ["Codec"], "summary": "URL-decode the body",           "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded string",    "content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/encode/rot13":  { "post": { "tags": ["Codec"], "summary": "Apply ROT13 to the body",       "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "ROT13 string",      "content": { "text/plain": {} } } } } },
-    "/decode/rot13":  { "post": { "tags": ["Codec"], "summary": "Apply ROT13 to the body (symmetric)", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "ROT13 string", "content": { "text/plain": {} } } } } },
-    "/decode/jwt":    { "post": { "tags": ["Codec"], "summary": "Decode JWT header and payload", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded JWT",       "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } }
+    "/format/json":          { "post": { "tags": ["Format"], "summary": "Pretty-print a JSON body",               "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Formatted JSON",  "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/yaml":          { "post": { "tags": ["Format"], "summary": "Pretty-format a YAML body",             "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Formatted YAML",   "content": { "application/yaml": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/xml":           { "post": { "tags": ["Format"], "summary": "Pretty-format an XML body",             "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Formatted XML",    "content": { "application/xml": {} } },  "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/camelCase":     { "post": { "tags": ["Format"], "summary": "Convert JSON keys to camelCase",         "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",  "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/kebab-case":    { "post": { "tags": ["Format"], "summary": "Convert JSON keys to kebab-case",        "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",  "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/snake-case":    { "post": { "tags": ["Format"], "summary": "Convert JSON keys to snake_case",        "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",  "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/format/toUpper":       { "post": { "tags": ["Format"], "summary": "Uppercase the body text",                "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Uppercased text", "content": { "text/plain": {} } } } } },
+    "/format/toLower":       { "post": { "tags": ["Format"], "summary": "Lowercase the body text",                "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Lowercased text", "content": { "text/plain": {} } } } } },
+    "/format/collapse-lines":{ "post": { "tags": ["Format"], "summary": "Collapse multiple blank lines into one", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Collapsed text",  "content": { "text/plain": {} } } } } },
+    "/encode/base64": { "post": { "tags": ["Codec"], "summary": "Base64-encode the body",              "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Base64 string", "content": { "text/plain": {} } } } } },
+    "/decode/base64": { "post": { "tags": ["Codec"], "summary": "Base64-decode the body",              "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded bytes", "content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/encode/hex":    { "post": { "tags": ["Codec"], "summary": "Hex-encode the body (lowercase)",     "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Hex string",    "content": { "text/plain": {} } } } } },
+    "/decode/hex":    { "post": { "tags": ["Codec"], "summary": "Hex-decode the body",                 "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded bytes", "content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/encode/url":    { "post": { "tags": ["Codec"], "summary": "URL-encode the body",                 "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Encoded string","content": { "text/plain": {} } } } } },
+    "/decode/url":    { "post": { "tags": ["Codec"], "summary": "URL-decode the body",                 "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded string","content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/encode/rot13":  { "post": { "tags": ["Codec"], "summary": "Apply ROT13 to the body",             "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "ROT13 string",  "content": { "text/plain": {} } } } } },
+    "/decode/rot13":  { "post": { "tags": ["Codec"], "summary": "Apply ROT13 to the body (symmetric)", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "ROT13 string",  "content": { "text/plain": {} } } } } },
+    "/decode/jwt":    { "post": { "tags": ["Codec"], "summary": "Decode JWT header and payload",       "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded JWT",   "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
+    "/hash/sha256":   { "post": { "tags": ["Hash"], "summary": "SHA-256 digest of the body", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "SHA-256 hex digest", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HashResponse" }, "example": { "hash": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824", "algorithm": "sha256", "input_bytes": 5 } } } } } } },
+    "/hash/md5":      { "post": { "tags": ["Hash"], "summary": "MD5 digest of the body",    "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "MD5 hex digest",    "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HashResponse" }, "example": { "hash": "5d41402abc4b2a76b9719d911017c592", "algorithm": "md5", "input_bytes": 5 } } } } } } }
   },
   "components": {
     "securitySchemes": {
@@ -449,32 +544,64 @@
       "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
     },
     "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status":          { "type": "string", "example": "ok" },
+          "version":         { "type": "string", "example": "0.6.0" },
+          "uptime_seconds":  { "type": "integer", "example": 3742 }
+        }
+      },
+      "DelayResponse": {
+        "type": "object",
+        "properties": {
+          "requested_ms": { "type": "integer", "example": 500 },
+          "delayed_ms":   { "type": "integer", "example": 500 }
+        }
+      },
+      "ColorResponse": {
+        "type": "object",
+        "properties": {
+          "hex": { "type": "string", "example": "#3a7fc1" },
+          "r":   { "type": "integer", "minimum": 0, "maximum": 255, "example": 58 },
+          "g":   { "type": "integer", "minimum": 0, "maximum": 255, "example": 127 },
+          "b":   { "type": "integer", "minimum": 0, "maximum": 255, "example": 193 }
+        }
+      },
+      "HashResponse": {
+        "type": "object",
+        "properties": {
+          "hash":        { "type": "string", "example": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824" },
+          "algorithm":   { "type": "string", "example": "sha256" },
+          "input_bytes": { "type": "integer", "example": 5 }
+        }
+      },
       "EchoBody": {
         "type": "object",
         "properties": {
-          "present": { "type": "boolean" },
-          "bytes": { "type": "integer" },
+          "present":   { "type": "boolean" },
+          "bytes":     { "type": "integer" },
           "truncated": { "type": "boolean" },
-          "utf8": { "type": "boolean", "nullable": true },
-          "included": { "type": "boolean" },
-          "body": { "type": "string", "nullable": true },
-          "reason": { "type": "string", "nullable": true }
+          "utf8":      { "type": "boolean", "nullable": true },
+          "included":  { "type": "boolean" },
+          "body":      { "type": "string", "nullable": true },
+          "reason":    { "type": "string", "nullable": true }
         }
       },
       "EchoResponse": {
         "type": "object",
         "properties": {
-          "method": { "type": "string", "example": "GET" },
-          "scheme": { "type": "string", "example": "http" },
-          "host": { "type": "string", "example": "localhost" },
-          "port": { "type": "integer", "example": 4000 },
-          "path": { "type": "string", "example": "/echo" },
-          "path_info": { "type": "array", "items": { "type": "string" } },
-          "query_string": { "type": "string", "example": "foo=bar" },
-          "query_params": { "type": "object", "additionalProperties": true },
-          "headers": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
-          "remote_ip": { "type": "string", "example": "127.0.0.1" },
-          "body": { "$ref": "#/components/schemas/EchoBody" },
+          "method":            { "type": "string", "example": "GET" },
+          "scheme":            { "type": "string", "example": "http" },
+          "host":              { "type": "string", "example": "localhost" },
+          "port":              { "type": "integer", "example": 4000 },
+          "path":              { "type": "string", "example": "/echo" },
+          "path_info":         { "type": "array", "items": { "type": "string" } },
+          "query_string":      { "type": "string", "example": "foo=bar" },
+          "query_params":      { "type": "object", "additionalProperties": true },
+          "headers":           { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+          "remote_ip":         { "type": "string", "example": "127.0.0.1" },
+          "body":              { "$ref": "#/components/schemas/EchoBody" },
           "timestamp_unix_ms": { "type": "integer", "example": 1700000000000 }
         }
       },
@@ -482,22 +609,22 @@
         "type": "object",
         "properties": {
           "authenticated": { "type": "boolean", "example": true },
-          "auth_type": { "type": "string", "example": "basic-auth" },
-          "username": { "type": "string", "example": "basic", "description": "Present for basic-auth" },
-          "header": { "type": "string", "example": "apikey", "description": "Present for api-key" },
-          "jwt_header": { "type": "object", "additionalProperties": true, "description": "Present for jwt" },
-          "claims": { "type": "object", "additionalProperties": true, "description": "Present for jwt" },
-          "client_dn": { "type": "string", "description": "Present for mtls" },
-          "client_ca": { "type": "string", "description": "Present for mtls" }
+          "auth_type":     { "type": "string", "example": "basic-auth" },
+          "username":      { "type": "string", "example": "basic", "description": "Present for basic-auth" },
+          "header":        { "type": "string", "example": "apikey", "description": "Present for api-key" },
+          "jwt_header":    { "type": "object", "additionalProperties": true, "description": "Present for jwt" },
+          "claims":        { "type": "object", "additionalProperties": true, "description": "Present for jwt" },
+          "client_dn":     { "type": "string", "description": "Present for mtls" },
+          "client_ca":     { "type": "string", "description": "Present for mtls" }
         }
       },
       "JwtExchangeResponse": {
         "type": "object",
         "properties": {
-          "authenticated": { "type": "boolean", "example": true },
-          "auth_type": { "type": "string", "example": "jwt" },
-          "exchanged_token": { "type": "string", "description": "HS256-signed JWT issued by Leywn" },
-          "claims": { "type": "object", "additionalProperties": true, "description": "Claims in the issued token" }
+          "authenticated":  { "type": "boolean", "example": true },
+          "auth_type":      { "type": "string", "example": "jwt" },
+          "exchanged_token":{ "type": "string", "description": "HS256-signed JWT issued by Leywn" },
+          "claims":         { "type": "object", "additionalProperties": true }
         }
       },
       "IpResponse": {
@@ -510,25 +637,28 @@
       "DateResponse": {
         "type": "object",
         "properties": {
-          "date": { "type": "string", "format": "date", "example": "2024-11-14" },
+          "date":     { "type": "string", "format": "date", "example": "2024-11-14" },
           "timezone": { "type": "string", "example": "UTC" }
         }
       },
       "TimeResponse": {
         "type": "object",
         "properties": {
-          "time": { "type": "string", "format": "date-time", "example": "2024-11-14T15:30:00Z" },
+          "time":     { "type": "string", "format": "date-time", "example": "2024-11-14T15:30:00Z" },
           "timezone": { "type": "string", "example": "UTC" }
         }
       },
       "RandomAll": {
         "type": "object",
         "properties": {
-          "int": { "type": "integer" },
-          "uint": { "type": "integer", "minimum": 0 },
-          "uuid": { "type": "string" },
-          "guuid": { "type": "string" },
-          "lorem_ipsum": { "type": "string" }
+          "int":        { "type": "integer" },
+          "uint":       { "type": "integer", "minimum": 0 },
+          "uuid":       { "type": "string" },
+          "guuid":      { "type": "string" },
+          "lorem_ipsum":{ "type": "string" },
+          "name":       { "type": "string" },
+          "email":      { "type": "string" },
+          "color":      { "$ref": "#/components/schemas/ColorResponse" }
         }
       },
       "LoremIpsum": {
@@ -568,9 +698,11 @@
       },
       "unprocessable": {
         "description": "Input could not be parsed / transformed",
-        "content": {
-          "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
-        }
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "badrequest": {
+        "description": "Invalid input",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
       }
     }
   }

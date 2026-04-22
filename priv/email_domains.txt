@@ -1,0 +1,18 @@
+# Email domains used by /random/email
+# One domain per line. Lines starting with # and blank lines are ignored.
+# Mount a custom file and set LEYWN_EMAIL_DOMAINS_FILE to override.
+example.com
+demo.org
+test.net
+mail.dev
+inbox.io
+sample.app
+myemail.com
+user.net
+webmail.org
+postbox.dev
+letters.io
+fastmail.com
+proton.me
+mailbox.org
+hey.com

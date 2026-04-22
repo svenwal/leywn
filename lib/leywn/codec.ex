@@ -59,6 +59,17 @@ defmodule Leywn.Codec do
     end
   end
 
+  def hex_encode(body),
+    do: {:ok, "text/plain", Base.encode16(body, case: :lower)}
+
+  def hex_decode(body) do
+    input = body |> String.trim() |> String.upcase()
+    case Base.decode16(input) do
+      {:ok, decoded} -> {:ok, "text/plain", decoded}
+      :error -> {:error, "invalid hex input"}
+    end
+  end
+
   defp b64url_decode(str) do
     stripped = String.trim_trailing(str, "=")
     padding = rem(4 - rem(String.length(stripped), 4), 4)

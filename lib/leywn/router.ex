@@ -1,6 +1,7 @@
 defmodule Leywn.Router do
   use Plug.Router
 
+  plug Leywn.CORS
   plug Leywn.RequestLogger
   plug :set_server_header
   plug :match
@@ -44,6 +45,36 @@ defmodule Leywn.Router do
     |> Plug.Conn.send_resp(200, Jason.encode!(spec))
   end
 
+  # ---- Insomnia collection ---------------------------------------------------
+
+  get "/request-collection" do
+    port = Application.get_env(:leywn, :port, 4000)
+    collection = Leywn.InsomniaCollection.build(port)
+
+    conn
+    |> Plug.Conn.put_resp_header(
+         "content-disposition",
+         ~s(attachment; filename="leywn.insomnia.json")
+       )
+    |> Plug.Conn.put_resp_content_type("application/json")
+    |> Plug.Conn.send_resp(200, Jason.encode!(collection, pretty: true))
+  end
+
+  # ---- Health ----------------------------------------------------------------
+
+  get "/health" do
+    started_at = Application.get_env(:leywn, :started_at, System.monotonic_time(:second))
+    uptime = System.monotonic_time(:second) - started_at
+
+    Leywn.Respond.send(conn, 200, %{
+      status: "ok",
+      version: Mix.Project.config()[:version],
+      uptime_seconds: uptime
+    }, root: "health")
+  end
+
+  # ---- Echo ------------------------------------------------------------------
+
   match "/echo" do
     conn = Plug.Conn.fetch_query_params(conn)
     max_body = Application.get_env(:leywn, :echo_max_body_bytes, 65_536)
@@ -78,6 +109,53 @@ defmodule Leywn.Router do
     Leywn.Respond.send(conn, 200, data, root: "echo")
   end
 
+  # ---- Delay -----------------------------------------------------------------
+
+  match "/delay/:ms" do
+    case Integer.parse(ms) do
+      {delay, ""} when delay >= 0 ->
+        clamped = min(delay, 30_000)
+        :timer.sleep(clamped)
+        Leywn.Respond.send(conn, 200, %{requested_ms: delay, delayed_ms: clamped}, root: "delay")
+
+      _ ->
+        Leywn.Respond.send(conn, 400, %{error: "invalid_delay", provided: ms}, root: "error")
+    end
+  end
+
+  # ---- Stream ----------------------------------------------------------------
+
+  get "/stream/:n" do
+    case Integer.parse(n) do
+      {count, ""} when count >= 1 ->
+        total = min(count, 100)
+
+        conn =
+          conn
+          |> Plug.Conn.put_resp_content_type("application/x-ndjson")
+          |> Plug.Conn.send_chunked(200)
+
+        Enum.reduce_while(1..total, conn, fn i, conn ->
+          line =
+            Jason.encode!(%{
+              line: i,
+              total: total,
+              timestamp_unix_ms: System.os_time(:millisecond)
+            })
+
+          case Plug.Conn.chunk(conn, line <> "\n") do
+            {:ok, conn} -> {:cont, conn}
+            {:error, _} -> {:halt, conn}
+          end
+        end)
+
+      _ ->
+        Leywn.Respond.send(conn, 400, %{error: "invalid_count", provided: n}, root: "error")
+    end
+  end
+
+  # ---- UUID / GUID -----------------------------------------------------------
+
   get "/uuid" do
     Leywn.Respond.send(conn, 200, %{uuid: Leywn.Random.uuid()}, root: "uuid")
   end
@@ -86,13 +164,18 @@ defmodule Leywn.Router do
     Leywn.Respond.send(conn, 200, %{guuid: Leywn.Random.guuid()}, root: "guuid")
   end
 
+  # ---- Random ----------------------------------------------------------------
+
   get "/random" do
     data = %{
       int: Leywn.Random.random_int(),
       uint: Leywn.Random.random_uint(),
       uuid: Leywn.Random.uuid(),
       guuid: Leywn.Random.guuid(),
-      lorem_ipsum: hd(Leywn.Random.lorem_ipsum(1))
+      lorem_ipsum: hd(Leywn.Random.lorem_ipsum(1)),
+      name: Leywn.Random.random_name(),
+      email: Leywn.Random.random_email(),
+      color: Leywn.Random.random_color()
     }
     Leywn.Respond.send(conn, 200, data, root: "random")
   end
@@ -132,6 +215,20 @@ defmodule Leywn.Router do
     end
   end
 
+  get "/random/name" do
+    Leywn.Respond.send(conn, 200, %{name: Leywn.Random.random_name()}, root: "random")
+  end
+
+  get "/random/email" do
+    Leywn.Respond.send(conn, 200, %{email: Leywn.Random.random_email()}, root: "random")
+  end
+
+  get "/random/color" do
+    Leywn.Respond.send(conn, 200, Leywn.Random.random_color(), root: "random")
+  end
+
+  # ---- Status ----------------------------------------------------------------
+
   match "/status/:code" do
     case Integer.parse(code) do
       {status, ""} when status in 100..599 ->
@@ -145,6 +242,8 @@ defmodule Leywn.Router do
         Leywn.Respond.send(conn, 400, %{error: "invalid_status_code", provided: code}, root: "error")
     end
   end
+
+  # ---- Auth ------------------------------------------------------------------
 
   match "/auth/basic-auth" do
     Leywn.Auth.handle_basic(conn, "basic", "password")
@@ -180,6 +279,8 @@ defmodule Leywn.Router do
       key_pem: Leywn.MTLS.client_key_pem()
     }, root: "client_cert")
   end
+
+  # ---- Info ------------------------------------------------------------------
 
   get "/ip" do
     Leywn.Respond.send(conn, 200, Leywn.Info.ip_data(conn), root: "ip")
@@ -220,6 +321,8 @@ defmodule Leywn.Router do
         Leywn.Respond.send(conn, 404, %{error: "unknown_timezone", timezone: tz}, root: "error")
     end
   end
+
+  # ---- Images ----------------------------------------------------------------
 
   get "/image/color/:rgb" do
     handle_color_image(conn, rgb, 64, 64)
@@ -274,6 +377,13 @@ defmodule Leywn.Router do
   post "/encode/rot13",  do: handle_codec(conn, &Leywn.Codec.rot13/1)
   post "/decode/rot13",  do: handle_codec(conn, &Leywn.Codec.rot13/1)
   post "/decode/jwt",    do: handle_codec(conn, &Leywn.Codec.jwt_decode/1)
+  post "/encode/hex",    do: handle_codec(conn, &Leywn.Codec.hex_encode/1)
+  post "/decode/hex",    do: handle_codec(conn, &Leywn.Codec.hex_decode/1)
+
+  # ---- Hash endpoints (POST only) ------------------------------------------
+
+  post "/hash/sha256", do: handle_codec(conn, &Leywn.Hash.sha256/1)
+  post "/hash/md5",    do: handle_codec(conn, &Leywn.Hash.md5/1)
 
   match _ do
     Leywn.Respond.send(conn, 404, %{error: "not_found"}, root: "error")
@@ -349,7 +459,7 @@ defmodule Leywn.Router do
         <span>Last Echo You Will Need</span>
       </div>
       <div class="leywn-hero">
-        <p>A complete selection of echo, auth, random, format, and codec endpoints — all in one lightweight, fast, highly customisable service.</p>
+        <p>A complete selection of echo, auth, random, format, codec, hash, delay, and stream endpoints — all in one lightweight, fast, highly customisable service.</p>
         <p>Configure everything with <code>LEYWN_xxx</code> environment variables. Set <code>LEYWN_ONLY_JSON=true</code> to disable XML content negotiation.</p>
       </div>
       <div id="swagger-ui"></div>

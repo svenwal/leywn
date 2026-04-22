@@ -100,4 +100,37 @@ defmodule Leywn.CodecTest do
     conn = post("/decode/jwt", "bad.!!!.sig")
     assert conn.status == 422
   end
+
+  # ---- /encode/hex -----------------------------------------------------------
+
+  test "encode/hex encodes text as lowercase hex" do
+    conn = post("/encode/hex", "hello")
+    assert conn.status == 200
+    assert conn.resp_body == "68656c6c6f"
+  end
+
+  test "encode/hex handles empty body" do
+    conn = post("/encode/hex", "")
+    assert conn.status == 200
+    assert conn.resp_body == ""
+  end
+
+  # ---- /decode/hex -----------------------------------------------------------
+
+  test "decode/hex decodes valid hex string" do
+    conn = post("/decode/hex", "68656c6c6f")
+    assert conn.status == 200
+    assert conn.resp_body == "hello"
+  end
+
+  test "decode/hex is case-insensitive" do
+    conn = post("/decode/hex", "48656C6C6F")
+    assert conn.status == 200
+    assert conn.resp_body == "Hello"
+  end
+
+  test "decode/hex returns 422 for invalid hex" do
+    conn = post("/decode/hex", "zzzz")
+    assert conn.status == 422
+  end
 end

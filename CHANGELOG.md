@@ -2,6 +2,33 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [1.0.0] - 2026-04-21
+
+### Added
+- **`GET /request-collection`** — serves a dynamically generated Insomnia v4 export collection covering every endpoint, with example request bodies, auth headers, and a `base_url` environment variable set to the running server's HTTP port. Offered as a `Content-Disposition: attachment` download.
+- **CORS** — `Access-Control-Allow-*` headers added to every response via a new `Leywn.CORS` plug; `OPTIONS` preflight requests return `204 No Content`. Allowed origin configurable via `LEYWN_CORS_ORIGIN` (default: `*`)
+- **`GET /health`** — health check endpoint returning `status`, `version`, and `uptime_seconds`; suitable for use as a Kubernetes liveness/readiness probe
+- **`ANY /delay/{ms}`** — delays the response by the requested milliseconds (clamped to 30 000 ms); useful for testing timeouts and retry logic
+- **`GET /stream/{n}`** — chunked `application/x-ndjson` response streaming `n` JSON lines (max 100); each line is flushed individually
+- **`GET /random/name`** — random first name drawn from `priv/names.txt`; path overridable via `LEYWN_NAMES_FILE`
+- **`GET /random/email`** — random email address built from names and domains files; domain path overridable via `LEYWN_EMAIL_DOMAINS_FILE`
+- **`GET /random/color`** — random RGB colour returned as `{hex, r, g, b}`
+- **`POST /encode/hex` / `/decode/hex`** — hex encode/decode the request body
+- **`POST /hash/sha256` / `/hash/md5`** — hash the request body; returns `{hash, algorithm, input_bytes}`
+- `priv/names.txt` and `priv/email_domains.txt` — data files for the name and email generators; can be replaced/mounted to customise the output
+- Test stage added to the Dockerfile (`--target test`)
+- ExUnit test suites for all new endpoints: `random_ext_test.exs`, `hash_test.exs`, `delay_stream_health_test.exs`; hex codec tests added to `codec_test.exs`
+- `README.md` created with full endpoint reference and configuration table
+- `/random` bundle now includes `name`, `email`, and `color` fields
+
+### Changed
+- **`/format/yaml`** — now accepts YAML input and re-formats it with 2-space indentation (previously converted JSON → YAML); uses `yaml_elixir` + `yamerl` (pure Erlang, no C NIFs)
+- **`/format/xml`** — now accepts XML input and re-formats it with 2-space indentation and an XML declaration header (previously converted JSON → XML); uses OTP's built-in `:xmerl` parser
+- Version bumped to `1.0.0` in `mix.exs` and `openapi.json`
+- OpenAPI spec updated: new `Hash` tag; new schemas `HealthResponse`, `DelayResponse`, `ColorResponse`, `HashResponse`; `RandomAll` schema extended; `badrequest` reusable response added
+
+---
+
 ## [0.6.0] - 2026-04-14
 
 ### Added

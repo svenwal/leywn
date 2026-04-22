@@ -2,7 +2,6 @@ defmodule Leywn.Random do
   @moduledoc "Helpers for all /random and /uuid endpoints."
   import Bitwise
 
-  # Classic opening sentence kept intact; rest is generated from word pool
   @first_sentence "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 
   @words ~w(
@@ -56,7 +55,6 @@ defmodule Leywn.Random do
   end
 
   defp build_paragraph(1) do
-    # First paragraph always opens with the classic sentence
     rest = Enum.map(1..4, fn _ -> random_sentence() end) |> Enum.join(" ")
     @first_sentence <> " " <> rest
   end
@@ -68,5 +66,50 @@ defmodule Leywn.Random do
     words = Enum.map(1..count, fn _ -> Enum.random(@words) end)
     [h | t] = words
     String.capitalize(h) <> " " <> Enum.join(t, " ") <> "."
+  end
+
+  # ── Names / emails / colors ──────────────────────────────────────────────────
+
+  @doc "Return a random name loaded from the names file."
+  def random_name do
+    load_lines("LEYWN_NAMES_FILE", "names.txt") |> Enum.random()
+  end
+
+  @doc "Return a random email address built from names and domains files."
+  def random_email do
+    name =
+      load_lines("LEYWN_NAMES_FILE", "names.txt")
+      |> Enum.random()
+      |> String.downcase()
+      |> String.replace(~r/[^a-z0-9]/, ".")
+
+    domain = load_lines("LEYWN_EMAIL_DOMAINS_FILE", "email_domains.txt") |> Enum.random()
+    n = :rand.uniform(9999)
+    "#{name}#{n}@#{domain}"
+  end
+
+  @doc "Return a random RGB colour as hex string and component values."
+  def random_color do
+    r = :rand.uniform(256) - 1
+    g = :rand.uniform(256) - 1
+    b = :rand.uniform(256) - 1
+    hex = :io_lib.format("#~2.16.0b~2.16.0b~2.16.0b", [r, g, b]) |> IO.iodata_to_binary()
+    %{hex: hex, r: r, g: g, b: b}
+  end
+
+  # ── Helpers ───────────────────────────────────────────────────────────────────
+
+  defp load_lines(env_var, filename) do
+    path = System.get_env(env_var) || Application.app_dir(:leywn, "priv/#{filename}")
+
+    case File.read(path) do
+      {:ok, content} ->
+        content
+        |> String.split("\n", trim: true)
+        |> Enum.reject(&(String.starts_with?(String.trim(&1), "#") or String.trim(&1) == ""))
+
+      {:error, _} ->
+        ["unknown"]
+    end
   end
 end

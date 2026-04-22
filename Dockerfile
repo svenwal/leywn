@@ -1,3 +1,25 @@
+# ---- Test Stage ----
+FROM hexpm/elixir:1.18.4-erlang-27.3.4.7-debian-bullseye-20260223-slim AS test
+
+ENV MIX_ENV=test \
+    LANG=C.UTF-8
+
+WORKDIR /app
+
+RUN mix local.hex --force && \
+    mix local.rebar --force
+
+COPY mix.exs mix.lock ./
+COPY config ./config
+
+RUN mix deps.get
+
+COPY priv ./priv
+COPY lib ./lib
+COPY test ./test
+
+CMD ["mix", "test"]
+
 # ---- Build Stage ----
 FROM hexpm/elixir:1.18.4-erlang-27.3.4.7-debian-bullseye-20260223-slim AS builder
 

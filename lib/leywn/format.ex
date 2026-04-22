@@ -13,25 +13,21 @@ defmodule Leywn.Format do
     end
   end
 
-  @doc "Convert a JSON body to YAML."
+  @doc "Pretty-format a YAML body."
   def yaml(body) do
-    with {:ok, data} <- Jason.decode(body) do
-      {:ok, "application/yaml", Leywn.YAML.encode(data)}
-    else
-      {:error, _} -> {:error, "invalid JSON input"}
+    case YamlElixir.read_from_string(body) do
+      {:ok, data} ->
+        {:ok, "application/yaml", Leywn.YAML.encode(data)}
+      {:error, _} ->
+        {:error, "invalid YAML input"}
     end
   end
 
-  @doc "Convert a JSON body to XML."
+  @doc "Pretty-format an XML body with consistent 2-space indentation."
   def xml(body) do
-    with {:ok, data} <- Jason.decode(body) do
-      xml_str =
-        XmlBuilder.document("root", Leywn.Respond.XML.to_elements(data))
-        |> XmlBuilder.generate(format: :indent)
-
-      {:ok, "application/xml", xml_str}
-    else
-      {:error, _} -> {:error, "invalid JSON input"}
+    case pretty_xml(String.trim(body)) do
+      {:ok, formatted} -> {:ok, "application/xml", formatted}
+      :error -> {:error, "invalid XML input"}
     end
   end
 
@@ -110,4 +106,65 @@ defmodule Leywn.Format do
     |> String.replace("-", "_")
     |> String.downcase()
   end
+
+  # ---------------------------------------------------------------------------
+  # Pure-string XML pretty-printer (no external parser required)
+  # ---------------------------------------------------------------------------
+
+  @xml_token ~r/(<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<[^>]*>|[^<]+)/
+
+  defp pretty_xml(input) do
+    tokens =
+      @xml_token
+      |> Regex.scan(input, capture: :first)
+      |> List.flatten()
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+
+    has_element = Enum.any?(tokens, &String.starts_with?(&1, "<"))
+
+    {lines, final_depth} =
+      Enum.reduce(tokens, {[], 0}, fn token, {acc, depth} ->
+        cond do
+          String.starts_with?(token, "<?") ->
+            {[token | acc], depth}
+
+          String.starts_with?(token, "<!--") ->
+            {[xmlpad(depth) <> token | acc], depth}
+
+          String.starts_with?(token, "<![CDATA[") ->
+            {[xmlpad(depth) <> token | acc], depth}
+
+          Regex.match?(~r|^<[^/!?][^>]*/\s*>$|, token) ->
+            {[xmlpad(depth) <> token | acc], depth}
+
+          String.starts_with?(token, "</") ->
+            d = max(0, depth - 1)
+            {[xmlpad(d) <> token | acc], d}
+
+          String.starts_with?(token, "<") ->
+            {[xmlpad(depth) <> token | acc], depth + 1}
+
+          true ->
+            {[xmlpad(depth) <> token | acc], depth}
+        end
+      end)
+
+    if not has_element or final_depth != 0 do
+      :error
+    else
+      result = lines |> Enum.reverse() |> Enum.join("\n")
+      formatted =
+        if String.starts_with?(result, "<?xml") do
+          result
+        else
+          ~s(<?xml version="1.0" encoding="UTF-8"?>\n) <> result
+        end
+      {:ok, formatted}
+    end
+  rescue
+    _ -> :error
+  end
+
+  defp xmlpad(depth), do: String.duplicate("  ", depth)
 end
