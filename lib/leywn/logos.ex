@@ -1,5 +1,6 @@
 defmodule Leywn.Logos do
   @max_dimension 4096
+  @max_pixels 1_048_576
   @default_size 64
 
   @doc """
@@ -137,8 +138,10 @@ defmodule Leywn.Logos do
 
   defp parse_hex8(_), do: {:error, "invalid_color"}
 
-  defp validate_dimensions(w, h) when w >= 1 and w <= @max_dimension and h >= 1 and h <= @max_dimension,
-    do: :ok
+  defp validate_dimensions(w, h)
+       when w >= 1 and w <= @max_dimension and h >= 1 and h <= @max_dimension and
+              w * h <= @max_pixels,
+       do: :ok
 
   defp validate_dimensions(_, _),
     do: {:error, "dimensions_out_of_range"}

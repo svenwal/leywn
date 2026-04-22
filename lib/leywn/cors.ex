@@ -4,7 +4,7 @@ defmodule Leywn.CORS do
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    origin = System.get_env("LEYWN_CORS_ORIGIN") || "*"
+    origin = (System.get_env("LEYWN_CORS_ORIGIN") || "*") |> String.replace(~r/[\r\n]/, "")
 
     conn =
       conn

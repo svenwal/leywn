@@ -2,30 +2,66 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Leywn",
-    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).",
+    "description": "Last Echo You Will Need \u2014 an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).",
     "version": "1.0.0-beta4"
   },
   "tags": [
-    { "name": "Echo",    "description": "Request echo and inspection endpoints" },
-    { "name": "Auth",    "description": "Authentication demo endpoints (Basic Auth, API Key, JWT, mTLS)" },
-    { "name": "Random",  "description": "Random value generators (integers, UUIDs, Lorem Ipsum, names, emails, colors)" },
-    { "name": "Info",    "description": "Caller information and server time endpoints" },
-    { "name": "Utility", "description": "Utility endpoints (status codes, images, delay, stream, health)" },
-    { "name": "Format",  "description": "POST body prettify / transform endpoints" },
-    { "name": "Codec",   "description": "POST body encode / decode endpoints" },
-    { "name": "Hash",    "description": "POST body hashing endpoints" }
+    {
+      "name": "Echo",
+      "description": "Request echo and inspection endpoints"
+    },
+    {
+      "name": "Auth",
+      "description": "Authentication demo endpoints (Basic Auth, API Key, JWT, mTLS)"
+    },
+    {
+      "name": "Random",
+      "description": "Random value generators (integers, UUIDs, Lorem Ipsum, names, emails, colors)"
+    },
+    {
+      "name": "Info",
+      "description": "Caller information and server time endpoints"
+    },
+    {
+      "name": "Utility",
+      "description": "Utility endpoints (status codes, images, delay, stream, health)"
+    },
+    {
+      "name": "Format",
+      "description": "POST body prettify / transform endpoints"
+    },
+    {
+      "name": "Codec",
+      "description": "POST body encode / decode endpoints"
+    },
+    {
+      "name": "Hash",
+      "description": "POST body hashing endpoints"
+    },
+    {
+      "name": "Chaos",
+      "description": "Chaos engineering endpoint \u2014 injects errors, mangled responses, and latency"
+    }
   ],
   "paths": {
     "/request-collection": {
       "summary": "Insomnia request collection",
       "description": "Returns an Insomnia v4 export JSON containing all Leywn endpoints with example requests. Import directly into Insomnia. The `base_url` environment variable defaults to the running server's HTTP port.",
       "get": {
-        "tags": ["Utility"],
+        "tags": [
+          "Utility"
+        ],
         "summary": "Download Insomnia collection",
         "responses": {
           "200": {
             "description": "Insomnia v4 export JSON",
-            "content": { "application/json": { "schema": { "type": "object" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
@@ -34,17 +70,29 @@
       "summary": "Server health check",
       "description": "Returns the server status, version, and uptime. Suitable for use as a Kubernetes liveness/readiness probe.",
       "get": {
-        "tags": ["Utility"],
+        "tags": [
+          "Utility"
+        ],
         "summary": "Health status",
         "responses": {
           "200": {
             "description": "Server is healthy",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/HealthResponse" },
-                "example": { "status": "ok", "version": "0.6.0", "uptime_seconds": 3742 }
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "version": "0.6.0",
+                  "uptime_seconds": 3742
+                }
               },
-              "application/xml": { "schema": { "$ref": "#/components/schemas/HealthResponse" } }
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
             }
           }
         }
@@ -54,86 +102,623 @@
       "summary": "Echo all request information",
       "description": "Returns all details of the incoming request: method, path, query parameters, headers, host, scheme, remote IP, and body (if text/UTF-8, up to the configured byte limit). The `path` property always starts with a leading `/`.",
       "get": {
-        "tags": ["Echo"],
+        "tags": [
+          "Echo"
+        ],
         "summary": "Echo request details",
         "responses": {
           "200": {
             "description": "Request details",
             "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" }, "example": { "method": "GET", "scheme": "http", "host": "localhost", "port": 4000, "path": "/echo", "path_info": ["echo"], "query_string": "", "query_params": {}, "headers": { "host": ["localhost:4000"] }, "remote_ip": "127.0.0.1", "body": { "present": false }, "timestamp_unix_ms": 1700000000000 } },
-              "application/xml": { "schema": { "$ref": "#/components/schemas/EchoResponse" } }
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                },
+                "example": {
+                  "method": "GET",
+                  "scheme": "http",
+                  "host": "localhost",
+                  "port": 4000,
+                  "path": "/echo",
+                  "path_info": [
+                    "echo"
+                  ],
+                  "query_string": "",
+                  "query_params": {},
+                  "headers": {
+                    "host": [
+                      "localhost:4000"
+                    ]
+                  },
+                  "remote_ip": "127.0.0.1",
+                  "body": {
+                    "present": false
+                  },
+                  "timestamp_unix_ms": 1700000000000
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
             }
           }
         }
       },
-      "post": { "tags": ["Echo"], "summary": "Echo request details", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "put": { "tags": ["Echo"], "summary": "Echo request details", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "patch": { "tags": ["Echo"], "summary": "Echo request details", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "delete": { "tags": ["Echo"], "summary": "Echo request details", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } }
+      "post": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "/echo/{path}": {
       "summary": "Echo all request information (sub-path)",
       "description": "Same as `/echo` but also captures the sub-path.",
       "parameters": [
-        { "name": "path", "in": "path", "required": true, "description": "Any sub-path, e.g. `foo/bar`", "schema": { "type": "string" } }
+        {
+          "name": "path",
+          "in": "path",
+          "required": true,
+          "description": "Any sub-path, e.g. `foo/bar`",
+          "schema": {
+            "type": "string"
+          }
+        }
       ],
-      "get": { "tags": ["Echo"], "summary": "Echo request details (sub-path)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "post": { "tags": ["Echo"], "summary": "Echo request details (sub-path)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "put": { "tags": ["Echo"], "summary": "Echo request details (sub-path)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "patch": { "tags": ["Echo"], "summary": "Echo request details (sub-path)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "delete": { "tags": ["Echo"], "summary": "Echo request details (sub-path)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } }
+      "get": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (sub-path)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (sub-path)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (sub-path)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (sub-path)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (sub-path)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "/anything": {
       "summary": "Echo all request information (alias)",
-      "description": "Identical to `/echo` — returns all details of the incoming request. Provided as a convenience alias.",
-      "get": { "tags": ["Echo"], "summary": "Echo request details (alias)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "post": { "tags": ["Echo"], "summary": "Echo request details (alias)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "put": { "tags": ["Echo"], "summary": "Echo request details (alias)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "patch": { "tags": ["Echo"], "summary": "Echo request details (alias)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "delete": { "tags": ["Echo"], "summary": "Echo request details (alias)", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } }
+      "description": "Identical to `/echo` \u2014 returns all details of the incoming request. Provided as a convenience alias.",
+      "get": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (alias)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (alias)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (alias)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (alias)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details (alias)",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "/anything/{path}": {
-      "summary": "Echo all request information – alias sub-path",
+      "summary": "Echo all request information \u2013 alias sub-path",
       "parameters": [
-        { "name": "path", "in": "path", "required": true, "schema": { "type": "string" } }
+        {
+          "name": "path",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
       ],
-      "get": { "tags": ["Echo"], "summary": "Echo request details – alias sub-path", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "post": { "tags": ["Echo"], "summary": "Echo request details – alias sub-path", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "put": { "tags": ["Echo"], "summary": "Echo request details – alias sub-path", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "patch": { "tags": ["Echo"], "summary": "Echo request details – alias sub-path", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } },
-      "delete": { "tags": ["Echo"], "summary": "Echo request details – alias sub-path", "responses": { "200": { "description": "Request details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EchoResponse" } } } } } }
+      "get": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details \u2013 alias sub-path",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details \u2013 alias sub-path",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details \u2013 alias sub-path",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details \u2013 alias sub-path",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Echo"
+        ],
+        "summary": "Echo request details \u2013 alias sub-path",
+        "responses": {
+          "200": {
+            "description": "Request details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "/delay/{ms}": {
       "summary": "Delayed response",
       "description": "Waits the requested number of milliseconds before responding. Useful for testing timeouts and retry logic. The delay is clamped to 30 000 ms.",
       "parameters": [
-        { "name": "ms", "in": "path", "required": true, "description": "Milliseconds to wait (0–30000; values above 30000 are clamped)", "schema": { "type": "integer", "minimum": 0, "maximum": 30000, "example": 500 } }
+        {
+          "name": "ms",
+          "in": "path",
+          "required": true,
+          "description": "Milliseconds to wait (0\u201330000; values above 30000 are clamped)",
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30000,
+            "example": 500
+          }
+        }
       ],
       "get": {
-        "tags": ["Utility"],
+        "tags": [
+          "Utility"
+        ],
         "summary": "Delay the response",
         "responses": {
-          "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" }, "example": { "requested_ms": 500, "delayed_ms": 500 } }, "application/xml": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } },
-          "400": { "description": "Invalid delay value", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "Response after delay",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayResponse"
+                },
+                "example": {
+                  "requested_ms": 500,
+                  "delayed_ms": 500
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid delay value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       },
-      "post": { "tags": ["Utility"], "summary": "Delay the response", "responses": { "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } }, "400": { "$ref": "#/components/responses/badrequest" } } },
-      "put": { "tags": ["Utility"], "summary": "Delay the response", "responses": { "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } }, "400": { "$ref": "#/components/responses/badrequest" } } },
-      "patch": { "tags": ["Utility"], "summary": "Delay the response", "responses": { "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } }, "400": { "$ref": "#/components/responses/badrequest" } } },
-      "delete": { "tags": ["Utility"], "summary": "Delay the response", "responses": { "200": { "description": "Response after delay", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DelayResponse" } } } }, "400": { "$ref": "#/components/responses/badrequest" } } }
+      "post": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Delay the response",
+        "responses": {
+          "200": {
+            "description": "Response after delay",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Delay the response",
+        "responses": {
+          "200": {
+            "description": "Response after delay",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Delay the response",
+        "responses": {
+          "200": {
+            "description": "Response after delay",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Delay the response",
+        "responses": {
+          "200": {
+            "description": "Response after delay",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          }
+        }
+      }
     },
     "/stream/{n}": {
       "summary": "Chunked newline-delimited JSON stream",
       "description": "Returns a chunked HTTP response with `n` newline-delimited JSON objects (`application/x-ndjson`). Each line is flushed individually. Maximum 100 lines.",
       "parameters": [
-        { "name": "n", "in": "path", "required": true, "description": "Number of lines to stream (1–100)", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "example": 10 } }
+        {
+          "name": "n",
+          "in": "path",
+          "required": true,
+          "description": "Number of lines to stream (1\u2013100)",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "example": 10
+          }
+        }
       ],
       "get": {
-        "tags": ["Utility"],
+        "tags": [
+          "Utility"
+        ],
         "summary": "Stream n ndjson lines",
         "responses": {
-          "200": { "description": "ndjson stream", "content": { "application/x-ndjson": { "schema": { "type": "string" }, "example": "{\"line\":1,\"total\":10,\"timestamp_unix_ms\":1700000000000}\n" } } },
-          "400": { "description": "Invalid count", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "ndjson stream",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "{\"line\":1,\"total\":10,\"timestamp_unix_ms\":1700000000000}\n"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -141,223 +726,1354 @@
       "summary": "Return any HTTP status code",
       "description": "Responds with the requested HTTP status code. Informational (1xx) and no-content (204, 304) responses have an empty body; all others include `{\"status\": <code>}`.",
       "parameters": [
-        { "name": "code", "in": "path", "required": true, "description": "HTTP status code in the range 100–599", "schema": { "type": "integer", "minimum": 100, "maximum": 599, "example": 418 } }
+        {
+          "name": "code",
+          "in": "path",
+          "required": true,
+          "description": "HTTP status code in the range 100\u2013599",
+          "schema": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599,
+            "example": 418
+          }
+        }
       ],
       "get": {
-        "tags": ["Utility"],
+        "tags": [
+          "Utility"
+        ],
         "summary": "Return the given status code",
         "responses": {
           "default": {
             "description": "The status code you requested",
             "content": {
-              "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "integer", "example": 418 } } }, "example": { "status": 418 } }
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 418
+                    }
+                  }
+                },
+                "example": {
+                  "status": 418
+                }
+              }
             }
           }
         }
       },
-      "post": { "tags": ["Utility"], "summary": "Return the given status code", "responses": { "default": { "description": "The status code you requested" } } },
-      "put": { "tags": ["Utility"], "summary": "Return the given status code", "responses": { "default": { "description": "The status code you requested" } } },
-      "patch": { "tags": ["Utility"], "summary": "Return the given status code", "responses": { "default": { "description": "The status code you requested" } } },
-      "delete": { "tags": ["Utility"], "summary": "Return the given status code", "responses": { "default": { "description": "The status code you requested" } } }
+      "post": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Return the given status code",
+        "responses": {
+          "default": {
+            "description": "The status code you requested"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Return the given status code",
+        "responses": {
+          "default": {
+            "description": "The status code you requested"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Return the given status code",
+        "responses": {
+          "default": {
+            "description": "The status code you requested"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Return the given status code",
+        "responses": {
+          "default": {
+            "description": "The status code you requested"
+          }
+        }
+      }
     },
     "/auth/basic-auth": {
       "summary": "Basic Auth (default credentials)",
       "description": "Enforces HTTP Basic Authentication with username `basic` and password `password`. Returns 401 with a `WWW-Authenticate` header if credentials are missing or wrong.",
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Authenticate with Basic Auth (user: basic, pass: password)",
-        "security": [{ "basicAuth": [] }],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" }, "example": { "authenticated": true, "auth_type": "basic-auth", "username": "basic", "method": "GET", "path": "/auth/basic-auth" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } },
-          "401": { "$ref": "#/components/responses/unauthorized" }
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "example": {
+                  "authenticated": true,
+                  "auth_type": "basic-auth",
+                  "username": "basic",
+                  "method": "GET",
+                  "path": "/auth/basic-auth"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
         }
       },
-      "post": { "tags": ["Auth"], "summary": "Authenticate with Basic Auth", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "put": { "tags": ["Auth"], "summary": "Authenticate with Basic Auth", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "patch": { "tags": ["Auth"], "summary": "Authenticate with Basic Auth", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "delete": { "tags": ["Auth"], "summary": "Authenticate with Basic Auth", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } }
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with Basic Auth",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with Basic Auth",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with Basic Auth",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with Basic Auth",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      }
     },
     "/auth/basic-auth/{username}/{password}": {
       "summary": "Basic Auth (custom credentials)",
       "description": "Enforces HTTP Basic Authentication with the credentials specified in the path.",
       "parameters": [
-        { "name": "username", "in": "path", "required": true, "schema": { "type": "string", "example": "alice" } },
-        { "name": "password", "in": "path", "required": true, "schema": { "type": "string", "example": "secret" } }
+        {
+          "name": "username",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "alice"
+          }
+        },
+        {
+          "name": "password",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "secret"
+          }
+        }
       ],
-      "get": { "tags": ["Auth"], "summary": "Authenticate with custom Basic Auth credentials", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "post": { "tags": ["Auth"], "summary": "Authenticate with custom Basic Auth credentials", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "put": { "tags": ["Auth"], "summary": "Authenticate with custom Basic Auth credentials", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "patch": { "tags": ["Auth"], "summary": "Authenticate with custom Basic Auth credentials", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "delete": { "tags": ["Auth"], "summary": "Authenticate with custom Basic Auth credentials", "security": [{ "basicAuth": [] }], "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } }
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom Basic Auth credentials",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom Basic Auth credentials",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom Basic Auth credentials",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom Basic Auth credentials",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom Basic Auth credentials",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      }
     },
     "/auth/api-key": {
       "summary": "API key auth (default header/value)",
       "description": "Enforces an API key by checking that the request includes the header `apikey: my-key`.",
       "parameters": [
-        { "name": "apikey", "in": "header", "required": true, "schema": { "type": "string", "example": "my-key" } }
+        {
+          "name": "apikey",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "my-key"
+          }
+        }
       ],
-      "get": { "tags": ["Auth"], "summary": "Authenticate with API key (apikey: my-key)", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" }, "example": { "authenticated": true, "auth_type": "api-key", "header": "apikey" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "post": { "tags": ["Auth"], "summary": "Authenticate with API key", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "put": { "tags": ["Auth"], "summary": "Authenticate with API key", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "patch": { "tags": ["Auth"], "summary": "Authenticate with API key", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "delete": { "tags": ["Auth"], "summary": "Authenticate with API key", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } }
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with API key (apikey: my-key)",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "example": {
+                  "authenticated": true,
+                  "auth_type": "api-key",
+                  "header": "apikey"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with API key",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with API key",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with API key",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with API key",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      }
     },
     "/auth/api-key/{header_name}/{key_value}": {
       "summary": "API key auth (custom header/value)",
       "description": "Enforces an API key by checking that the request includes a header named `header_name` with value `key_value`.",
       "parameters": [
-        { "name": "header_name", "in": "path", "required": true, "schema": { "type": "string", "example": "X-Api-Key" } },
-        { "name": "key_value", "in": "path", "required": true, "schema": { "type": "string", "example": "supersecret" } }
+        {
+          "name": "header_name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "X-Api-Key"
+          }
+        },
+        {
+          "name": "key_value",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "supersecret"
+          }
+        }
       ],
-      "get": { "tags": ["Auth"], "summary": "Authenticate with custom API key header and value", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "post": { "tags": ["Auth"], "summary": "Authenticate with custom API key", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "put": { "tags": ["Auth"], "summary": "Authenticate with custom API key", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "patch": { "tags": ["Auth"], "summary": "Authenticate with custom API key", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "delete": { "tags": ["Auth"], "summary": "Authenticate with custom API key", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } }
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom API key header and value",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom API key",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom API key",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom API key",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with custom API key",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      }
     },
     "/auth/jwt": {
       "summary": "JWT Bearer auth",
-      "description": "Enforces a Bearer JWT in the `Authorization` header. Validates structure and decodes header/claims — does **not** verify the signature.",
+      "description": "Enforces a Bearer JWT in the `Authorization` header. Validates structure and decodes header/claims \u2014 does **not** verify the signature.",
       "parameters": [
-        { "name": "Authorization", "in": "header", "required": true, "schema": { "type": "string", "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.signature" } }
+        {
+          "name": "Authorization",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.signature"
+          }
+        }
       ],
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Validate JWT and return decoded claims",
         "responses": {
-          "200": { "description": "Valid JWT — returns decoded header and claims", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" }, "example": { "authenticated": true, "auth_type": "jwt", "jwt_header": { "alg": "HS256", "typ": "JWT" }, "claims": { "sub": "1234", "name": "Jane Doe" } } }, "application/xml": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } },
-          "401": { "$ref": "#/components/responses/unauthorized" }
+          "200": {
+            "description": "Valid JWT \u2014 returns decoded header and claims",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "example": {
+                  "authenticated": true,
+                  "auth_type": "jwt",
+                  "jwt_header": {
+                    "alg": "HS256",
+                    "typ": "JWT"
+                  },
+                  "claims": {
+                    "sub": "1234",
+                    "name": "Jane Doe"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
         }
       },
-      "post": { "tags": ["Auth"], "summary": "Validate JWT", "responses": { "200": { "description": "Valid JWT", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "put": { "tags": ["Auth"], "summary": "Validate JWT", "responses": { "200": { "description": "Valid JWT", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "patch": { "tags": ["Auth"], "summary": "Validate JWT", "responses": { "200": { "description": "Valid JWT", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "delete": { "tags": ["Auth"], "summary": "Validate JWT", "responses": { "200": { "description": "Valid JWT", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } }
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Validate JWT",
+        "responses": {
+          "200": {
+            "description": "Valid JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Validate JWT",
+        "responses": {
+          "200": {
+            "description": "Valid JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Validate JWT",
+        "responses": {
+          "200": {
+            "description": "Valid JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Validate JWT",
+        "responses": {
+          "200": {
+            "description": "Valid JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      }
     },
     "/auth/jwt/exchange": {
       "summary": "Exchange a JWT for a Leywn-signed JWT",
       "description": "Accepts a structurally valid Bearer JWT. Validates the structure (not the signature), then issues a new JWT signed with the server's HS256 key.",
       "parameters": [
-        { "name": "Authorization", "in": "header", "required": true, "schema": { "type": "string", "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.signature" } }
+        {
+          "name": "Authorization",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.signature"
+          }
+        }
       ],
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Exchange JWT for a Leywn-signed token",
         "responses": {
-          "200": { "description": "A new HS256 JWT signed by Leywn", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } } } },
-          "401": { "$ref": "#/components/responses/unauthorized" }
+          "200": {
+            "description": "A new HS256 JWT signed by Leywn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtExchangeResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtExchangeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
         }
       },
-      "post": { "tags": ["Auth"], "summary": "Exchange JWT", "responses": { "200": { "description": "New HS256 JWT", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "put": { "tags": ["Auth"], "summary": "Exchange JWT", "responses": { "200": { "description": "New HS256 JWT", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "patch": { "tags": ["Auth"], "summary": "Exchange JWT", "responses": { "200": { "description": "New HS256 JWT", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "delete": { "tags": ["Auth"], "summary": "Exchange JWT", "responses": { "200": { "description": "New HS256 JWT", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JwtExchangeResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } }
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Exchange JWT",
+        "responses": {
+          "200": {
+            "description": "New HS256 JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtExchangeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Exchange JWT",
+        "responses": {
+          "200": {
+            "description": "New HS256 JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtExchangeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Exchange JWT",
+        "responses": {
+          "200": {
+            "description": "New HS256 JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtExchangeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Exchange JWT",
+        "responses": {
+          "200": {
+            "description": "New HS256 JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtExchangeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      }
     },
     "/auth/mtls": {
       "summary": "mTLS client certificate auth",
       "description": "Validates that the client presented a certificate signed by the Leywn demo CA. Must be called on the **HTTPS port**.",
-      "get": { "tags": ["Auth"], "summary": "Authenticate with mTLS client certificate", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "post": { "tags": ["Auth"], "summary": "Authenticate with mTLS", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "put": { "tags": ["Auth"], "summary": "Authenticate with mTLS", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "patch": { "tags": ["Auth"], "summary": "Authenticate with mTLS", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } },
-      "delete": { "tags": ["Auth"], "summary": "Authenticate with mTLS", "responses": { "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } }, "401": { "$ref": "#/components/responses/unauthorized" } } }
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with mTLS client certificate",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with mTLS",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with mTLS",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with mTLS",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate with mTLS",
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          }
+        }
+      }
     },
     "/auth/mtls/get-client-cert": {
       "summary": "Download the generated client certificate and key",
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Get client cert and key",
         "responses": {
-          "200": { "description": "Client certificate and key in PEM format", "content": { "application/json": { "schema": { "type": "object", "properties": { "cert_pem": { "type": "string" }, "key_pem": { "type": "string" } } } } } }
+          "200": {
+            "description": "Client certificate and key in PEM format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cert_pem": {
+                      "type": "string"
+                    },
+                    "key_pem": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/uuid": {
       "summary": "Generate a UUID v4",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Random UUID v4",
         "responses": {
-          "200": { "description": "A random UUID v4", "content": { "application/json": { "schema": { "type": "object", "properties": { "uuid": { "type": "string", "example": "550e8400-e29b-41d4-a716-446655440000" } } } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "A random UUID v4",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "example": "550e8400-e29b-41d4-a716-446655440000"
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/guuid": {
       "summary": "Generate a GUID",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Random GUID (UUID v4 in curly braces)",
         "responses": {
-          "200": { "description": "A random GUID", "content": { "application/json": { "schema": { "type": "object", "properties": { "guuid": { "type": "string", "example": "{550e8400-e29b-41d4-a716-446655440000}" } } } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "A random GUID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "guuid": {
+                      "type": "string",
+                      "example": "{550e8400-e29b-41d4-a716-446655440000}"
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/random": {
       "summary": "Sample of all random values",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Returns one of each random type",
         "responses": {
-          "200": { "description": "A bundle of all random types", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RandomAll" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/RandomAll" } } } }
+          "200": {
+            "description": "A bundle of all random types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RandomAll"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/RandomAll"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/random/int": {
       "summary": "Random signed integer",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Random integer in [-32000, 32000]",
         "responses": {
-          "200": { "description": "Random integer", "content": { "application/json": { "schema": { "type": "object", "properties": { "value": { "type": "integer", "example": 12345 } } } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "Random integer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "integer",
+                      "example": 12345
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/random/int/{lower}/{upper}": {
       "summary": "Random signed integer in custom range",
       "parameters": [
-        { "name": "lower", "in": "path", "required": true, "schema": { "type": "integer", "example": -100 } },
-        { "name": "upper", "in": "path", "required": true, "schema": { "type": "integer", "example": 100 } }
+        {
+          "name": "lower",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "example": -100
+          }
+        },
+        {
+          "name": "upper",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "example": 100
+          }
+        }
       ],
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Random integer between lower and upper (inclusive)",
         "responses": {
-          "200": { "description": "Random integer", "content": { "application/json": { "schema": { "type": "object", "properties": { "value": { "type": "integer" } } } }, "application/xml": { "schema": { "type": "object" } } } },
-          "400": { "description": "Invalid range", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "Random integer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/random/uint": {
       "summary": "Random unsigned integer",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Random unsigned integer in [0, 65535]",
         "responses": {
-          "200": { "description": "Random unsigned integer", "content": { "application/json": { "schema": { "type": "object", "properties": { "value": { "type": "integer", "minimum": 0, "example": 42000 } } } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "Random unsigned integer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 42000
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/random/lorem-ipsum": {
       "summary": "One paragraph of Lorem Ipsum",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Returns one Lorem Ipsum paragraph",
         "responses": {
-          "200": { "description": "Lorem Ipsum text", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoremIpsum" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/LoremIpsum" } } } }
+          "200": {
+            "description": "Lorem Ipsum text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoremIpsum"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoremIpsum"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/random/lorem-ipsum/{count}": {
       "summary": "Multiple Lorem Ipsum paragraphs",
       "parameters": [
-        { "name": "count", "in": "path", "required": true, "description": "Number of paragraphs (1–32)", "schema": { "type": "integer", "minimum": 1, "maximum": 32, "example": 3 } }
+        {
+          "name": "count",
+          "in": "path",
+          "required": true,
+          "description": "Number of paragraphs (1\u201332)",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32,
+            "example": 3
+          }
+        }
       ],
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Returns up to 32 Lorem Ipsum paragraphs",
         "responses": {
-          "200": { "description": "Lorem Ipsum paragraphs", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoremIpsum" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/LoremIpsum" } } } },
-          "400": { "description": "Invalid count", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "Lorem Ipsum paragraphs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoremIpsum"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoremIpsum"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -365,10 +2081,35 @@
       "summary": "Random first name",
       "description": "Returns a random name from `priv/names.txt`. Override the source file with `LEYWN_NAMES_FILE`.",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Random name",
         "responses": {
-          "200": { "description": "A random name", "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string", "example": "Alice" } } }, "example": { "name": "Alice" } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "A random name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "Alice"
+                    }
+                  }
+                },
+                "example": {
+                  "name": "Alice"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -376,10 +2117,35 @@
       "summary": "Random email address",
       "description": "Returns a randomly generated email address. Names from `priv/names.txt`, domains from `priv/email_domains.txt`. Override with `LEYWN_NAMES_FILE` / `LEYWN_EMAIL_DOMAINS_FILE`.",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Random email",
         "responses": {
-          "200": { "description": "A random email address", "content": { "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string", "example": "alice42@example.com" } } }, "example": { "email": "alice42@example.com" } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "A random email address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "alice42@example.com"
+                    }
+                  }
+                },
+                "example": {
+                  "email": "alice42@example.com"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -387,10 +2153,32 @@
       "summary": "Random RGB colour",
       "description": "Returns a random colour as a hex string and R/G/B component values.",
       "get": {
-        "tags": ["Random"],
+        "tags": [
+          "Random"
+        ],
         "summary": "Random color",
         "responses": {
-          "200": { "description": "A random colour", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ColorResponse" }, "example": { "hex": "#3a7fc1", "r": 58, "g": 127, "b": 193 } }, "application/xml": { "schema": { "$ref": "#/components/schemas/ColorResponse" } } } }
+          "200": {
+            "description": "A random colour",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorResponse"
+                },
+                "example": {
+                  "hex": "#3a7fc1",
+                  "r": 58,
+                  "g": 127,
+                  "b": 193
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColorResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -398,279 +2186,1408 @@
       "summary": "Caller's IP addresses",
       "description": "Returns the caller's IPv4 and/or IPv6 address. When `LEYWN_TRUST_FORWARD=true`, uses `X-Forwarded-For`.",
       "get": {
-        "tags": ["Info"],
+        "tags": [
+          "Info"
+        ],
         "summary": "Caller's IPv4 and IPv6",
         "responses": {
-          "200": { "description": "IP address information", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/IpResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/IpResponse" } } } }
+          "200": {
+            "description": "IP address information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/IpResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/ip/v4": {
       "summary": "Caller's IPv4 address",
       "get": {
-        "tags": ["Info"],
+        "tags": [
+          "Info"
+        ],
         "summary": "Returns the caller's IPv4 address",
         "responses": {
-          "200": { "description": "IPv4 address", "content": { "application/json": { "schema": { "type": "object", "properties": { "ipv4": { "type": "string", "nullable": true } } } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "IPv4 address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ipv4": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/ip/v6": {
       "summary": "Caller's IPv6 address",
       "get": {
-        "tags": ["Info"],
+        "tags": [
+          "Info"
+        ],
         "summary": "Returns the caller's IPv6 address",
         "responses": {
-          "200": { "description": "IPv6 address", "content": { "application/json": { "schema": { "type": "object", "properties": { "ipv6": { "type": "string", "nullable": true } } } }, "application/xml": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "IPv6 address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ipv6": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/date": {
       "summary": "Current date in UTC",
       "get": {
-        "tags": ["Info"],
+        "tags": [
+          "Info"
+        ],
         "summary": "Current date in UTC (ISO 8601)",
         "responses": {
-          "200": { "description": "Current date", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DateResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/DateResponse" } } } }
+          "200": {
+            "description": "Current date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DateResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/DateResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/date/{timezone}": {
       "summary": "Current date in a given timezone",
       "parameters": [
-        { "name": "timezone", "in": "path", "required": true, "description": "IANA timezone name, e.g. `America/New_York`", "schema": { "type": "string", "example": "America/New_York" } }
+        {
+          "name": "timezone",
+          "in": "path",
+          "required": true,
+          "description": "IANA timezone name, e.g. `America/New_York`",
+          "schema": {
+            "type": "string",
+            "example": "America/New_York"
+          }
+        }
       ],
       "get": {
-        "tags": ["Info"],
+        "tags": [
+          "Info"
+        ],
         "summary": "Current date in the given timezone",
         "responses": {
-          "200": { "description": "Current date in given timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DateResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/DateResponse" } } } },
-          "404": { "description": "Unknown timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "Current date in given timezone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DateResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/DateResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown timezone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/time": {
       "summary": "Current time in UTC",
       "get": {
-        "tags": ["Info"],
+        "tags": [
+          "Info"
+        ],
         "summary": "Current time in UTC (ISO 8601)",
         "responses": {
-          "200": { "description": "Current time", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/TimeResponse" } } } }
+          "200": {
+            "description": "Current time",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/time/{timezone}": {
       "summary": "Current time in a given timezone",
       "parameters": [
-        { "name": "timezone", "in": "path", "required": true, "description": "IANA timezone name, e.g. `Europe/Berlin`", "schema": { "type": "string", "example": "Europe/Berlin" } }
+        {
+          "name": "timezone",
+          "in": "path",
+          "required": true,
+          "description": "IANA timezone name, e.g. `Europe/Berlin`",
+          "schema": {
+            "type": "string",
+            "example": "Europe/Berlin"
+          }
+        }
       ],
       "get": {
-        "tags": ["Info"],
+        "tags": [
+          "Info"
+        ],
         "summary": "Current time in the given timezone",
         "responses": {
-          "200": { "description": "Current time in given timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TimeResponse" } }, "application/xml": { "schema": { "$ref": "#/components/schemas/TimeResponse" } } } },
-          "404": { "description": "Unknown timezone", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "Current time in given timezone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown timezone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/image/{type}": {
       "summary": "Serve a demo image",
       "parameters": [
-        { "name": "type", "in": "path", "required": true, "description": "Image format: png, jpeg, jpg, gif, svg, webp", "schema": { "type": "string", "enum": ["png", "jpeg", "jpg", "gif", "svg", "webp"] } }
+        {
+          "name": "type",
+          "in": "path",
+          "required": true,
+          "description": "Image format: png, jpeg, jpg, gif, svg, webp",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "png",
+              "jpeg",
+              "jpg",
+              "gif",
+              "svg",
+              "webp"
+            ]
+          }
+        }
       ],
       "get": {
-        "tags": ["Utility"],
+        "tags": [
+          "Utility"
+        ],
         "summary": "Get the Leywn demo image",
         "responses": {
-          "200": { "description": "Image file", "content": { "image/png": {}, "image/jpeg": {}, "image/gif": {}, "image/svg+xml": {}, "image/webp": {} } },
-          "400": { "description": "Unsupported image type", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "Image file",
+            "content": {
+              "image/png": {},
+              "image/jpeg": {},
+              "image/gif": {},
+              "image/svg+xml": {},
+              "image/webp": {}
+            }
+          },
+          "400": {
+            "description": "Unsupported image type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/image/color/{rgb}": {
-      "summary": "Solid-colour PNG image (64×64)",
+      "summary": "Solid-colour PNG image (64\u00d764)",
       "parameters": [
-        { "name": "rgb", "in": "path", "required": true, "description": "Hex colour: 3, 6, or 8 chars", "schema": { "type": "string", "example": "1a2b3c" } }
+        {
+          "name": "rgb",
+          "in": "path",
+          "required": true,
+          "description": "Hex colour: 3, 6, or 8 chars",
+          "schema": {
+            "type": "string",
+            "example": "1a2b3c"
+          }
+        }
       ],
       "get": {
-        "tags": ["Utility"],
-        "summary": "64×64 solid-colour PNG",
+        "tags": [
+          "Utility"
+        ],
+        "summary": "64\u00d764 solid-colour PNG",
         "responses": {
-          "200": { "description": "PNG image", "content": { "image/png": {} } },
-          "400": { "description": "Invalid colour string", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "PNG image",
+            "content": {
+              "image/png": {}
+            }
+          },
+          "400": {
+            "description": "Invalid colour string",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/image/color/{rgb}/{width}/{height}": {
       "summary": "Solid-colour PNG image at custom size",
       "parameters": [
-        { "name": "rgb",    "in": "path", "required": true, "schema": { "type": "string", "example": "1a2b3c" } },
-        { "name": "width",  "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1, "maximum": 4096, "example": 200 } },
-        { "name": "height", "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1, "maximum": 4096, "example": 100 } }
+        {
+          "name": "rgb",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "1a2b3c"
+          }
+        },
+        {
+          "name": "width",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096,
+            "example": 200
+          }
+        },
+        {
+          "name": "height",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096,
+            "example": 100
+          }
+        }
       ],
       "get": {
-        "tags": ["Utility"],
+        "tags": [
+          "Utility"
+        ],
         "summary": "Custom-size solid-colour PNG",
         "responses": {
-          "200": { "description": "PNG image", "content": { "image/png": {} } },
-          "400": { "description": "Invalid colour or dimensions", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          "200": {
+            "description": "PNG image",
+            "content": {
+              "image/png": {}
+            }
+          },
+          "400": {
+            "description": "Invalid colour or dimensions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     },
-    "/format/json":          { "post": { "tags": ["Format"], "summary": "Pretty-print a JSON body",               "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Formatted JSON",  "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/yaml":          { "post": { "tags": ["Format"], "summary": "Pretty-format a YAML body",             "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Formatted YAML",   "content": { "application/yaml": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/xml":           { "post": { "tags": ["Format"], "summary": "Pretty-format an XML body",             "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Formatted XML",    "content": { "application/xml": {} } },  "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/camelCase":     { "post": { "tags": ["Format"], "summary": "Convert JSON keys to camelCase",         "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",  "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/kebab-case":    { "post": { "tags": ["Format"], "summary": "Convert JSON keys to kebab-case",        "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",  "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/snake-case":    { "post": { "tags": ["Format"], "summary": "Convert JSON keys to snake_case",        "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Converted JSON",  "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/format/toUpper":       { "post": { "tags": ["Format"], "summary": "Uppercase the body text",                "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Uppercased text", "content": { "text/plain": {} } } } } },
-    "/format/toLower":       { "post": { "tags": ["Format"], "summary": "Lowercase the body text",                "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Lowercased text", "content": { "text/plain": {} } } } } },
-    "/format/collapse-lines":{ "post": { "tags": ["Format"], "summary": "Collapse multiple blank lines into one", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Collapsed text",  "content": { "text/plain": {} } } } } },
-    "/encode/base64": { "post": { "tags": ["Codec"], "summary": "Base64-encode the body",              "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Base64 string", "content": { "text/plain": {} } } } } },
-    "/decode/base64": { "post": { "tags": ["Codec"], "summary": "Base64-decode the body",              "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded bytes", "content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/encode/hex":    { "post": { "tags": ["Codec"], "summary": "Hex-encode the body (lowercase)",     "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Hex string",    "content": { "text/plain": {} } } } } },
-    "/decode/hex":    { "post": { "tags": ["Codec"], "summary": "Hex-decode the body",                 "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded bytes", "content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/encode/url":    { "post": { "tags": ["Codec"], "summary": "URL-encode the body",                 "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Encoded string","content": { "text/plain": {} } } } } },
-    "/decode/url":    { "post": { "tags": ["Codec"], "summary": "URL-decode the body",                 "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded string","content": { "text/plain": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/encode/rot13":  { "post": { "tags": ["Codec"], "summary": "Apply ROT13 to the body",             "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "ROT13 string",  "content": { "text/plain": {} } } } } },
-    "/decode/rot13":  { "post": { "tags": ["Codec"], "summary": "Apply ROT13 to the body (symmetric)", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "ROT13 string",  "content": { "text/plain": {} } } } } },
-    "/decode/jwt":    { "post": { "tags": ["Codec"], "summary": "Decode JWT header and payload",       "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "Decoded JWT",   "content": { "application/json": {} } }, "422": { "$ref": "#/components/responses/unprocessable" } } } },
-    "/hash/sha256":   { "post": { "tags": ["Hash"], "summary": "SHA-256 digest of the body", "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "SHA-256 hex digest", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HashResponse" }, "example": { "hash": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824", "algorithm": "sha256", "input_bytes": 5 } } } } } } },
-    "/hash/md5":      { "post": { "tags": ["Hash"], "summary": "MD5 digest of the body",    "requestBody": { "$ref": "#/components/requestBodies/PlainBody" }, "responses": { "200": { "description": "MD5 hex digest",    "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HashResponse" }, "example": { "hash": "5d41402abc4b2a76b9719d911017c592", "algorithm": "md5", "input_bytes": 5 } } } } } } }
+    "/format/json": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Pretty-print a JSON body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Formatted JSON",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/format/yaml": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Pretty-format a YAML body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Formatted YAML",
+            "content": {
+              "application/yaml": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/format/xml": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Pretty-format an XML body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Formatted XML",
+            "content": {
+              "application/xml": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/format/camelCase": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Convert JSON keys to camelCase",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Converted JSON",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/format/kebab-case": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Convert JSON keys to kebab-case",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Converted JSON",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/format/snake-case": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Convert JSON keys to snake_case",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Converted JSON",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/format/toUpper": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Uppercase the body text",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Uppercased text",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/format/toLower": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Lowercase the body text",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Lowercased text",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/format/collapse-lines": {
+      "post": {
+        "tags": [
+          "Format"
+        ],
+        "summary": "Collapse multiple blank lines into one",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Collapsed text",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/encode/base64": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "Base64-encode the body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Base64 string",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/decode/base64": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "Base64-decode the body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded bytes",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/encode/hex": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "Hex-encode the body (lowercase)",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Hex string",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/decode/hex": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "Hex-decode the body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded bytes",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/encode/url": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "URL-encode the body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Encoded string",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/decode/url": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "URL-decode the body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded string",
+            "content": {
+              "text/plain": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/encode/rot13": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "Apply ROT13 to the body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "ROT13 string",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/decode/rot13": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "Apply ROT13 to the body (symmetric)",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "ROT13 string",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/decode/jwt": {
+      "post": {
+        "tags": [
+          "Codec"
+        ],
+        "summary": "Decode JWT header and payload",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded JWT",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
+          }
+        }
+      }
+    },
+    "/hash/sha256": {
+      "post": {
+        "tags": [
+          "Hash"
+        ],
+        "summary": "SHA-256 digest of the body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "SHA-256 hex digest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HashResponse"
+                },
+                "example": {
+                  "hash": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+                  "algorithm": "sha256",
+                  "input_bytes": 5
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hash/md5": {
+      "post": {
+        "tags": [
+          "Hash"
+        ],
+        "summary": "MD5 digest of the body",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlainBody"
+        },
+        "responses": {
+          "200": {
+            "description": "MD5 hex digest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HashResponse"
+                },
+                "example": {
+                  "hash": "5d41402abc4b2a76b9719d911017c592",
+                  "algorithm": "md5",
+                  "input_bytes": 5
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chaos-engineering": {
+      "summary": "Chaos engineering \u2014 echo with random faults",
+      "description": "Returns an echo response, but randomly injects errors, mangled JSON, or latency.\n\nDefaults: `error_percentage=10`, `mangled_percentage=10`, `latency_percentage=20`, `maximum_latency=2000`.\n\nOverride per-request via `X-Chaos-*` headers.",
+      "parameters": [
+        {
+          "name": "x-chaos-error-percentage",
+          "in": "header",
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 10
+          }
+        },
+        {
+          "name": "x-chaos-mangled-percentage",
+          "in": "header",
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 10
+          }
+        },
+        {
+          "name": "x-chaos-latency-percentage",
+          "in": "header",
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 20
+          }
+        },
+        {
+          "name": "x-chaos-maximum-latency",
+          "in": "header",
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30000,
+            "example": 2000
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (GET)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (POST)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (PUT)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (PATCH)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (DELETE)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      }
+    },
+    "/chaos-engineering/{error_percentage}/{mangled_percentage}/{latency_percentage}/{maximum_latency}": {
+      "summary": "Chaos engineering with explicit parameters",
+      "description": "Same as `/chaos-engineering` but with explicit fault parameters in the path.",
+      "parameters": [
+        {
+          "name": "error_percentage",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        {
+          "name": "mangled_percentage",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        {
+          "name": "latency_percentage",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        {
+          "name": "maximum_latency",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30000
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (GET)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (POST)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (PUT)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (PATCH)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Chaos"
+        ],
+        "summary": "Chaos engineering (DELETE)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/chaosok"
+          },
+          "400": {
+            "$ref": "#/components/responses/badrequest"
+          },
+          "default": {
+            "$ref": "#/components/responses/chaoserror"
+          }
+        }
+      }
+    }
   },
   "components": {
     "securitySchemes": {
-      "basicAuth": { "type": "http", "scheme": "basic" },
-      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
     },
     "schemas": {
       "HealthResponse": {
         "type": "object",
         "properties": {
-          "status":          { "type": "string", "example": "ok" },
-          "version":         { "type": "string", "example": "0.6.0" },
-          "uptime_seconds":  { "type": "integer", "example": 3742 }
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "version": {
+            "type": "string",
+            "example": "0.6.0"
+          },
+          "uptime_seconds": {
+            "type": "integer",
+            "example": 3742
+          }
         }
       },
       "DelayResponse": {
         "type": "object",
         "properties": {
-          "requested_ms": { "type": "integer", "example": 500 },
-          "delayed_ms":   { "type": "integer", "example": 500 }
+          "requested_ms": {
+            "type": "integer",
+            "example": 500
+          },
+          "delayed_ms": {
+            "type": "integer",
+            "example": 500
+          }
         }
       },
       "ColorResponse": {
         "type": "object",
         "properties": {
-          "hex": { "type": "string", "example": "#3a7fc1" },
-          "r":   { "type": "integer", "minimum": 0, "maximum": 255, "example": 58 },
-          "g":   { "type": "integer", "minimum": 0, "maximum": 255, "example": 127 },
-          "b":   { "type": "integer", "minimum": 0, "maximum": 255, "example": 193 }
+          "hex": {
+            "type": "string",
+            "example": "#3a7fc1"
+          },
+          "r": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "example": 58
+          },
+          "g": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "example": 127
+          },
+          "b": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "example": 193
+          }
         }
       },
       "HashResponse": {
         "type": "object",
         "properties": {
-          "hash":        { "type": "string", "example": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824" },
-          "algorithm":   { "type": "string", "example": "sha256" },
-          "input_bytes": { "type": "integer", "example": 5 }
+          "hash": {
+            "type": "string",
+            "example": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+          },
+          "algorithm": {
+            "type": "string",
+            "example": "sha256"
+          },
+          "input_bytes": {
+            "type": "integer",
+            "example": 5
+          }
         }
       },
       "EchoBody": {
         "type": "object",
         "properties": {
-          "present":   { "type": "boolean" },
-          "bytes":     { "type": "integer" },
-          "truncated": { "type": "boolean" },
-          "utf8":      { "type": "boolean", "nullable": true },
-          "included":  { "type": "boolean" },
-          "body":      { "type": "string", "nullable": true },
-          "reason":    { "type": "string", "nullable": true }
+          "present": {
+            "type": "boolean"
+          },
+          "bytes": {
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "utf8": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "included": {
+            "type": "boolean"
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "EchoResponse": {
         "type": "object",
         "properties": {
-          "method":            { "type": "string", "example": "GET" },
-          "scheme":            { "type": "string", "example": "http" },
-          "host":              { "type": "string", "example": "localhost" },
-          "port":              { "type": "integer", "example": 4000 },
-          "path":              { "type": "string", "example": "/echo" },
-          "path_info":         { "type": "array", "items": { "type": "string" } },
-          "query_string":      { "type": "string", "example": "foo=bar" },
-          "query_params":      { "type": "object", "additionalProperties": true },
-          "headers":           { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
-          "remote_ip":         { "type": "string", "example": "127.0.0.1" },
-          "body":              { "$ref": "#/components/schemas/EchoBody" },
-          "timestamp_unix_ms": { "type": "integer", "example": 1700000000000 }
+          "method": {
+            "type": "string",
+            "example": "GET"
+          },
+          "scheme": {
+            "type": "string",
+            "example": "http"
+          },
+          "host": {
+            "type": "string",
+            "example": "localhost"
+          },
+          "port": {
+            "type": "integer",
+            "example": 4000
+          },
+          "path": {
+            "type": "string",
+            "example": "/echo"
+          },
+          "path_info": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "query_string": {
+            "type": "string",
+            "example": "foo=bar"
+          },
+          "query_params": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "remote_ip": {
+            "type": "string",
+            "example": "127.0.0.1"
+          },
+          "body": {
+            "$ref": "#/components/schemas/EchoBody"
+          },
+          "timestamp_unix_ms": {
+            "type": "integer",
+            "example": 1700000000000
+          }
         }
       },
       "AuthResponse": {
         "type": "object",
         "properties": {
-          "authenticated": { "type": "boolean", "example": true },
-          "auth_type":     { "type": "string", "example": "basic-auth" },
-          "username":      { "type": "string", "example": "basic", "description": "Present for basic-auth" },
-          "header":        { "type": "string", "example": "apikey", "description": "Present for api-key" },
-          "jwt_header":    { "type": "object", "additionalProperties": true, "description": "Present for jwt" },
-          "claims":        { "type": "object", "additionalProperties": true, "description": "Present for jwt" },
-          "client_dn":     { "type": "string", "description": "Present for mtls" },
-          "client_ca":     { "type": "string", "description": "Present for mtls" }
+          "authenticated": {
+            "type": "boolean",
+            "example": true
+          },
+          "auth_type": {
+            "type": "string",
+            "example": "basic-auth"
+          },
+          "username": {
+            "type": "string",
+            "example": "basic",
+            "description": "Present for basic-auth"
+          },
+          "header": {
+            "type": "string",
+            "example": "apikey",
+            "description": "Present for api-key"
+          },
+          "jwt_header": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Present for jwt"
+          },
+          "claims": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Present for jwt"
+          },
+          "client_dn": {
+            "type": "string",
+            "description": "Present for mtls"
+          },
+          "client_ca": {
+            "type": "string",
+            "description": "Present for mtls"
+          }
         }
       },
       "JwtExchangeResponse": {
         "type": "object",
         "properties": {
-          "authenticated":  { "type": "boolean", "example": true },
-          "auth_type":      { "type": "string", "example": "jwt" },
-          "exchanged_token":{ "type": "string", "description": "HS256-signed JWT issued by Leywn" },
-          "claims":         { "type": "object", "additionalProperties": true }
+          "authenticated": {
+            "type": "boolean",
+            "example": true
+          },
+          "auth_type": {
+            "type": "string",
+            "example": "jwt"
+          },
+          "exchanged_token": {
+            "type": "string",
+            "description": "HS256-signed JWT issued by Leywn"
+          },
+          "claims": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "IpResponse": {
         "type": "object",
         "properties": {
-          "ipv4": { "type": "string", "nullable": true, "example": "203.0.113.42" },
-          "ipv6": { "type": "string", "nullable": true, "example": null }
+          "ipv4": {
+            "type": "string",
+            "nullable": true,
+            "example": "203.0.113.42"
+          },
+          "ipv6": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          }
         }
       },
       "DateResponse": {
         "type": "object",
         "properties": {
-          "date":     { "type": "string", "format": "date", "example": "2024-11-14" },
-          "timezone": { "type": "string", "example": "UTC" }
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2024-11-14"
+          },
+          "timezone": {
+            "type": "string",
+            "example": "UTC"
+          }
         }
       },
       "TimeResponse": {
         "type": "object",
         "properties": {
-          "time":     { "type": "string", "format": "date-time", "example": "2024-11-14T15:30:00Z" },
-          "timezone": { "type": "string", "example": "UTC" }
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-11-14T15:30:00Z"
+          },
+          "timezone": {
+            "type": "string",
+            "example": "UTC"
+          }
         }
       },
       "RandomAll": {
         "type": "object",
         "properties": {
-          "int":        { "type": "integer" },
-          "uint":       { "type": "integer", "minimum": 0 },
-          "uuid":       { "type": "string" },
-          "guuid":      { "type": "string" },
-          "lorem_ipsum":{ "type": "string" },
-          "name":       { "type": "string" },
-          "email":      { "type": "string" },
-          "color":      { "$ref": "#/components/schemas/ColorResponse" }
+          "int": {
+            "type": "integer"
+          },
+          "uint": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "guuid": {
+            "type": "string"
+          },
+          "lorem_ipsum": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "color": {
+            "$ref": "#/components/schemas/ColorResponse"
+          }
         }
       },
       "LoremIpsum": {
         "type": "object",
         "properties": {
-          "paragraphs": { "type": "array", "items": { "type": "string" } }
+          "paragraphs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "Error": {
         "type": "object",
         "properties": {
-          "error": { "type": "string" }
+          "error": {
+            "type": "string"
+          }
         }
       }
     },
@@ -678,7 +3595,16 @@
       "PlainBody": {
         "description": "Raw text or JSON body to transform",
         "required": false,
-        "content": { "text/plain": { "schema": { "type": "string" } }, "application/json": { "schema": {} } }
+        "content": {
+          "text/plain": {
+            "schema": {
+              "type": "string"
+            }
+          },
+          "application/json": {
+            "schema": {}
+          }
+        }
       }
     },
     "responses": {
@@ -689,8 +3615,14 @@
             "schema": {
               "type": "object",
               "properties": {
-                "authenticated": { "type": "boolean", "example": false },
-                "error": { "type": "string", "example": "unauthorized" }
+                "authenticated": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error": {
+                  "type": "string",
+                  "example": "unauthorized"
+                }
               }
             }
           }
@@ -698,11 +3630,36 @@
       },
       "unprocessable": {
         "description": "Input could not be parsed / transformed",
-        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
       },
       "badrequest": {
         "description": "Invalid input",
-        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "chaosok": {
+        "description": "Echo response (no fault injected)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "chaoserror": {
+        "description": "Injected error status code"
       }
     }
   }

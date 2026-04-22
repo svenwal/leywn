@@ -148,6 +148,9 @@ defmodule Leywn.Auth do
           [] ->
             {:error, "missing certificate header #{header_name}"}
 
+          [pem | _] when byte_size(pem) > 16_384 ->
+            {:error, "certificate header too large"}
+
           [pem | _] ->
             pem
             |> URI.decode()

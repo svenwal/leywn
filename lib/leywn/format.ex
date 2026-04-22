@@ -13,13 +13,23 @@ defmodule Leywn.Format do
     end
   end
 
-  @doc "Pretty-format a YAML body."
+  @yaml_max_bytes 16_384
+
+  @doc "Pretty-format a YAML body (max #{@yaml_max_bytes} bytes)."
   def yaml(body) do
-    case YamlElixir.read_from_string(body) do
-      {:ok, data} ->
-        {:ok, "application/yaml", Leywn.YAML.encode(data)}
-      {:error, _} ->
-        {:error, "invalid YAML input"}
+    if byte_size(body) > @yaml_max_bytes do
+      {:error, "YAML input too large (max #{@yaml_max_bytes} bytes)"}
+    else
+      try do
+        case YamlElixir.read_from_string(body) do
+          {:ok, data} -> {:ok, "application/yaml", Leywn.YAML.encode(data)}
+          {:error, _} -> {:error, "invalid YAML input"}
+        end
+      rescue
+        _ -> {:error, "invalid YAML input"}
+      catch
+        _, _ -> {:error, "invalid YAML input"}
+      end
     end
   end
 

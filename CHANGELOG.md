@@ -4,6 +4,18 @@ All notable changes to Leywn are documented in this file.
 
 ## [1.0.0-beta4] - 2026-04-22
 
+  ### Security
+  - **H1 — PNG pixel budget** — `GET /image/color/{rgb}/{w}/{h}` now rejects requests whose total pixel count exceeds 1 048 576 (1 MP); previously `4096×4096` allocated ~50 MB per request
+  - **H2 — YAML parsing DoS** — `POST /format/yaml` now rejects bodies larger than 16 384 bytes before parsing, and wraps `YamlElixir.read_from_string/1` in a `try/catch` to survive pathological anchor-expansion inputs
+  - **M1 — CORS header injection** — `LEYWN_CORS_ORIGIN` value is stripped of CR/LF before being placed into the `Access-Control-Allow-Origin` response header
+  - **M2 — Host header injection** — the `Host` request header is now validated against `[a-zA-Z0-9._-]+(:\d+)?` before being reflected into OpenAPI `servers` or the Insomnia button URL; invalid values fall back to `localhost`
+  - **M3 — Internal error leakage** — `inspect(reason)` removed from the body-read error path in `body.ex` and the format/codec handler in `router.ex`; both now return generic opaque error strings
+  - **M4 — Connection exhaustion** — Cowboy `max_connections` set to 1 000 on both HTTP and HTTPS listeners, capping the total number of concurrent connections
+  - **Low — mTLS PEM header size** — certificate header value capped at 16 384 bytes before any parsing; rejects oversized values with a 401
+
+  ### Added
+  - **`ANY /chaos-engineering`** — echo response with configurable random fault injection: error codes (random 4xx/5xx), mangled JSON (truncated mid-stream), and latency. Defaults: `error_percentage=10`, `mangled_percentage=10`, `latency_percentage=20`, `maximum_latency=2000`. Parameters accepted as path segments (`/chaos-engineering/{ep}/{mp}/{lp}/{ml}`) or as `X-Chaos-*` request headers. Response always includes a `_chaos` meta field with applied parameters and actual latency.
+
   ### Fixed
   - **`/delay/{ms}` no longer silently clamps** — requests with `ms > 30000` now return `400` with `{error: "delay_too_large", maximum_ms: 30000, provided_ms: n}`
   - **`/stream/{n}` no longer silently clamps** — requests with `n > 100` now return `400` with `{error: "count_too_large", maximum: 100, provided: n}`

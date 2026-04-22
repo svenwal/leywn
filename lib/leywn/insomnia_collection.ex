@@ -28,6 +28,7 @@ defmodule Leywn.InsomniaCollection do
     [workspace(), environment(base_url)] ++
       folder_utility() ++
       folder_echo() ++
+      folder_chaos() ++
       folder_auth() ++
       folder_random() ++
       folder_info() ++
@@ -103,6 +104,36 @@ defmodule Leywn.InsomniaCollection do
         req("req_echo_sub",   "GET /echo/some/sub/path",    "GET",    "/echo/some/sub/path", "fld_echo"),
         req("req_anything",   "GET /anything",              "GET",    "/anything",     "fld_echo"),
         req("req_anything_s", "GET /anything/foo/bar",      "GET",    "/anything/foo/bar", "fld_echo")
+      ]
+  end
+
+  # ---------------------------------------------------------------------------
+  # Chaos Engineering
+  # ---------------------------------------------------------------------------
+
+  defp folder_chaos do
+    [folder("fld_chaos", "Chaos Engineering")] ++
+      [
+        req("req_chaos_default",  "ANY /chaos-engineering (defaults)",           "GET",  "/chaos-engineering",             "fld_chaos",
+            description: "Defaults: 10% error, 10% mangled, 20% latency, max 2000 ms"),
+        req("req_chaos_headers",  "ANY /chaos-engineering (via headers)",        "GET",  "/chaos-engineering",             "fld_chaos",
+            headers: [
+              header("x-chaos-error-percentage",   "25"),
+              header("x-chaos-mangled-percentage",  "25"),
+              header("x-chaos-latency-percentage",  "50"),
+              header("x-chaos-maximum-latency",    "3000")
+            ],
+            description: "Chaos params supplied as X-Chaos-* headers"),
+        req("req_chaos_path",     "ANY /chaos-engineering/25/25/50/3000",        "GET",  "/chaos-engineering/25/25/50/3000", "fld_chaos",
+            description: "error 25%, mangled 25%, latency 50%, max 3000 ms"),
+        req("req_chaos_high",     "ANY /chaos-engineering/50/50/100/5000",       "GET",  "/chaos-engineering/50/50/100/5000", "fld_chaos",
+            description: "High chaos: 50% error, 50% mangled, always latency up to 5 s"),
+        req("req_chaos_latency",  "ANY /chaos-engineering/0/0/100/2000",         "GET",  "/chaos-engineering/0/0/100/2000",   "fld_chaos",
+            description: "Latency only — no errors or mangling"),
+        req("req_chaos_errors",   "ANY /chaos-engineering/100/0/0/0",            "GET",  "/chaos-engineering/100/0/0/0",      "fld_chaos",
+            description: "Always inject an error code — no latency or mangling"),
+        req("req_chaos_mangled",  "ANY /chaos-engineering/0/100/0/0",            "GET",  "/chaos-engineering/0/100/0/0",      "fld_chaos",
+            description: "Always return a mangled response — no latency or errors")
       ]
   end
 

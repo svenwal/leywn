@@ -35,7 +35,7 @@ defmodule Leywn.Router do
     # same origin the page was loaded from. This prevents mixed-content blocks and
     # CORS errors regardless of how LEYWN_EXTERNAL_* URLs are configured.
     scheme = if conn.scheme == :https, do: "https", else: "http"
-    host = Plug.Conn.get_req_header(conn, "host") |> List.first() || "localhost:#{port}"
+    host = safe_host(conn, "localhost:#{port}")
     this_server = %{"url" => "#{scheme}://#{host}", "description" => "This server"}
 
     extra_servers =
@@ -122,6 +122,32 @@ defmodule Leywn.Router do
     {body_info, conn} = Leywn.Body.read(conn, max_body)
     data = Leywn.Echo.build(conn, body_info)
     Leywn.Respond.send(conn, 200, data, root: "echo")
+  end
+
+  # ---- Chaos Engineering -----------------------------------------------------
+
+  match "/chaos-engineering" do
+    conn = Plug.Conn.fetch_query_params(conn)
+    max_body = Application.get_env(:leywn, :echo_max_body_bytes, 65_536)
+    {body_info, conn} = Leywn.Body.read(conn, max_body)
+    echo_data = Leywn.Echo.build(conn, body_info)
+    params = Leywn.Chaos.from_headers(conn)
+    Leywn.Chaos.apply_chaos(conn, params, echo_data)
+  end
+
+  match "/chaos-engineering/:error_pct/:mangled_pct/:latency_pct/:max_latency" do
+    conn = Plug.Conn.fetch_query_params(conn)
+    max_body = Application.get_env(:leywn, :echo_max_body_bytes, 65_536)
+    {body_info, conn} = Leywn.Body.read(conn, max_body)
+    echo_data = Leywn.Echo.build(conn, body_info)
+
+    case Leywn.Chaos.from_path(error_pct, mangled_pct, latency_pct, max_latency) do
+      {:ok, params} ->
+        Leywn.Chaos.apply_chaos(conn, params, echo_data)
+      {:error, field, msg} ->
+        Leywn.Respond.send(conn, 400,
+          %{error: "invalid_chaos_params", field: field, detail: msg}, root: "error")
+    end
   end
 
   # ---- Delay -----------------------------------------------------------------
@@ -443,8 +469,8 @@ defmodule Leywn.Router do
       {:more, _partial, conn} ->
         Leywn.Respond.send(conn, 413, %{error: "payload_too_large"}, root: "error")
 
-      {:error, reason} ->
-        Leywn.Respond.send(conn, 400, %{error: inspect(reason)}, root: "error")
+      {:error, _reason} ->
+        Leywn.Respond.send(conn, 400, %{error: "could_not_read_body"}, root: "error")
     end
   end
 
@@ -452,6 +478,14 @@ defmodule Leywn.Router do
 
   defp set_server_header(conn, _opts) do
     Plug.Conn.put_resp_header(conn, "server", "leywn")
+  end
+
+  # Sanitise the Host header before embedding it in URLs or JSON responses.
+  # Accepts only hostname[:port] — rejects anything containing path separators,
+  # whitespace, or other characters that could enable header/URL injection.
+  defp safe_host(conn, default) do
+    raw = Plug.Conn.get_req_header(conn, "host") |> List.first() || default
+    if Regex.match?(~r/\A[a-zA-Z0-9._\-]+(:\d+)?\z/, raw), do: raw, else: default
   end
 
   defp collection_url(conn) do
@@ -465,7 +499,7 @@ defmodule Leywn.Router do
       System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
       (fn ->
         scheme = if conn.scheme == :https, do: "https", else: "http"
-        host = Plug.Conn.get_req_header(conn, "host") |> List.first() || "localhost:#{port}"
+        host = safe_host(conn, "localhost:#{port}")
         "#{scheme}://#{host}"
       end).()
     base <> "/request-collection"

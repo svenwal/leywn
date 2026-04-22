@@ -11,8 +11,8 @@ defmodule Leywn.Body do
       {:more, partial, conn} ->
         {body_info(partial, truncated: true), conn}
 
-      {:error, reason} ->
-        {%{present: false, bytes: 0, truncated: false, included: false, reason: inspect(reason)}, conn}
+      {:error, _reason} ->
+        {%{present: false, bytes: 0, truncated: false, included: false, reason: "read_error"}, conn}
     end
   end
 

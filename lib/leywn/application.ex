@@ -15,9 +15,13 @@ defmodule Leywn.Application do
     tls_port = Application.get_env(:leywn, :tls_port, 4443)
     tls_opts = Leywn.MTLS.init()
 
+    max_connections = 1_000
+
     children = [
-      {Plug.Cowboy, scheme: :http, plug: Leywn.Router, options: [port: port]},
-      {Plug.Cowboy, scheme: :https, plug: Leywn.Router, options: [port: tls_port] ++ tls_opts}
+      {Plug.Cowboy, scheme: :http,  plug: Leywn.Router,
+        options: [port: port,     transport_options: [max_connections: max_connections]]},
+      {Plug.Cowboy, scheme: :https, plug: Leywn.Router,
+        options: [port: tls_port, transport_options: [max_connections: max_connections]] ++ tls_opts}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
