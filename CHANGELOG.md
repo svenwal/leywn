@@ -15,6 +15,10 @@ All notable changes to Leywn are documented in this file.
 
   ### Added
   - **`ANY /chaos-engineering`** — echo response with configurable random fault injection: error codes (random 4xx/5xx), mangled JSON (truncated mid-stream), and latency. Defaults: `error_percentage=10`, `mangled_percentage=10`, `latency_percentage=20`, `maximum_latency=2000`. Parameters accepted as path segments (`/chaos-engineering/{ep}/{mp}/{lp}/{ml}`) or as `X-Chaos-*` request headers. Response always includes a `_chaos` meta field with applied parameters and actual latency.
+  - **LICENSE** — BSD 2-Clause license added at repository root
+  - **GitHub Actions CI** — `.github/workflows/ci.yml` runs `mix format --check-formatted` and the full test suite on every push/PR via the Docker `test` stage
+  - **`.dockerignore`** — `_build/`, `deps/`, `.git/` excluded from the Docker build context for faster builds
+  - **CI badge** — `README.md` now shows a live CI status badge and a Docker Hub pulls badge
 
   ### Fixed
   - **`/delay/{ms}` no longer silently clamps** — requests with `ms > 30000` now return `400` with `{error: "delay_too_large", maximum_ms: 30000, provided_ms: n}`
@@ -24,7 +28,11 @@ All notable changes to Leywn are documented in this file.
   - **Insomnia "Run" button fetching wrong URL** — `collection_url` and `InsomniaCollection.build/1` now prefer `LEYWN_EXTERNAL_HTTPS_URL` over `LEYWN_EXTERNAL_HTTP_URL`, falling back to the request-derived URL; prevents Insomnia fetch failures when only the HTTP external URL was configured on an HTTPS-only server
   - **Custom API key headers blocked by CORS preflight** — `Access-Control-Allow-Headers` changed from an explicit allowlist (`Content-Type, Accept, Authorization`) to `*`; previously any request carrying a non-listed header (e.g. `apikey`, `X-Token`) was silently rejected by the browser before reaching the server
 
+  ### Removed
+  - **Mix scaffold files** — `lib/leywn.ex` (`hello/0`) and the corresponding scaffold test removed
+
   ### Changed
+  - **Docker image references** — `README.md` now links to `svenwal/leywn` on Docker Hub
   - Version bumped to `1.0.0-beta4` in `mix.exs` and `openapi.json`
 
 ---
