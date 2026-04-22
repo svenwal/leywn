@@ -942,4 +942,10 @@ Contributions are welcome. Please follow these guidelines:
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+BSD 2-Clause — see [LICENSE](LICENSE) for details.
+
+---
+
+## AI Disclaimer
+
+This project was created with the assistance of AI (Claude by Anthropic). All code has been reviewed and is provided as-is under the terms of the BSD 2-Clause license.
