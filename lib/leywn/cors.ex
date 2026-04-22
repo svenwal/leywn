@@ -10,7 +10,7 @@ defmodule Leywn.CORS do
       conn
       |> put_resp_header("access-control-allow-origin", origin)
       |> put_resp_header("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-      |> put_resp_header("access-control-allow-headers", "Content-Type, Accept, Authorization")
+      |> put_resp_header("access-control-allow-headers", "*")
       |> put_resp_header("access-control-max-age", "86400")
 
     if conn.method == "OPTIONS" do

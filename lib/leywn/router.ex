@@ -17,31 +17,43 @@ defmodule Leywn.Router do
     else
       conn
       |> Plug.Conn.put_resp_content_type("text/html")
-      |> Plug.Conn.send_resp(200, home_html(collection_url()))
+      |> Plug.Conn.send_resp(200, home_html(collection_url(conn)))
     end
   end
 
   get "/docs" do
     conn
     |> Plug.Conn.put_resp_content_type("text/html")
-    |> Plug.Conn.send_resp(200, home_html(collection_url()))
+    |> Plug.Conn.send_resp(200, home_html(collection_url(conn)))
   end
 
   get "/openapi.json" do
     port = Application.get_env(:leywn, :port, 4000)
     tls_port = Application.get_env(:leywn, :tls_port, 4443)
 
-    http_url = System.get_env("LEYWN_EXTERNAL_HTTP_URL") || "http://localhost:#{port}"
-    https_url = System.get_env("LEYWN_EXTERNAL_HTTPS_URL") || "https://localhost:#{tls_port}"
+    # Always put "this server" first so Swagger UI's "Try it out" calls back to the
+    # same origin the page was loaded from. This prevents mixed-content blocks and
+    # CORS errors regardless of how LEYWN_EXTERNAL_* URLs are configured.
+    scheme = if conn.scheme == :https, do: "https", else: "http"
+    host = Plug.Conn.get_req_header(conn, "host") |> List.first() || "localhost:#{port}"
+    this_server = %{"url" => "#{scheme}://#{host}", "description" => "This server"}
+
+    extra_servers =
+      [
+        System.get_env("LEYWN_EXTERNAL_HTTP_URL") &&
+          %{"url" => System.get_env("LEYWN_EXTERNAL_HTTP_URL"), "description" => "HTTP"},
+        System.get_env("LEYWN_EXTERNAL_HTTPS_URL") &&
+          %{"url" => System.get_env("LEYWN_EXTERNAL_HTTPS_URL"), "description" => "HTTPS / mTLS"}
+      ]
+      |> Enum.reject(&is_nil/1)
+
+    servers = [this_server | extra_servers]
 
     spec =
       Application.app_dir(:leywn, "priv/openapi.json")
       |> File.read!()
       |> Jason.decode!()
-      |> Map.put("servers", [
-        %{"url" => http_url, "description" => "HTTP"},
-        %{"url" => https_url, "description" => "HTTPS / mTLS"}
-      ])
+      |> Map.put("servers", servers)
 
     conn
     |> Plug.Conn.put_resp_content_type("application/json")
@@ -116,10 +128,12 @@ defmodule Leywn.Router do
 
   match "/delay/:ms" do
     case Integer.parse(ms) do
-      {delay, ""} when delay >= 0 ->
-        clamped = min(delay, 30_000)
-        :timer.sleep(clamped)
-        Leywn.Respond.send(conn, 200, %{requested_ms: delay, delayed_ms: clamped}, root: "delay")
+      {delay, ""} when delay >= 0 and delay <= 30_000 ->
+        :timer.sleep(delay)
+        Leywn.Respond.send(conn, 200, %{requested_ms: delay, delayed_ms: delay}, root: "delay")
+
+      {delay, ""} when delay > 30_000 ->
+        Leywn.Respond.send(conn, 400, %{error: "delay_too_large", maximum_ms: 30_000, provided_ms: delay}, root: "error")
 
       _ ->
         Leywn.Respond.send(conn, 400, %{error: "invalid_delay", provided: ms}, root: "error")
@@ -130,19 +144,17 @@ defmodule Leywn.Router do
 
   get "/stream/:n" do
     case Integer.parse(n) do
-      {count, ""} when count >= 1 ->
-        total = min(count, 100)
-
+      {count, ""} when count >= 1 and count <= 100 ->
         conn =
           conn
           |> Plug.Conn.put_resp_content_type("application/x-ndjson")
           |> Plug.Conn.send_chunked(200)
 
-        Enum.reduce_while(1..total, conn, fn i, conn ->
+        Enum.reduce_while(1..count, conn, fn i, conn ->
           line =
             Jason.encode!(%{
               line: i,
-              total: total,
+              total: count,
               timestamp_unix_ms: System.os_time(:millisecond)
             })
 
@@ -151,6 +163,9 @@ defmodule Leywn.Router do
             {:error, _} -> {:halt, conn}
           end
         end)
+
+      {count, ""} when count > 100 ->
+        Leywn.Respond.send(conn, 400, %{error: "count_too_large", maximum: 100, provided: count}, root: "error")
 
       _ ->
         Leywn.Respond.send(conn, 400, %{error: "invalid_count", provided: n}, root: "error")
@@ -210,9 +225,11 @@ defmodule Leywn.Router do
 
   get "/random/lorem-ipsum/:count" do
     case Integer.parse(count) do
-      {n, ""} when n >= 1 ->
+      {n, ""} when n >= 1 and n <= 32 ->
         paragraphs = Leywn.Random.lorem_ipsum(n)
         Leywn.Respond.send(conn, 200, %{paragraphs: paragraphs}, root: "lorem_ipsum")
+      {n, ""} when n > 32 ->
+        Leywn.Respond.send(conn, 400, %{error: "count_too_large", maximum: 32, provided: n}, root: "error")
       _ ->
         Leywn.Respond.send(conn, 400, %{error: "invalid_count", provided: count}, root: "error")
     end
@@ -437,9 +454,20 @@ defmodule Leywn.Router do
     Plug.Conn.put_resp_header(conn, "server", "leywn")
   end
 
-  defp collection_url do
+  defp collection_url(conn) do
     port = Application.get_env(:leywn, :port, 4000)
-    base = System.get_env("LEYWN_EXTERNAL_HTTP_URL") || "http://localhost:#{port}"
+    # Prefer HTTPS external URL, then HTTP external URL, then derive from the request.
+    # The Insomnia button must point to a URL Insomnia can actually fetch — an HTTP URL
+    # on an HTTPS-only server will fail. Request-derived URL always matches the scheme
+    # the user is actually on.
+    base =
+      System.get_env("LEYWN_EXTERNAL_HTTPS_URL") ||
+      System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
+      (fn ->
+        scheme = if conn.scheme == :https, do: "https", else: "http"
+        host = Plug.Conn.get_req_header(conn, "host") |> List.first() || "localhost:#{port}"
+        "#{scheme}://#{host}"
+      end).()
     base <> "/request-collection"
   end
 

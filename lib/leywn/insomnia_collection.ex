@@ -7,7 +7,9 @@ defmodule Leywn.InsomniaCollection do
 
   def build(port) do
     base_url =
-      System.get_env("LEYWN_EXTERNAL_HTTP_URL") || "http://localhost:#{port}"
+      System.get_env("LEYWN_EXTERNAL_HTTPS_URL") ||
+      System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
+      "http://localhost:#{port}"
 
     %{
       "_type" => "export",

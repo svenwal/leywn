@@ -39,12 +39,20 @@ defmodule Leywn.DelayStreamHealthTest do
     assert elapsed >= 10
   end
 
-  test "/delay clamps to 30 000 ms maximum" do
+  test "/delay returns 400 for value exceeding 30 000 ms maximum" do
     conn = get("/delay/999999")
+    assert conn.status == 400
+    {:ok, body} = Jason.decode(conn.resp_body)
+    assert body["error"] == "delay_too_large"
+    assert body["maximum_ms"] == 30_000
+    assert body["provided_ms"] == 999_999
+  end
+
+  test "/delay/30000 is accepted (at the limit)" do
+    conn = get("/delay/30000")
     assert conn.status == 200
     {:ok, body} = Jason.decode(conn.resp_body)
     assert body["delayed_ms"] == 30_000
-    assert body["requested_ms"] == 999_999
   end
 
   test "/delay returns 400 for non-integer" do
@@ -73,8 +81,17 @@ defmodule Leywn.DelayStreamHealthTest do
     end)
   end
 
-  test "/stream clamps to 100 lines maximum" do
+  test "/stream returns 400 for value exceeding 100 lines maximum" do
     conn = get("/stream/200")
+    assert conn.status == 400
+    {:ok, body} = Jason.decode(conn.resp_body)
+    assert body["error"] == "count_too_large"
+    assert body["maximum"] == 100
+    assert body["provided"] == 200
+  end
+
+  test "/stream/100 is accepted (at the limit)" do
+    conn = get("/stream/100")
     assert conn.status == 200
     lines = conn.resp_body |> String.split("\n", trim: true)
     assert length(lines) == 100

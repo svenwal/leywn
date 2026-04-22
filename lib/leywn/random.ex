@@ -48,10 +48,9 @@ defmodule Leywn.Random do
 
   # ── Lorem ipsum ──────────────────────────────────────────────────────────────
 
-  @doc "Return `n` paragraphs of Lorem Ipsum (max 32)."
-  def lorem_ipsum(n) when is_integer(n) and n >= 1 do
-    count = min(n, 32)
-    Enum.map(1..count, &build_paragraph/1)
+  @doc "Return `n` paragraphs of Lorem Ipsum (1–32)."
+  def lorem_ipsum(n) when is_integer(n) and n >= 1 and n <= 32 do
+    Enum.map(1..n, &build_paragraph/1)
   end
 
   defp build_paragraph(1) do

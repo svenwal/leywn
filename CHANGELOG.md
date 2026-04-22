@@ -2,6 +2,21 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [1.0.0-beta4] - 2026-04-22
+
+  ### Fixed
+  - **`/delay/{ms}` no longer silently clamps** — requests with `ms > 30000` now return `400` with `{error: "delay_too_large", maximum_ms: 30000, provided_ms: n}`
+  - **`/stream/{n}` no longer silently clamps** — requests with `n > 100` now return `400` with `{error: "count_too_large", maximum: 100, provided: n}`
+  - **`/random/lorem-ipsum/{n}` no longer silently clamps** — requests with `n > 32` now return `400` with `{error: "count_too_large", maximum: 32, provided: n}` instead of silently returning 32 paragraphs
+  - **Swagger UI "Try it out" CORS / mixed-content error** — `/openapi.json` now always lists the request's own origin (`scheme://host`) as the first server entry, so Swagger UI calls back to the same origin the page was loaded from; configured `LEYWN_EXTERNAL_*` URLs appear as additional entries rather than replacing the first
+  - **Insomnia "Run" button fetching wrong URL** — `collection_url` and `InsomniaCollection.build/1` now prefer `LEYWN_EXTERNAL_HTTPS_URL` over `LEYWN_EXTERNAL_HTTP_URL`, falling back to the request-derived URL; prevents Insomnia fetch failures when only the HTTP external URL was configured on an HTTPS-only server
+  - **Custom API key headers blocked by CORS preflight** — `Access-Control-Allow-Headers` changed from an explicit allowlist (`Content-Type, Accept, Authorization`) to `*`; previously any request carrying a non-listed header (e.g. `apikey`, `X-Token`) was silently rejected by the browser before reaching the server
+
+  ### Changed
+  - Version bumped to `1.0.0-beta4` in `mix.exs` and `openapi.json`
+
+---
+
 ## [1.0.0-beta3] - 2026-04-22
 
   ### Changed
