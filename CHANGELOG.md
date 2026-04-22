@@ -2,6 +2,18 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [1.0.0-beta3] - 2026-04-22
+
+  ### Changed
+  - **Docker runtime image switched from Debian to Alpine** — base image changed from `debian:bullseye-slim` to `alpine:3.21.3`; builder and test stages now use `hexpm/elixir:...-alpine-3.21.3`; total image size reduced from 93 MB to 38 MB
+  - **OTP application trimming** — `mix release` now only bundles OTP apps required by the transitive dependency graph, dropping unused apps automatically
+  - **BEAM debug chunks stripped** — `strip_beams: true` in release config removes `Dbgi` and `Docs` chunks from all `.beam` files
+  - **OpenShift-compatible security posture** — image runs as non-root (`USER 1001`); all release files owned `1001:0` via `COPY --chown`; permissions set to `g=u` in the builder stage so OpenShift's arbitrary-UID injection (GID 0) works without modification; `HOME=/tmp` set for Erlang runtime compatibility
+  - **Fixed `Mix.Project` unavailable in release** — `/health` version field now uses `Application.spec(:leywn, :vsn)` instead of `Mix.Project.config()[:version]`, which is not available outside of a Mix environment
+  - Version bumped to `1.0.0-beta3` in `mix.exs` and `openapi.json`
+
+---
+
 ## [1.0.0-beta2] - 2026-04-22
 
   ### Added

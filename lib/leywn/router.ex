@@ -71,7 +71,7 @@ defmodule Leywn.Router do
 
     Leywn.Respond.send(conn, 200, %{
       status: "ok",
-      version: Mix.Project.config()[:version],
+      version: Application.spec(:leywn, :vsn) |> to_string(),
       uptime_seconds: uptime
     }, root: "health")
   end

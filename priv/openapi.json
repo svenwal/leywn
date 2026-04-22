@@ -3,7 +3,7 @@
   "info": {
     "title": "Leywn",
     "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).",
-    "version": "1.0.0-beta2"
+    "version": "1.0.0-beta3"
   },
   "tags": [
     { "name": "Echo",    "description": "Request echo and inspection endpoints" },

@@ -4,10 +4,11 @@ defmodule Leywn.MixProject do
   def project do
     [
       app: :leywn,
-      version: "1.0.0-beta2",
+      version: "1.0.0-beta3",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -16,6 +17,14 @@ defmodule Leywn.MixProject do
     [
       extra_applications: [:logger],
       mod: {Leywn.Application, []}
+    ]
+  end
+
+  defp releases do
+    [
+      leywn: [
+        strip_beams: true
+      ]
     ]
   end
 
