@@ -17,9 +17,13 @@ Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives yo
 - [Configuration](#configuration)
 - [Endpoints](#endpoints)
   - [/ — Swagger UI](#----swagger-ui)
+  - [/health — Health check](#health--health-check)
   - [/echo — Request mirror](#echo--request-mirror)
   - [/anything — Echo alias](#anything--echo-alias)
   - [/status/{code} — HTTP status codes](#statuscode--http-status-codes)
+  - [/delay/{ms} — Response delay](#delayms--response-delay)
+  - [/stream/{n} — Chunked streaming](#streamn--chunked-streaming)
+  - [/chaos-engineering — Chaos engineering](#chaos-engineering--chaos-engineering)
   - [/auth/basic-auth — Basic authentication](#authbasic-auth--basic-authentication)
   - [/auth/api-key — API key authentication](#authapikey--api-key-authentication)
   - [/auth/jwt — JWT Bearer authentication](#authjwt--jwt-bearer-authentication)
@@ -32,6 +36,9 @@ Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives yo
   - [/ip — Caller IP address](#ip--caller-ip-address)
   - [/date — Current date](#date--current-date)
   - [/time — Current time](#time--current-time)
+  - [/format/* — Format and prettify](#format--format-and-prettify)
+  - [/encode and /decode — Codec](#encode-and-decode--codec)
+  - [/hash/* — Hashing](#hash--hashing)
 - [Content negotiation](#content-negotiation)
 - [Use cases](#use-cases)
 - [Code structure](#code-structure)
@@ -155,6 +162,21 @@ open http://localhost:4000
 
 ---
 
+### /health — Health check
+
+```
+GET /health
+```
+
+Returns server status, version, and uptime. Suitable for use as a Kubernetes liveness/readiness probe.
+
+```bash
+curl http://localhost:4000/health
+# {"status":"ok","version":"1.0.0-beta4","uptime_seconds":42}
+```
+
+---
+
 ### /echo — Request mirror
 
 ```
@@ -243,6 +265,76 @@ curl -i http://localhost:4000/status/503
 # Test redirects
 curl -iL http://localhost:4000/status/301
 ```
+
+---
+
+### /delay/{ms} — Response delay
+
+```
+ANY /delay/{ms}
+```
+
+Delays the response by the requested number of milliseconds (0–30 000). Useful for testing timeouts, retry logic, and client-side loading states.
+
+```bash
+# Delay by 2 seconds
+curl http://localhost:4000/delay/2000
+# {"requested_ms":2000,"delayed_ms":2000}
+
+# Over the 30-second limit → 400
+curl -i http://localhost:4000/delay/60000
+```
+
+---
+
+### /stream/{n} — Chunked streaming
+
+```
+GET /stream/{n}
+```
+
+Streams `n` newline-delimited JSON objects (NDJSON) as chunked transfer encoding, one line per chunk (max 100). Each object contains `line`, `total`, and `timestamp_unix_ms`.
+
+```bash
+curl http://localhost:4000/stream/5
+# {"line":1,"total":5,"timestamp_unix_ms":...}
+# {"line":2,"total":5,"timestamp_unix_ms":...}
+# ...
+```
+
+---
+
+### /chaos-engineering — Chaos engineering
+
+```
+ANY /chaos-engineering
+ANY /chaos-engineering/{error_pct}/{mangled_pct}/{latency_pct}/{max_latency_ms}
+```
+
+Returns an echo response but randomly injects faults — useful for testing resilience and circuit-breaker logic.
+
+| Fault | What happens |
+|---|---|
+| Error | A random 4xx/5xx status code is returned |
+| Mangled | Response is truncated mid-stream so JSON is syntactically invalid |
+| Latency | A random delay up to `max_latency_ms` is added |
+
+**Path parameters** (all integers, 0–100 for percentages, 0–30000 for max latency):
+
+```bash
+# 10% errors, 10% mangled, 20% latency up to 2 s (same as defaults)
+curl http://localhost:4000/chaos-engineering/10/10/20/2000
+```
+
+**Header-based configuration** (percentages as `X-Chaos-*` headers, falls back to defaults):
+
+```bash
+curl http://localhost:4000/chaos-engineering \
+  -H "X-Chaos-Error-Percentage: 50" \
+  -H "X-Chaos-Maximum-Latency: 500"
+```
+
+Every response includes a `_chaos` field with the applied parameters and actual latency introduced.
 
 ---
 
@@ -629,6 +721,7 @@ curl -s -X POST http://localhost:4000/format/snake-case \
 ```
 POST /encode/base64   POST /decode/base64
 POST /encode/url      POST /decode/url
+POST /encode/hex      POST /decode/hex
 POST /encode/rot13    POST /decode/rot13
 POST /decode/jwt      # decode JWT header + payload (no sig verification)
 ```
@@ -640,13 +733,35 @@ curl -s -X POST http://localhost:4000/encode/base64 -d "hello world"
 curl -s -X POST http://localhost:4000/decode/base64 -d "aGVsbG8gd29ybGQ="
 # hello world
 
+curl -s -X POST http://localhost:4000/encode/hex -d "hello"
+# 68656c6c6f
+
 TOKEN="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMSJ9.sig"
 curl -s -X POST http://localhost:4000/decode/jwt -d "$TOKEN"
 ```
 
 ---
 
-### /image/{type} — Demo images
+### /hash/* — Hashing
+
+```
+POST /hash/sha256
+POST /hash/md5
+```
+
+Hashes the raw request body and returns the hex digest along with the algorithm name and input byte count.
+
+```bash
+curl -s -X POST http://localhost:4000/hash/sha256 -d "hello world"
+# {"hash":"b94d27b9...","algorithm":"sha256","input_bytes":11}
+
+curl -s -X POST http://localhost:4000/hash/md5 -d "hello world"
+# {"hash":"5eb63bbbe01eeed093cb22bb8f5acdc3","algorithm":"md5","input_bytes":11}
+```
+
+---
+
+### /time — Current time
 
 ```
 GET /time                   # UTC
@@ -764,21 +879,25 @@ curl -H "Accept: application/xml" http://localhost:4000/echo
 
 ```
 lib/
-├── leywn/
-│   ├── application.ex   # OTP Application — starts HTTP + HTTPS listeners
-│   ├── router.ex        # Plug.Router — all route definitions and home page HTML
-│   ├── echo.ex          # Builds the echo response map from a Plug.Conn
-│   ├── body.ex          # Reads and inspects the request body
-│   ├── auth.ex          # All authentication handlers (basic, api-key, jwt, mtls)
-│   ├── mtls.ex          # Generates CA / server / client certificates at startup
-│   ├── random.ex        # UUID, integer, and Lorem Ipsum generators
-│   ├── logos.ex         # Image serving: file lookup, SVG, WebP, solid-colour PNG generator
-│   ├── info.ex          # IP address, date, and time helpers
-│   ├── format.ex        # POST body format/prettify transformations
-│   ├── codec.ex         # POST body encode/decode operations
-│   ├── yaml.ex          # Minimal pure-Elixir YAML emitter
-│   └── respond.ex       # Content negotiation and JSON/XML serialisation
-└── leywn.ex
+└── leywn/
+    ├── application.ex   # OTP Application — starts HTTP + HTTPS listeners
+    ├── router.ex        # Plug.Router — all route definitions and home page HTML
+    ├── echo.ex          # Builds the echo response map from a Plug.Conn
+    ├── body.ex          # Reads and inspects the request body
+    ├── auth.ex          # All authentication handlers (basic, api-key, jwt, mtls)
+    ├── mtls.ex          # Generates CA / server / client certificates at startup
+    ├── chaos.ex         # Chaos engineering: random error/mangled/latency injection
+    ├── random.ex        # UUID, integer, color, name, email, and Lorem Ipsum generators
+    ├── logos.ex         # Image serving: file lookup, SVG, WebP, solid-colour PNG generator
+    ├── info.ex          # IP address, date, and time helpers
+    ├── format.ex        # POST body format/prettify transformations
+    ├── codec.ex         # POST body encode/decode operations
+    ├── hash.ex          # POST body hashing (SHA-256, MD5)
+    ├── yaml.ex          # Minimal pure-Elixir YAML emitter
+    ├── cors.ex          # CORS plug — adds Access-Control-* headers
+    ├── request_logger.ex# Structured request logging to stdout
+    ├── respond.ex       # Content negotiation and JSON/XML serialisation
+    └── insomnia_collection.ex  # Generates the Insomnia v4 collection export
 
 config/
 ├── config.exs           # Compile-time defaults
