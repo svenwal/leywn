@@ -24,4 +24,4 @@ jobs:
             --target test \
             --progress=plain \
             -f Dockerfile \
-            Leywn/leywn
+            .
