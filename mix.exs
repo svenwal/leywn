@@ -4,7 +4,7 @@ defmodule Leywn.MixProject do
   def project do
     [
       app: :leywn,
-      version: "1.0.0-beta4",
+      version: "1.0.0-rc1",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),

@@ -78,26 +78,19 @@ defmodule Leywn.Auth do
   end
 
   def handle_jwt_exchange(conn) do
+    content_type = get_req_header(conn, "content-type") |> List.first() || ""
+
+    if String.starts_with?(content_type, "application/x-www-form-urlencoded") do
+      handle_rfc8693_exchange(conn)
+    else
+      handle_bearer_exchange(conn)
+    end
+  end
+
+  defp handle_bearer_exchange(conn) do
     case check_jwt(conn) do
       {:ok, %{claims: incoming_claims}} ->
-        key = Application.get_env(:leywn, :jwt_signing_key)
-        now = System.system_time(:second)
-
-        header = %{"alg" => "HS256", "typ" => "JWT"}
-
-        new_claims =
-          Map.merge(incoming_claims, %{
-            "iss" => "leywn",
-            "iat" => now,
-            "jti" => Leywn.Random.uuid()
-          })
-
-        header_b64 = Base.url_encode64(Jason.encode!(header), padding: false)
-        payload_b64 = Base.url_encode64(Jason.encode!(new_claims), padding: false)
-        signing_input = header_b64 <> "." <> payload_b64
-        sig = :crypto.mac(:hmac, :sha256, key, signing_input)
-        token = signing_input <> "." <> Base.url_encode64(sig, padding: false)
-
+        {token, new_claims} = mint_jwt(incoming_claims)
         {echo_data, conn} = build_echo(conn)
 
         Leywn.Respond.send(
@@ -116,6 +109,106 @@ defmodule Leywn.Auth do
         conn
         |> put_resp_header("www-authenticate", ~s(Bearer realm="Leywn"))
         |> Leywn.Respond.send(401, %{authenticated: false, error: "unauthorized"}, root: "auth")
+    end
+  end
+
+  # RFC 8693 — OAuth 2.0 Token Exchange
+  # https://datatracker.ietf.org/doc/html/rfc8693
+  defp handle_rfc8693_exchange(conn) do
+    with {:ok, body, conn} <- Plug.Conn.read_body(conn, length: 65_536),
+         params <- URI.decode_query(body),
+         {:grant_type, "urn:ietf:params:oauth:grant-type:token-exchange"} <-
+           {:grant_type, Map.get(params, "grant_type")},
+         {:subject_token, st} when is_binary(st) and st != "" <-
+           {:subject_token, Map.get(params, "subject_token")},
+         {:subject_token_type, stt}
+         when stt in [
+                "urn:ietf:params:oauth:token-type:jwt",
+                "urn:ietf:params:oauth:token-type:access_token"
+              ] <-
+           {:subject_token_type, Map.get(params, "subject_token_type")},
+         {:ok, claims} <- decode_jwt_claims(st) do
+      extra =
+        %{}
+        |> then(fn m ->
+          if aud = Map.get(params, "audience"), do: Map.put(m, "aud", aud), else: m
+        end)
+        |> then(fn m ->
+          if scope = Map.get(params, "scope"), do: Map.put(m, "scope", scope), else: m
+        end)
+
+      {token, _new_claims} = mint_jwt(Map.merge(claims, extra))
+
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(
+        200,
+        Jason.encode!(%{
+          "access_token" => token,
+          "issued_token_type" => "urn:ietf:params:oauth:token-type:jwt",
+          "token_type" => "Bearer",
+          "expires_in" => 3600
+        })
+      )
+    else
+      {:grant_type, _} ->
+        rfc8693_error(
+          conn,
+          "invalid_request",
+          "grant_type must be urn:ietf:params:oauth:grant-type:token-exchange"
+        )
+
+      {:subject_token, _} ->
+        rfc8693_error(conn, "invalid_request", "subject_token is required")
+
+      {:subject_token_type, _} ->
+        rfc8693_error(
+          conn,
+          "invalid_request",
+          "subject_token_type must be urn:ietf:params:oauth:token-type:jwt or urn:ietf:params:oauth:token-type:access_token"
+        )
+
+      {:error, _} ->
+        rfc8693_error(conn, "invalid_request", "subject_token is not a valid JWT")
+
+      _ ->
+        rfc8693_error(conn, "invalid_request", "Malformed request")
+    end
+  end
+
+  defp rfc8693_error(conn, error, description) do
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(400, Jason.encode!(%{"error" => error, "error_description" => description}))
+  end
+
+  defp mint_jwt(incoming_claims) do
+    key = Application.get_env(:leywn, :jwt_signing_key)
+    now = System.system_time(:second)
+    header = %{"alg" => "HS256", "typ" => "JWT"}
+
+    new_claims =
+      Map.merge(incoming_claims, %{
+        "iss" => "leywn",
+        "iat" => now,
+        "jti" => Leywn.Random.uuid()
+      })
+
+    header_b64 = Base.url_encode64(Jason.encode!(header), padding: false)
+    payload_b64 = Base.url_encode64(Jason.encode!(new_claims), padding: false)
+    signing_input = header_b64 <> "." <> payload_b64
+    sig = :crypto.mac(:hmac, :sha256, key, signing_input)
+    token = signing_input <> "." <> Base.url_encode64(sig, padding: false)
+    {token, new_claims}
+  end
+
+  defp decode_jwt_claims(token) do
+    with [_header_b64, payload_b64, _sig] <- String.split(token, "."),
+         {:ok, payload_json} <- base64url_decode(payload_b64),
+         {:ok, claims} <- Jason.decode(payload_json) do
+      {:ok, claims}
+    else
+      _ -> {:error, :invalid_jwt}
     end
   end
 

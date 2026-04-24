@@ -2,6 +2,13 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [1.0.0-rc1] - 2026-04-24
+
+  ### Changed
+  - Version bumped to `1.0.0-rc1` in `mix.exs` and `openapi.json`
+
+---
+
 ## [1.0.0-beta4] - 2026-04-22
 
   ### Security
@@ -34,6 +41,7 @@ All notable changes to Leywn are documented in this file.
   ### Changed
   - **Docker image references** — `README.md` now links to `svenwal/leywn` on Docker Hub
   - Version bumped to `1.0.0-beta4` in `mix.exs` and `openapi.json`
+
 
 ---
 

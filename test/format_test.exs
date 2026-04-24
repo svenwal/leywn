@@ -123,11 +123,11 @@ defmodule Leywn.FormatTest do
     assert conn.status == 422
   end
 
-  # ---- /format/snake-case ----------------------------------------------------
+  # ---- /format/snake_case ----------------------------------------------------
 
   test "format/snake-case converts camelCase keys" do
     conn =
-      post("/format/snake-case", ~s({"firstName":"Alice","lastName":"Smith"}), "application/json")
+      post("/format/snake_case", ~s({"firstName":"Alice","lastName":"Smith"}), "application/json")
 
     assert conn.status == 200
     assert conn.resp_body =~ "first_name"
@@ -136,7 +136,7 @@ defmodule Leywn.FormatTest do
   end
 
   test "format/snake-case returns 422 for invalid JSON" do
-    conn = post("/format/snake-case", "not json")
+    conn = post("/format/snake_case", "not json")
     assert conn.status == 422
   end
 
