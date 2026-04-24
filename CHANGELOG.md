@@ -4,7 +4,16 @@ All notable changes to Leywn are documented in this file.
 
 ## [1.0.0-rc1] - 2026-04-24
 
+  ### Added
+  - **RFC 8693 Token Exchange** — `POST /auth/jwt/exchange` now supports `application/x-www-form-urlencoded` requests with `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`; returns a standards-compliant response (`access_token`, `issued_token_type`, `token_type`, `expires_in`); optional `audience` and `scope` parameters are forwarded as claims
+  - **Homepage GitHub and Docker Hub buttons** — upper-right header now links to the GitHub repository and Docker Hub image page alongside the existing Insomnia button
+
   ### Changed
+  - **`/format/snake-case` renamed to `/format/snake_case`** — path now uses an underscore to match the output convention
+  - **`/format/camelCase`, `/format/kebab-case`, `/format/snake_case`** — OpenAPI descriptions corrected: these endpoints transform generic text, not JSON exclusively
+  - **OpenAPI endpoint ordering** — all paths are now sorted alphabetically within each tag group
+  - **OpenAPI examples** — every operation now carries a real-world request example and a computed response example (e.g. `encode/rot13` request `"Hello Leywn"` → response `"Uryyb Yrlja"`)
+  - **Swagger UI** — tags start collapsed (`docExpansion: none`) for a cleaner first-load experience
   - Version bumped to `1.0.0-rc1` in `mix.exs` and `openapi.json`
 
 ---
