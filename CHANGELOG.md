@@ -2,6 +2,16 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [1.0.0-rc2] - 2026-04-24
+
+  ### Changed
+  - **OpenAPI: `/echo/{path}` and `/anything/{path}` removed** — sub-path support is now documented inline on `/echo` and `/anything` instead of as separate operations
+  - **OpenAPI: alphabetical operation ordering enforced** — `operationsSorter: 'alpha'` added to Swagger UI config so operations are always sorted alphabetically within each tag group
+  - **GitHub Actions: Node.js 24 compatibility** — all actions in `build-and-push.yaml` updated to their latest versions (`actions/checkout@v4`, `docker/*@v3`, `docker/build-push-action@v6`)
+  - Version bumped to `1.0.0-rc2` in `mix.exs` and `openapi.json`
+
+---
+
 ## [1.0.0-rc1] - 2026-04-24
 
   ### Added

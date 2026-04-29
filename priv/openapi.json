@@ -3,7 +3,7 @@
   "info": {
     "title": "Leywn",
     "description": "Last Echo You Will Need \u2014 an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).",
-    "version": "1.0.0-rc1"
+    "version": "1.0.0-rc2"
   },
   "tags": [
     {
@@ -49,7 +49,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /anything",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -93,13 +93,14 @@
               }
             }
           }
-        }
+        },
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/anything`, `/anything/foo`, `/anything/foo/bar`, etc. The full path and path segments are reflected in the response."
       },
       "post": {
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /anything",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -143,13 +144,14 @@
               }
             }
           }
-        }
+        },
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/anything`, `/anything/foo`, `/anything/foo/bar`, etc. The full path and path segments are reflected in the response."
       },
       "put": {
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /anything",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -193,13 +195,14 @@
               }
             }
           }
-        }
+        },
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/anything`, `/anything/foo`, `/anything/foo/bar`, etc. The full path and path segments are reflected in the response."
       },
       "patch": {
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /anything",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -243,13 +246,14 @@
               }
             }
           }
-        }
+        },
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/anything`, `/anything/foo`, `/anything/foo/bar`, etc. The full path and path segments are reflected in the response."
       },
       "delete": {
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /anything",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -293,314 +297,8 @@
               }
             }
           }
-        }
-      }
-    },
-    "/anything/{path}": {
-      "get": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /anything/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/anything/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
         },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /anything/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/anything/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /anything/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/anything/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
-      },
-      "patch": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /anything/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/anything/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /anything/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/anything/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/anything`, `/anything/foo`, `/anything/foo/bar`, etc. The full path and path segments are reflected in the response."
       }
     },
     "/echo": {
@@ -608,7 +306,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /echo",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -652,13 +350,14 @@
               }
             }
           }
-        }
+        },
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/echo`, `/echo/foo`, `/echo/foo/bar`, etc. The full path and path segments are reflected in the response."
       },
       "post": {
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /echo",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -702,13 +401,14 @@
               }
             }
           }
-        }
+        },
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/echo`, `/echo/foo`, `/echo/foo/bar`, etc. The full path and path segments are reflected in the response."
       },
       "put": {
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /echo",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -752,13 +452,14 @@
               }
             }
           }
-        }
+        },
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/echo`, `/echo/foo`, `/echo/foo/bar`, etc. The full path and path segments are reflected in the response."
       },
       "patch": {
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /echo",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -802,13 +503,14 @@
               }
             }
           }
-        }
+        },
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/echo`, `/echo/foo`, `/echo/foo/bar`, etc. The full path and path segments are reflected in the response."
       },
       "delete": {
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request to /echo",
+        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -852,314 +554,8 @@
               }
             }
           }
-        }
-      }
-    },
-    "/echo/{path}": {
-      "get": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /echo/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/echo/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
         },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /echo/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/echo/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /echo/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/echo/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
-      },
-      "patch": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /echo/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/echo/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Echo"
-        ],
-        "summary": "Mirror any request to /echo/{path}",
-        "responses": {
-          "200": {
-            "description": "Full request mirror",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                },
-                "example": {
-                  "method": "GET",
-                  "scheme": "http",
-                  "host": "localhost",
-                  "port": 4000,
-                  "path": "/echo/foo/bar",
-                  "path_info": [],
-                  "query_string": "",
-                  "query_params": {},
-                  "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
-                  },
-                  "remote_ip": "127.0.0.1",
-                  "body": {
-                    "present": false,
-                    "bytes": 0,
-                    "truncated": false,
-                    "utf8": true,
-                    "included": false
-                  },
-                  "timestamp_unix_ms": 1745481600000
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/EchoResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "foo/bar"
-          }
-        ]
+        "description": "Returns every detail of the incoming request. Any sub-path is accepted: `/echo`, `/echo/foo`, `/echo/foo/bar`, etc. The full path and path segments are reflected in the response."
       }
     },
     "/auth/api-key": {
@@ -4628,7 +4024,7 @@
                 },
                 "example": {
                   "status": "ok",
-                  "version": "1.0.0-rc1",
+                  "version": "1.0.0-rc2",
                   "uptime_seconds": 3742
                 }
               },
@@ -5112,10 +4508,10 @@
                 "example": "firstName lastName isAdmin"
               }
             }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
           }
-        },
-        "422": {
-          "description": "Invalid input"
         }
       }
     },
@@ -5220,10 +4616,10 @@
                 "example": "first-name last-name is-admin"
               }
             }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
           }
-        },
-        "422": {
-          "description": "Invalid input"
         }
       }
     },
@@ -5258,10 +4654,10 @@
                 "example": "first_name last_name is_admin"
               }
             }
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessable"
           }
-        },
-        "422": {
-          "description": "Invalid input"
         }
       }
     },
@@ -7291,6 +6687,71 @@
           "error_description": {
             "type": "string",
             "example": "subject_token is required"
+          }
+        }
+      },
+      "RandomIntResponse": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "example": -14203
+          }
+        }
+      },
+      "UuidResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "example": "6986f945-a01e-4ffd-aff8-a15648be7946"
+          }
+        }
+      },
+      "GuuidResponse": {
+        "type": "object",
+        "properties": {
+          "guuid": {
+            "type": "string",
+            "example": "{d3afb989-99bf-49b2-9cd6-820c039a1e6f}"
+          }
+        }
+      },
+      "StatusResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 418
+          }
+        }
+      },
+      "LoremIpsumResponse": {
+        "type": "object",
+        "properties": {
+          "paragraphs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RandomNameResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Alice"
+          }
+        }
+      },
+      "RandomEmailResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "alice@example.com"
           }
         }
       }

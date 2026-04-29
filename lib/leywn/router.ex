@@ -600,7 +600,8 @@ defmodule Leywn.Router do
           layout: 'BaseLayout',
           deepLinking: true,
           tryItOutEnabled: true,
-          docExpansion: 'none'
+          docExpansion: 'none',
+          operationsSorter: 'alpha'
         });
       </script>
     </body>
