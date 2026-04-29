@@ -1,5 +1,6 @@
 defmodule Leywn.Router do
   use Plug.Router
+  require EEx
 
   plug(Leywn.CORS)
   plug(Leywn.RequestLogger)
@@ -541,71 +542,5 @@ defmodule Leywn.Router do
     base <> "/request-collection"
   end
 
-  defp home_html(collection_url) do
-    encoded_url = URI.encode_www_form(collection_url)
-    insomnia_href = "https://insomnia.rest/run/?label=Leywn&uri=#{encoded_url}"
-
-    """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Leywn – Last Echo You Will Need</title>
-      <link rel="icon" type="image/png" href="/image/png">
-      <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
-      <style>
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        .leywn-header { background: #1a1a2e; color: #e0e0e0; padding: 1rem 3rem; display: flex; align-items: center; gap: 1.5rem; }
-        .leywn-header span { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.5px; }
-        .leywn-header .leywn-actions { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
-        .leywn-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
-        .leywn-btn-gh { background: #24292f; color: #fff; border: 1px solid rgba(255,255,255,0.15); }
-        .leywn-btn-dh { background: #1d63ed; color: #fff; border: 1px solid rgba(255,255,255,0.15); }
-        .leywn-btn:hover { opacity: 0.85; }
-        .leywn-hero { background: #1a1a2e; color: #e0e0e0; padding: 1.5rem 3rem 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
-        .leywn-hero p { margin: 0 0 0.6rem; opacity: 0.85; font-size: 1.05rem; }
-        .leywn-hero code { background: rgba(255,255,255,0.12); padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9em; }
-      </style>
-    </head>
-    <body>
-      <div class="leywn-header">
-        <img src="/image/png" alt="Leywn logo" style="height:56px;">
-        <span>Last Echo You Will Need</span>
-        <div class="leywn-actions">
-          <a href="https://github.com/svenwal/leywn" target="_blank" rel="noopener" class="leywn-btn leywn-btn-gh">
-            <svg height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 012-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            GitHub
-          </a>
-          <a href="https://hub.docker.com/r/svenwal/leywn" target="_blank" rel="noopener" class="leywn-btn leywn-btn-dh">
-            <svg height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.12a.186.186 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.92 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.185.185v1.888c0 .102.082.185.184.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288z"/></svg>
-            Docker Hub
-          </a>
-          <a href="#{insomnia_href}" target="_blank" rel="noopener">
-            <img src="https://insomnia.rest/images/run.svg" alt="Run in Insomnia">
-          </a>
-        </div>
-      </div>
-      <div class="leywn-hero">
-        <p>Leywn is the last demo backend you will ever need. Whether you are building a new API client, stress-testing a retry strategy, demonstrating an integration, or just need a quick echo server for a workshop — Leywn has you covered with a single <code>docker run</code>.</p>
-        <p>Every endpoint is purposefully designed: mirror your requests with <code>/echo</code>, simulate network latency with <code>/delay</code>, stream chunked responses with <code>/stream</code>, test all your auth flows, generate random data, hash and encode payloads, and more. Zero dependencies to manage, zero state to worry about, and everything tunable via <code>LEYWN_</code> environment variables.</p>
-      </div>
-      <div id="swagger-ui"></div>
-      <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
-      <script>
-        SwaggerUIBundle({
-          url: '/openapi.json',
-          dom_id: '#swagger-ui',
-          presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
-          layout: 'BaseLayout',
-          deepLinking: true,
-          tryItOutEnabled: true,
-          docExpansion: 'none',
-          operationsSorter: 'alpha'
-        });
-      </script>
-    </body>
-    </html>
-    """
-  end
+  EEx.function_from_file(:defp, :home_html, Path.join(__DIR__, "../../priv/templates/home.html.eex"), [:collection_url])
 end
