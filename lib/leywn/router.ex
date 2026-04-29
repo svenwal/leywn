@@ -542,5 +542,10 @@ defmodule Leywn.Router do
     base <> "/request-collection"
   end
 
-  EEx.function_from_file(:defp, :home_html, Path.join(__DIR__, "../../priv/templates/home.html.eex"), [:collection_url])
+  EEx.function_from_file(
+    :defp,
+    :home_html,
+    Path.join(__DIR__, "../../priv/templates/home.html.eex"),
+    [:collection_url]
+  )
 end
