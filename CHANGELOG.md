@@ -2,12 +2,18 @@
 
 All notable changes to Leywn are documented in this file.
 
-## [1.0.0-rc2] - 2026-04-24
+## [1.0.0-rc2] - 2026-04-30
 
   ### Changed
   - **OpenAPI: `/echo/{path}` and `/anything/{path}` removed** — sub-path support is now documented inline on `/echo` and `/anything` instead of as separate operations
   - **OpenAPI: alphabetical operation ordering enforced** — `operationsSorter: 'alpha'` added to Swagger UI config so operations are always sorted alphabetically within each tag group
   - **GitHub Actions: Node.js 24 compatibility** — all actions in `build-and-push.yaml` updated to their latest versions (`actions/checkout@v4`, `docker/*@v3`, `docker/build-push-action@v6`)
+  - **`/format/camelCase`, `/format/kebab-case`, and `/format/snake_case` now accept plain text** — previously required a JSON object and transformed its keys; now convert the raw body string to the target case and return `text/plain`. Existing camelCase/snake_case/kebab-case input all work; no JSON parsing involved.
+  - **Homepage extracted into an EEx template** — `priv/templates/home.html.eex` now holds all HTML/CSS; `router.ex` compiles it at build time via `EEx.function_from_file`, keeping the router free of inline markup.
+  - **Insomnia collection corrected** — `/format/snake_case` entry had the wrong URL (`/format/snake-case`); both `/format/kebab-case` and `/format/snake_case` examples updated to use `text/plain` bodies that reflect plain-text conversion.
+  - **Insomnia collection: RFC 8693 token exchange entry added** — a second `/auth/jwt/exchange` request now demonstrates the `POST application/x-www-form-urlencoded` flow with `grant_type`, `subject_token`, `subject_token_type`, `audience`, and `scope` fields alongside the existing Bearer variant; `Content-Type: application/x-www-form-urlencoded` is set explicitly in the headers array so the correct server path is taken regardless of Insomnia version.
+  - **Chaos test made deterministic** — the `path params appear in _chaos meta` test previously used `5/15/25/1000`, giving a ~20 % per-run failure rate; replaced with `0/0/0/500` (zero error/mangled/latency percentages guarantee a 200 response with no sleep while still verifying `maximum_latency_ms` is reflected in meta).
+  - **Startup banner** — on launch, Leywn now prints the version and listening ports to stdout, followed by a list of all `LEYWN_*` environment variables that are explicitly set (PEM-valued vars `LEYWN_TLS_SERVER_KEY`, `LEYWN_TLS_SERVER_CRT`, `LEYWN_MTLS_CERT`, and `LEYWN_MTLS_KEY` are shown as `<set>` rather than their content); if no variables are set a single "using defaults" line is printed instead.
   - Version bumped to `1.0.0-rc2` in `mix.exs` and `openapi.json`
 
 ---

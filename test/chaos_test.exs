@@ -46,13 +46,15 @@ defmodule Leywn.ChaosTest do
   # ---- path params -----------------------------------------------------------
 
   test "/chaos-engineering path params appear in _chaos meta" do
-    conn = call(:get, "/chaos-engineering/5/15/25/1000")
+    # 0/0/0 for error/mangled/latency guarantees a deterministic 200 with no sleep;
+    # non-zero max_latency confirms the value is still reflected in the meta.
+    conn = call(:get, "/chaos-engineering/0/0/0/500")
     assert conn.status == 200
     {:ok, body} = Jason.decode(conn.resp_body)
-    assert body["_chaos"]["error_percentage"] == 5
-    assert body["_chaos"]["mangled_percentage"] == 15
-    assert body["_chaos"]["latency_percentage"] == 25
-    assert body["_chaos"]["maximum_latency_ms"] == 1000
+    assert body["_chaos"]["error_percentage"] == 0
+    assert body["_chaos"]["mangled_percentage"] == 0
+    assert body["_chaos"]["latency_percentage"] == 0
+    assert body["_chaos"]["maximum_latency_ms"] == 500
   end
 
   # ---- header params ---------------------------------------------------------

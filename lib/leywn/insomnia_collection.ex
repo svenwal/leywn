@@ -266,9 +266,28 @@ defmodule Leywn.InsomniaCollection do
           headers: [bearer(@jwt_example)],
           description: "Bearer JWT — structure validated, signature ignored"
         ),
-        req("req_jwt_exchange", "GET /auth/jwt/exchange", "GET", "/auth/jwt/exchange", "fld_auth",
+        req("req_jwt_exchange", "ANY /auth/jwt/exchange (Bearer)", "GET", "/auth/jwt/exchange",
+          "fld_auth",
           headers: [bearer(@jwt_example)],
-          description: "Exchange incoming JWT for a Leywn-signed HS256 token"
+          description: "Exchange incoming JWT for a Leywn-signed HS256 token (Bearer variant)"
+        ),
+        req(
+          "req_jwt_exchange_rfc8693",
+          "POST /auth/jwt/exchange (RFC 8693)",
+          "POST",
+          "/auth/jwt/exchange",
+          "fld_auth",
+          headers: [content_type("application/x-www-form-urlencoded")],
+          body:
+            form_body([
+              {"grant_type", "urn:ietf:params:oauth:grant-type:token-exchange"},
+              {"subject_token", @jwt_example},
+              {"subject_token_type", "urn:ietf:params:oauth:token-type:jwt"},
+              {"audience", "my-service"},
+              {"scope", "read write"}
+            ]),
+          description:
+            "RFC 8693 token exchange — POST application/x-www-form-urlencoded; audience and scope are optional"
         ),
         req(
           "req_mtls_getcert",
@@ -368,8 +387,8 @@ defmodule Leywn.InsomniaCollection do
           body: text_body("<root><child><name>Alice</name><age>30</age></child></root>")
         ),
         req("req_fmt_camel", "POST /format/camelCase", "POST", "/format/camelCase", "fld_format",
-          headers: [content_type("application/json")],
-          body: json_body(~s({"first_name":"Alice","last_name":"Smith","home_city":"Berlin"}))
+          headers: [content_type("text/plain")],
+          body: text_body("my_variable_name")
         ),
         req(
           "req_fmt_kebab",
@@ -377,17 +396,17 @@ defmodule Leywn.InsomniaCollection do
           "POST",
           "/format/kebab-case",
           "fld_format",
-          headers: [content_type("application/json")],
-          body: json_body(~s({"firstName":"Alice","lastName":"Smith","homeCity":"Berlin"}))
+          headers: [content_type("text/plain")],
+          body: text_body("myVariableName")
         ),
         req(
           "req_fmt_snake",
-          "POST /format/snake-case",
+          "POST /format/snake_case",
           "POST",
-          "/format/snake-case",
+          "/format/snake_case",
           "fld_format",
-          headers: [content_type("application/json")],
-          body: json_body(~s({"firstName":"Alice","lastName":"Smith","homeCity":"Berlin"}))
+          headers: [content_type("text/plain")],
+          body: text_body("my-variable-name")
         ),
         req("req_fmt_upper", "POST /format/toUpper", "POST", "/format/toUpper", "fld_format",
           headers: [content_type("text/plain")],
@@ -518,4 +537,10 @@ defmodule Leywn.InsomniaCollection do
 
   defp json_body(json_str),
     do: %{"mimeType" => "application/json", "text" => json_str}
+
+  defp form_body(pairs),
+    do: %{
+      "mimeType" => "application/x-www-form-urlencoded",
+      "params" => Enum.map(pairs, fn {k, v} -> %{"name" => k, "value" => v} end)
+    }
 end

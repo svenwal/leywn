@@ -41,32 +41,14 @@ defmodule Leywn.Format do
     end
   end
 
-  @doc "Recursively convert all JSON keys to camelCase."
-  def camel_case(body) do
-    with {:ok, data} <- Jason.decode(body) do
-      {:ok, "application/json", Jason.encode!(transform_keys(data, &to_camel/1), pretty: true)}
-    else
-      {:error, _} -> {:error, "invalid JSON input"}
-    end
-  end
+  @doc "Convert body text to camelCase."
+  def camel_case(body), do: {:ok, "text/plain", to_camel(body)}
 
-  @doc "Recursively convert all JSON keys to kebab-case."
-  def kebab_case(body) do
-    with {:ok, data} <- Jason.decode(body) do
-      {:ok, "application/json", Jason.encode!(transform_keys(data, &to_kebab/1), pretty: true)}
-    else
-      {:error, _} -> {:error, "invalid JSON input"}
-    end
-  end
+  @doc "Convert body text to kebab-case."
+  def kebab_case(body), do: {:ok, "text/plain", to_kebab(body)}
 
-  @doc "Recursively convert all JSON keys to snake_case."
-  def snake_case(body) do
-    with {:ok, data} <- Jason.decode(body) do
-      {:ok, "application/json", Jason.encode!(transform_keys(data, &to_snake/1), pretty: true)}
-    else
-      {:error, _} -> {:error, "invalid JSON input"}
-    end
-  end
+  @doc "Convert body text to snake_case."
+  def snake_case(body), do: {:ok, "text/plain", to_snake(body)}
 
   @doc "Convert the body text to uppercase."
   def to_upper(body), do: {:ok, "text/plain", String.upcase(body)}

@@ -87,57 +87,62 @@ defmodule Leywn.FormatTest do
 
   # ---- /format/camelCase -----------------------------------------------------
 
-  test "format/camelCase converts snake_case keys" do
-    conn =
-      post(
-        "/format/camelCase",
-        ~s({"first_name":"Alice","last_name":"Smith"}),
-        "application/json"
-      )
-
+  test "format/camelCase converts snake_case text" do
+    conn = post("/format/camelCase", "my_variable_name")
     assert conn.status == 200
-    assert conn.resp_body =~ "firstName"
-    assert conn.resp_body =~ "lastName"
-    refute conn.resp_body =~ "first_name"
+    assert conn.resp_body == "myVariableName"
   end
 
-  test "format/camelCase returns 422 for invalid JSON" do
-    conn = post("/format/camelCase", "not json")
-    assert conn.status == 422
+  test "format/camelCase converts kebab-case text" do
+    conn = post("/format/camelCase", "my-variable-name")
+    assert conn.status == 200
+    assert conn.resp_body == "myVariableName"
+  end
+
+  test "format/camelCase accepts empty body" do
+    conn = post("/format/camelCase", "")
+    assert conn.status == 200
+    assert conn.resp_body == ""
   end
 
   # ---- /format/kebab-case ----------------------------------------------------
 
-  test "format/kebab-case converts camelCase keys" do
-    conn =
-      post("/format/kebab-case", ~s({"firstName":"Alice","lastName":"Smith"}), "application/json")
-
+  test "format/kebab-case converts camelCase text" do
+    conn = post("/format/kebab-case", "myVariableName")
     assert conn.status == 200
-    assert conn.resp_body =~ "first-name"
-    assert conn.resp_body =~ "last-name"
-    refute conn.resp_body =~ "firstName"
+    assert conn.resp_body == "my-variable-name"
   end
 
-  test "format/kebab-case returns 422 for invalid JSON" do
-    conn = post("/format/kebab-case", "not json")
-    assert conn.status == 422
+  test "format/kebab-case converts snake_case text" do
+    conn = post("/format/kebab-case", "my_variable_name")
+    assert conn.status == 200
+    assert conn.resp_body == "my-variable-name"
+  end
+
+  test "format/kebab-case accepts empty body" do
+    conn = post("/format/kebab-case", "")
+    assert conn.status == 200
+    assert conn.resp_body == ""
   end
 
   # ---- /format/snake_case ----------------------------------------------------
 
-  test "format/snake-case converts camelCase keys" do
-    conn =
-      post("/format/snake_case", ~s({"firstName":"Alice","lastName":"Smith"}), "application/json")
-
+  test "format/snake_case converts camelCase text" do
+    conn = post("/format/snake_case", "myVariableName")
     assert conn.status == 200
-    assert conn.resp_body =~ "first_name"
-    assert conn.resp_body =~ "last_name"
-    refute conn.resp_body =~ "firstName"
+    assert conn.resp_body == "my_variable_name"
   end
 
-  test "format/snake-case returns 422 for invalid JSON" do
-    conn = post("/format/snake_case", "not json")
-    assert conn.status == 422
+  test "format/snake_case converts kebab-case text" do
+    conn = post("/format/snake_case", "my-variable-name")
+    assert conn.status == 200
+    assert conn.resp_body == "my_variable_name"
+  end
+
+  test "format/snake_case accepts empty body" do
+    conn = post("/format/snake_case", "")
+    assert conn.status == 200
+    assert conn.resp_body == ""
   end
 
   # ---- /format/toUpper -------------------------------------------------------

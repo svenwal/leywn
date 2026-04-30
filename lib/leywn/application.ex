@@ -1,9 +1,29 @@
 defmodule Leywn.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
   use Application
+
+  @leywn_vars [
+    "LEYWN_PORT",
+    "LEYWN_TLS_PORT",
+    "LEYWN_ECHO_MAX_BODY_BYTES",
+    "LEYWN_ECHO_ON_HOME",
+    "LEYWN_ONLY_JSON",
+    "LEYWN_CORS_ORIGIN",
+    "LEYWN_TRUST_FORWARD",
+    "LEYWN_EXTERNAL_HTTP_URL",
+    "LEYWN_EXTERNAL_HTTPS_URL",
+    "LEYWN_NAMES_FILE",
+    "LEYWN_EMAIL_DOMAINS_FILE",
+    "LEYWN_TLS_SERVER_KEY",
+    "LEYWN_TLS_SERVER_CRT",
+    "LEYWN_MTLS_CERT",
+    "LEYWN_MTLS_KEY",
+    "LEYWN_MTLS_IN_HEADER"
+  ]
+
+  # Values for these vars are PEM blobs — show presence only, never the content.
+  @sensitive_vars ~w(LEYWN_TLS_SERVER_KEY LEYWN_TLS_SERVER_CRT LEYWN_MTLS_CERT LEYWN_MTLS_KEY)
 
   @impl true
   def start(_type, _args) do
@@ -29,9 +49,32 @@ defmodule Leywn.Application do
          [port: tls_port, transport_options: [max_connections: max_connections]] ++ tls_opts}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Leywn.Supervisor]
-    Supervisor.start_link(children, opts)
+    result = Supervisor.start_link(children, opts)
+    if match?({:ok, _}, result), do: print_banner(port, tls_port)
+    result
+  end
+
+  defp print_banner(port, tls_port) do
+    version = Application.spec(:leywn, :vsn) |> to_string()
+
+    IO.puts(
+      "Leywn version #{version} has been started, listening on ports #{port} (HTTP) and #{tls_port} (HTTPS/mTLS)."
+    )
+
+    set_vars =
+      @leywn_vars
+      |> Enum.filter(&(System.get_env(&1) not in [nil, ""]))
+      |> Enum.map(fn var ->
+        value = if var in @sensitive_vars, do: "<set>", else: System.get_env(var)
+        "  - #{var}: #{value}"
+      end)
+
+    if set_vars == [] do
+      IO.puts("No LEYWN_* environment variables have been set (using defaults).")
+    else
+      IO.puts("The following environment variables have been set:")
+      Enum.each(set_vars, &IO.puts/1)
+    end
   end
 end
