@@ -266,7 +266,11 @@ defmodule Leywn.InsomniaCollection do
           headers: [bearer(@jwt_example)],
           description: "Bearer JWT — structure validated, signature ignored"
         ),
-        req("req_jwt_exchange", "ANY /auth/jwt/exchange (Bearer)", "GET", "/auth/jwt/exchange",
+        req(
+          "req_jwt_exchange",
+          "ANY /auth/jwt/exchange (Bearer)",
+          "GET",
+          "/auth/jwt/exchange",
           "fld_auth",
           headers: [bearer(@jwt_example)],
           description: "Exchange incoming JWT for a Leywn-signed HS256 token (Bearer variant)"
