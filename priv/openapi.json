@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Leywn",
-    "description": "Last Echo You Will Need \u2014 an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).",
-    "version": "1.0.0-rc2"
+    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).",
+    "version": "1.0.0"
   },
   "tags": [
     {
@@ -40,7 +40,7 @@
     },
     {
       "name": "Chaos",
-      "description": "Chaos engineering endpoint \u2014 injects errors, mangled responses, and latency"
+      "description": "Chaos engineering endpoint — injects errors, mangled responses, and latency"
     }
   ],
   "paths": {
@@ -49,7 +49,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -68,12 +68,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -100,7 +96,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -119,12 +115,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -151,7 +143,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -170,12 +162,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -202,7 +190,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -221,12 +209,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -253,7 +237,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/anything, /anything/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/anything, /anything/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -272,12 +256,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -306,7 +286,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -325,12 +305,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -357,7 +333,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -376,12 +352,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -408,7 +380,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -427,12 +399,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -459,7 +427,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -478,12 +446,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -510,7 +474,7 @@
         "tags": [
           "Echo"
         ],
-        "summary": "Mirror any request \u2014 accepts optional sub-path (/echo, /echo/foo/bar, ...)",
+        "summary": "Mirror any request — accepts optional sub-path (/echo, /echo/foo/bar, ...)",
         "responses": {
           "200": {
             "description": "Full request mirror",
@@ -529,12 +493,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -592,12 +552,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -658,12 +614,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -724,12 +676,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -790,12 +738,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -856,12 +800,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -942,12 +882,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1026,12 +962,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1110,12 +1042,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1194,12 +1122,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1278,12 +1202,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1347,12 +1267,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1414,12 +1330,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1481,12 +1393,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1548,12 +1456,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1615,12 +1519,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1702,12 +1602,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1787,12 +1683,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1872,12 +1764,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -1957,12 +1845,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2042,12 +1926,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2110,12 +1990,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2184,12 +2060,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2258,12 +2130,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2332,12 +2200,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2406,12 +2270,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2471,12 +2331,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2528,7 +2384,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Exchange JWT \u2014 Bearer or RFC 8693 Token Exchange",
+        "summary": "Exchange JWT — Bearer or RFC 8693 Token Exchange",
         "description": "Supports two exchange modes:\n\n**Bearer mode** (default): send `Authorization: Bearer <token>` with any Content-Type. Returns the full echo payload plus `exchanged_token` and `claims`.\n\n**RFC 8693 mode**: POST with `Content-Type: application/x-www-form-urlencoded` and `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`. Returns a standards-compliant token exchange response with `access_token`, `issued_token_type`, `token_type`, and `expires_in`.",
         "parameters": [
           {
@@ -2579,12 +2435,8 @@
                     "path_info": [],
                     "query_string": "",
                     "headers": {
-                      "authorization": [
-                        "Basic YmFzaWM6cGFzc3dvcmQ="
-                      ],
-                      "host": [
-                        "localhost:4000"
-                      ]
+                      "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                      "host": "localhost:4000"
                     },
                     "remote_ip": "127.0.0.1",
                     "body": {
@@ -2653,12 +2505,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2728,12 +2576,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2803,12 +2647,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2881,12 +2721,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2938,12 +2774,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -2995,12 +2827,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -3052,12 +2880,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -3109,12 +2933,8 @@
                   "path_info": [],
                   "query_string": "",
                   "headers": {
-                    "authorization": [
-                      "Basic YmFzaWM6cGFzc3dvcmQ="
-                    ],
-                    "host": [
-                      "localhost:4000"
-                    ]
+                    "authorization": "Basic YmFzaWM6cGFzc3dvcmQ=",
+                    "host": "localhost:4000"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -4013,7 +3833,7 @@
         "tags": [
           "Utility"
         ],
-        "summary": "Health check \u2014 returns status, version, and uptime",
+        "summary": "Health check — returns status, version, and uptime",
         "responses": {
           "200": {
             "description": "Success",
@@ -4024,7 +3844,7 @@
                 },
                 "example": {
                   "status": "ok",
-                  "version": "1.0.0-rc2",
+                  "version": "1.0.0",
                   "uptime_seconds": 3742
                 }
               },
@@ -4043,7 +3863,7 @@
         "tags": [
           "Utility"
         ],
-        "summary": "Solid-colour PNG image (64\u00d764) from a hex RGB/RGBA colour code",
+        "summary": "Solid-colour PNG image (64×64) from a hex RGB/RGBA colour code",
         "parameters": [
           {
             "name": "rgb",
@@ -4086,7 +3906,7 @@
         "tags": [
           "Utility"
         ],
-        "summary": "Solid-colour PNG image at a custom size (max 4096\u00d74096, max 1 MP total)",
+        "summary": "Solid-colour PNG image at a custom size (max 4096×4096, max 1 MP total)",
         "parameters": [
           {
             "name": "rgb",
@@ -4214,6 +4034,26 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The image type is supported but its file is not present in this build (for example WebP when the build-time conversion did not run).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "image_not_available",
+                  "type": "webp"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><error>image_not_available</error><type>webp</type></error>"
+              }
+            }
           }
         }
       }
@@ -4251,7 +4091,7 @@
         "tags": [
           "Utility"
         ],
-        "summary": "Respond with the exact HTTP status code specified (100\u2013599)",
+        "summary": "Respond with the exact HTTP status code specified (100–599)",
         "parameters": [
           {
             "name": "code",
@@ -4288,7 +4128,7 @@
         "tags": [
           "Utility"
         ],
-        "summary": "Respond with the exact HTTP status code specified (100\u2013599)",
+        "summary": "Respond with the exact HTTP status code specified (100–599)",
         "parameters": [
           {
             "name": "code",
@@ -4325,7 +4165,7 @@
         "tags": [
           "Utility"
         ],
-        "summary": "Respond with the exact HTTP status code specified (100\u2013599)",
+        "summary": "Respond with the exact HTTP status code specified (100–599)",
         "parameters": [
           {
             "name": "code",
@@ -4362,7 +4202,7 @@
         "tags": [
           "Utility"
         ],
-        "summary": "Respond with the exact HTTP status code specified (100\u2013599)",
+        "summary": "Respond with the exact HTTP status code specified (100–599)",
         "parameters": [
           {
             "name": "code",
@@ -4399,7 +4239,7 @@
         "tags": [
           "Utility"
         ],
-        "summary": "Respond with the exact HTTP status code specified (100\u2013599)",
+        "summary": "Respond with the exact HTTP status code specified (100–599)",
         "parameters": [
           {
             "name": "code",
@@ -4946,7 +4786,7 @@
             }
           }
         },
-        "description": "ROT13 is its own inverse \u2014 encode and decode use the same operation."
+        "description": "ROT13 is its own inverse — encode and decode use the same operation."
       }
     },
     "/decode/url": {
@@ -5219,7 +5059,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that a random 4xx/5xx status is returned instead of the echo. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Mangled-Percentage",
@@ -5230,7 +5071,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that the response body is truncated mid-stream into invalid JSON. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Latency-Percentage",
@@ -5241,7 +5083,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 20
-            }
+            },
+            "description": "Probability (0-100) that an artificial delay is applied. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Maximum-Latency",
@@ -5252,7 +5095,8 @@
               "minimum": 0,
               "maximum": 30000,
               "example": 2000
-            }
+            },
+            "description": "Upper bound in milliseconds (0-30000) for the injected delay. Values outside the range are rejected with 400 before any delay is applied."
           }
         ],
         "responses": {
@@ -5270,12 +5114,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -5327,7 +5167,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that a random 4xx/5xx status is returned instead of the echo. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Mangled-Percentage",
@@ -5338,7 +5179,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that the response body is truncated mid-stream into invalid JSON. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Latency-Percentage",
@@ -5349,7 +5191,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 20
-            }
+            },
+            "description": "Probability (0-100) that an artificial delay is applied. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Maximum-Latency",
@@ -5360,7 +5203,8 @@
               "minimum": 0,
               "maximum": 30000,
               "example": 2000
-            }
+            },
+            "description": "Upper bound in milliseconds (0-30000) for the injected delay. Values outside the range are rejected with 400 before any delay is applied."
           }
         ],
         "responses": {
@@ -5378,12 +5222,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -5435,7 +5275,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that a random 4xx/5xx status is returned instead of the echo. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Mangled-Percentage",
@@ -5446,7 +5287,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that the response body is truncated mid-stream into invalid JSON. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Latency-Percentage",
@@ -5457,7 +5299,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 20
-            }
+            },
+            "description": "Probability (0-100) that an artificial delay is applied. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Maximum-Latency",
@@ -5468,7 +5311,8 @@
               "minimum": 0,
               "maximum": 30000,
               "example": 2000
-            }
+            },
+            "description": "Upper bound in milliseconds (0-30000) for the injected delay. Values outside the range are rejected with 400 before any delay is applied."
           }
         ],
         "responses": {
@@ -5486,12 +5330,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -5543,7 +5383,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that a random 4xx/5xx status is returned instead of the echo. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Mangled-Percentage",
@@ -5554,7 +5395,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that the response body is truncated mid-stream into invalid JSON. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Latency-Percentage",
@@ -5565,7 +5407,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 20
-            }
+            },
+            "description": "Probability (0-100) that an artificial delay is applied. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Maximum-Latency",
@@ -5576,7 +5419,8 @@
               "minimum": 0,
               "maximum": 30000,
               "example": 2000
-            }
+            },
+            "description": "Upper bound in milliseconds (0-30000) for the injected delay. Values outside the range are rejected with 400 before any delay is applied."
           }
         ],
         "responses": {
@@ -5594,12 +5438,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -5651,7 +5491,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that a random 4xx/5xx status is returned instead of the echo. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Mangled-Percentage",
@@ -5662,7 +5503,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 10
-            }
+            },
+            "description": "Probability (0-100) that the response body is truncated mid-stream into invalid JSON. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Latency-Percentage",
@@ -5673,7 +5515,8 @@
               "minimum": 0,
               "maximum": 100,
               "example": 20
-            }
+            },
+            "description": "Probability (0-100) that an artificial delay is applied. Values outside the range are rejected with 400."
           },
           {
             "name": "X-Chaos-Maximum-Latency",
@@ -5684,7 +5527,8 @@
               "minimum": 0,
               "maximum": 30000,
               "example": 2000
-            }
+            },
+            "description": "Upper bound in milliseconds (0-30000) for the injected delay. Values outside the range are rejected with 400 before any delay is applied."
           }
         ],
         "responses": {
@@ -5702,12 +5546,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -5811,12 +5651,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -5918,12 +5754,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -6025,12 +5857,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -6132,12 +5960,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -6239,12 +6063,8 @@
                   "query_string": "",
                   "query_params": {},
                   "headers": {
-                    "host": [
-                      "localhost:4000"
-                    ],
-                    "user-agent": [
-                      "curl/8.7.1"
-                    ]
+                    "host": "localhost:4000",
+                    "user-agent": "curl/8.7.1"
                   },
                   "remote_ip": "127.0.0.1",
                   "body": {
@@ -6274,6 +6094,72 @@
               "application/json": {
                 "example": {
                   "error": "invalid_request"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Home page with embedded Swagger UI",
+        "description": "Serves the Leywn home page: a short overview plus a Swagger UI instance loaded from /openapi.json. When LEYWN_ECHO_ON_HOME is set to true this path returns the /echo payload instead of the HTML page.",
+        "operationId": "getHome",
+        "responses": {
+          "200": {
+            "description": "The Leywn home page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Alias for the home page",
+        "description": "Identical to GET /. Always serves the HTML documentation page, even when LEYWN_ECHO_ON_HOME is set.",
+        "operationId": "getDocs",
+        "responses": {
+          "200": {
+            "description": "The Leywn home page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "This OpenAPI specification",
+        "description": "Returns this specification. The servers array is generated per request: the origin the request arrived on is listed first, followed by any LEYWN_EXTERNAL_HTTP_URL and LEYWN_EXTERNAL_HTTPS_URL that are configured.",
+        "operationId": "getOpenApiSpec",
+        "responses": {
+          "200": {
+            "description": "The OpenAPI 3.0 specification for this running instance.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
                 }
               }
             }
@@ -6437,11 +6323,19 @@
           },
           "headers": {
             "type": "object",
+            "description": "Request headers. A header sent once is a string; a header sent more than once is an array of strings.",
             "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
             }
           },
           "remote_ip": {

@@ -66,16 +66,6 @@ defmodule Leywn.Format do
   # Key transformation helpers
   # ---------------------------------------------------------------------------
 
-  defp transform_keys(map, fun) when is_map(map) do
-    Map.new(map, fn {k, v} -> {fun.(to_string(k)), transform_keys(v, fun)} end)
-  end
-
-  defp transform_keys(list, fun) when is_list(list) do
-    Enum.map(list, &transform_keys(&1, fun))
-  end
-
-  defp transform_keys(value, _fun), do: value
-
   defp to_camel(key) do
     parts = String.split(key, ~r/[_\-]+/, trim: true)
 

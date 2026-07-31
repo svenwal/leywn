@@ -10,6 +10,7 @@ defmodule Leywn.MTLS do
   @secp256r1 {1, 2, 840, 10045, 3, 1, 7}
   @id_at_common_name {2, 5, 4, 3}
   @id_ce_basic_constraints {2, 5, 29, 19}
+  @id_ce_subject_alt_name {2, 5, 29, 17}
 
   # Validity window: 2024-01-01 to 2035-01-01 (generalTime format)
   @not_before ~c"20240101000000Z"
@@ -68,19 +69,36 @@ defmodule Leywn.MTLS do
   end
 
   defp load_or_generate_server_cert(ca_key, ca_cert_der) do
-    key_pem = System.get_env("LEYWN_TLS_SERVER_KEY")
-    cert_pem = System.get_env("LEYWN_TLS_SERVER_CRT")
+    key_pem = blank_to_nil(System.get_env("LEYWN_TLS_SERVER_KEY"))
+    cert_pem = blank_to_nil(System.get_env("LEYWN_TLS_SERVER_CRT"))
 
-    if key_pem && cert_pem do
-      cert_der = validate_and_load_cert!(cert_pem)
-      key_opt = parse_key_pem!(key_pem)
-      {cert_der, key_opt}
-    else
-      server_key = :public_key.generate_key({:namedCurve, :secp256r1})
-      server_cert_der = build_end_cert(server_key, "localhost", ca_key, ca_cert_der)
-      {server_cert_der, {:ECPrivateKey, :public_key.der_encode(:ECPrivateKey, server_key)}}
+    case {cert_pem, key_pem} do
+      {nil, nil} ->
+        server_key = :public_key.generate_key({:namedCurve, :secp256r1})
+
+        server_cert_der =
+          build_end_cert(server_key, "localhost", ca_key, ca_cert_der, [server_san_ext()])
+
+        {server_cert_der, {:ECPrivateKey, :public_key.der_encode(:ECPrivateKey, server_key)}}
+
+      {cert, key} when is_binary(cert) and is_binary(key) ->
+        {validate_and_load_cert!(cert), parse_key_pem!(key)}
+
+      # Half a configuration is always a mistake — silently falling back to a
+      # self-signed certificate would hide it until someone checked the cert in
+      # production.
+      {nil, _} ->
+        IO.puts("ERROR: LEYWN_TLS_SERVER_KEY is set but LEYWN_TLS_SERVER_CRT is not — aborting")
+        System.halt(1)
+
+      {_, nil} ->
+        IO.puts("ERROR: LEYWN_TLS_SERVER_CRT is set but LEYWN_TLS_SERVER_KEY is not — aborting")
+        System.halt(1)
     end
   end
+
+  defp blank_to_nil(value) when value in [nil, ""], do: nil
+  defp blank_to_nil(value), do: value
 
   # Returns {extra_cacerts} — any certs from LEYWN_MTLS_CERT that the server must trust.
   defp load_or_store_client_cert(ca_key, ca_cert_der) do
@@ -214,12 +232,12 @@ defmodule Leywn.MTLS do
     :public_key.pkix_sign(tbs, key)
   end
 
-  defp build_end_cert(key, cn, ca_key, ca_cert_der) do
+  defp build_end_cert(key, cn, ca_key, ca_cert_der, extra_extensions \\ []) do
     ca_cert = :public_key.pkix_decode_cert(ca_cert_der, :otp)
     ca_subject = cert_subject(ca_cert)
     subject = rdn(cn)
     serial = :rand.uniform(1_000_000_000)
-    extensions = [basic_constraints_ext(false)]
+    extensions = [basic_constraints_ext(false) | extra_extensions]
     tbs = otp_tbs(serial, ca_subject, subject, ec_spki(key), extensions)
     :public_key.pkix_sign(tbs, ca_key)
   end
@@ -247,6 +265,18 @@ defmodule Leywn.MTLS do
 
   defp basic_constraints_ext(is_ca) do
     {:Extension, @id_ce_basic_constraints, true, {:BasicConstraints, is_ca, :asn1_NOVALUE}}
+  end
+
+  # Clients have ignored the subject CN for hostname verification since RFC 6125;
+  # without a subjectAltName the generated certificate can only ever be used with
+  # verification switched off, even by a client that trusts the demo CA.
+  defp server_san_ext do
+    {:Extension, @id_ce_subject_alt_name, false,
+     [
+       {:dNSName, ~c"localhost"},
+       {:iPAddress, <<127, 0, 0, 1>>},
+       {:iPAddress, <<0::112, 1::16>>}
+     ]}
   end
 
   defp cert_subject({:OTPCertificate, tbs, _, _}) do

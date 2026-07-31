@@ -98,14 +98,36 @@ defmodule Leywn.Random do
 
   # ── Helpers ───────────────────────────────────────────────────────────────────
 
+  # Reading and parsing the file on every request turned /random, /random/name and
+  # /random/email into disk I/O on the hot path (/random/email hit it twice). The
+  # files never change while the node is up, so parse once and keep the result in
+  # :persistent_term, which reads without copying.
   defp load_lines(env_var, filename) do
     path = System.get_env(env_var) || Application.app_dir(:leywn, "priv/#{filename}")
+    key = {__MODULE__, :lines, path}
 
+    case :persistent_term.get(key, nil) do
+      nil ->
+        lines = read_lines(path)
+        :persistent_term.put(key, lines)
+        lines
+
+      lines ->
+        lines
+    end
+  end
+
+  defp read_lines(path) do
     case File.read(path) do
       {:ok, content} ->
         content
         |> String.split("\n", trim: true)
-        |> Enum.reject(&(String.starts_with?(String.trim(&1), "#") or String.trim(&1) == ""))
+        |> Enum.map(&String.trim/1)
+        |> Enum.reject(&(&1 == "" or String.starts_with?(&1, "#")))
+        |> case do
+          [] -> ["unknown"]
+          lines -> lines
+        end
 
       {:error, _} ->
         ["unknown"]

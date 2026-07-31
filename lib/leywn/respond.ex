@@ -88,8 +88,30 @@ defmodule Leywn.Respond do
       end)
     end
 
-    defp key_name(k) when is_atom(k), do: Atom.to_string(k)
-    defp key_name(k) when is_binary(k), do: k
-    defp key_name(k), do: to_string(k)
+    defp key_name(k) when is_atom(k), do: k |> Atom.to_string() |> safe_element_name()
+    defp key_name(k) when is_binary(k), do: safe_element_name(k)
+    defp key_name(k), do: k |> to_string() |> safe_element_name()
+
+    # Map keys become XML element names, and several of them are attacker-controlled:
+    # /echo reflects query-parameter and header names verbatim. Without sanitising,
+    # a request such as `/echo?a><injected>x</injected><b=1` emits those angle
+    # brackets as markup and injects arbitrary elements into the response document.
+    # Anything outside the XML NameChar set we allow is replaced with "_", and a
+    # name that cannot legally start an element gets an "_" prefix.
+    @invalid_name_chars ~r/[^A-Za-z0-9_.\-]/u
+
+    defp safe_element_name(name) do
+      name
+      |> String.replace(@invalid_name_chars, "_")
+      |> ensure_valid_start()
+    end
+
+    defp ensure_valid_start(""), do: "_"
+
+    defp ensure_valid_start(<<first, _::binary>> = name)
+         when first in ?0..?9 or first == ?- or first == ?.,
+         do: "_" <> name
+
+    defp ensure_valid_start(name), do: name
   end
 end

@@ -21,10 +21,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Check formatting & run tests
+      # `docker build --target test` only runs the RUN layers, so on its own it
+      # checks formatting and never executes a single test — CMD is not run during
+      # a build. Tag the stage, then actually run the suite in a container.
+      - name: Build test image (also runs mix format --check-formatted)
         run: |
           docker build \
             --target test \
             --progress=plain \
+            --load \
+            -t leywn-test:ci \
             -f Dockerfile \
             .
+
+      - name: Run test suite
+        run: docker run --rm leywn-test:ci mix test

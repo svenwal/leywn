@@ -1,6 +1,7 @@
 defmodule Leywn.HashTest do
-  use ExUnit.Case
-  use Plug.Test
+  use ExUnit.Case, async: true
+  import Plug.Test
+  import Plug.Conn
 
   @opts Leywn.Router.init([])
 

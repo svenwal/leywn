@@ -2,6 +2,45 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [1.0.0] - 2026-07-31
+
+First generally available release.
+
+  ### Security
+  - **XML element-name injection** — map keys become XML element names, and on `/echo`, `/anything`, `/chaos-engineering` and the `/auth/*` endpoints those keys come straight from query-parameter and header names. A request such as `/echo?a><injected>x</injected><b=1` with `Accept: application/xml` previously emitted the angle brackets as markup, injecting arbitrary elements into the response and breaking every XML parser. Element names are now restricted to legal XML `NameChar`s, with an `_` prefix where a name could not legally start an element
+  - **Chaos latency denial of service** — the `X-Chaos-*` headers were read without any validation, so `X-Chaos-Maximum-Latency: 600000` made the server sleep for up to ten minutes per request; against the 1 000-connection cap that is trivially exhaustible. Header parameters are now validated against the same ranges as the path parameters and rejected with `400` before any sleep occurs
+  - **Timing-safe credential comparison** — `/auth/basic-auth` and `/auth/api-key` compared the presented username, password and key with `==`, which short-circuits on the first differing byte. Comparison now runs over SHA-256 digests via `:crypto.hash_equals/2`, so neither the value nor its length leaks through response timing
+  - **Swagger UI pinned with Subresource Integrity** — the home page loaded `swagger-ui-dist@5` from unpkg with no integrity hash, so any future `5.x` release or a compromise of the CDN would execute unreviewed script on the page. Both assets are now pinned to `5.32.11` and carry `integrity` + `crossorigin` attributes
+  - **Half-configured TLS no longer ignored** — setting only one of `LEYWN_TLS_SERVER_CRT` / `LEYWN_TLS_SERVER_KEY` silently fell back to a generated self-signed certificate. Startup now aborts with an explicit error, as documented
+  - **Generated server certificate carries a subjectAltName** — the certificate had only `CN=localhost`, which clients have not accepted for hostname verification since RFC 6125, so it could never be validated even by a client trusting the demo CA. It now includes `DNS:localhost`, `IP:127.0.0.1` and `IP:::1`
+  - **`Vary: Origin`** — sent whenever `LEYWN_CORS_ORIGIN` names a specific origin, so an intermediary cache cannot serve one origin's response, and its `Access-Control-Allow-Origin`, to another
+  - **Empty `LEYWN_MTLS_IN_HEADER`** — an exported-but-empty value took the header branch with no header name, failing every `/auth/mtls` request; it is now treated as unset
+
+  ### Fixed
+  - **Self-referencing URLs were wrong on HTTPS** — the HTTPS listener negotiates HTTP/2 via ALPN, and HTTP/2 has no `Host` header. Reading the raw header made the OpenAPI `servers` entry, the Insomnia button and the collection `base_url` all fall back to `http://localhost:<HTTP port>` on every HTTPS request. These now derive from `conn.host` / `conn.port`, which Plug populates for both protocol versions
+  - **`/image/webp` returned 500 when the file was absent** — `send_file/3` raised on the missing path. A supported type with no file now returns `404 image_not_available`; an unsupported type still returns `400 unsupported_image_type`
+  - **Single-valued headers in `/echo` are no longer wrapped in an array** — `sub-docs/endpoints/echo.md` has always required a header sent once to be returned as a plain value. Only genuinely repeated headers are now arrays
+  - **CI never ran the test suite** — the workflow only ran `docker build --target test`, and `CMD` is not executed during a build, so nothing but `mix format --check-formatted` actually gated a merge. The image is now tagged and the suite run in a container
+  - **`OPTIONS` requests were never logged** — the CORS plug halts preflights, and the request logger was registered after it. The logger now runs first, so every request reaches the log as `CLAUDE.md` requires
+  - **Binary images were labelled `charset=utf-8`** — `put_resp_content_type/2` appends a character set, which is meaningless on a PNG, JPEG, GIF or WebP payload. The content type is now set verbatim
+  - **Insomnia `/decode/rot13` example was wrong** — `Uryyb, Yrjla!` decodes to `Lewyn`; corrected to `Uryyb, Yrlja!`
+  - **Insomnia collection was missing `/image/webp`**
+
+  ### Changed
+  - **Name and domain files are read once and cached** — `/random`, `/random/name` and `/random/email` re-read and re-parsed their backing file on every request (`/random/email` twice). They are now parsed once into `:persistent_term`; replacing the files requires a restart
+  - **Test suite expanded from 112 to 180 tests** — added coverage for `/echo`, `/anything`, `/status/{code}`, `/uuid`, `/guuid`, `/random/int`, `/random/uint`, `/ip`, `/date`, `/time`, `/auth/basic-auth`, `/auth/api-key`, `/auth/jwt`, `/image/webp`, XML content negotiation, `LEYWN_ONLY_JSON` and chaos header validation, none of which had any tests
+  - **Test modules run concurrently** and the deprecated `use Plug.Test` was replaced with explicit imports; the suite compiles without warnings
+  - **`cwebp` added to the Docker test stage** so `/image/webp` is exercised under the same conditions as production
+  - Removed the unused `Leywn.Format.transform_keys/2` left behind by the plain-text case conversion change, and an unused variable in `router.ex` — the project now compiles warning-free
+  - `SwaggerUIStandalonePreset` removed from the Swagger UI config; it ships in a bundle the page does not load, so it only ever contributed `undefined`
+
+  ### Documentation
+  - OpenAPI: documented `/`, `/docs` and `/openapi.json`, which were served but absent from the spec; added the `404` response on `/image/{type}`; corrected the `EchoResponse.headers` schema and every echo example to the new header shape; described the enforced ranges on the `X-Chaos-*` parameters
+  - README: corrected the `/format/*` section, which still described `yaml`/`xml` as JSON converters and the case endpoints as JSON key transformers, and still used the pre-1.0 `/format/snake-case` path; refreshed the `/health` version example; documented `LEYWN_CORS_ORIGIN`, `LEYWN_EXTERNAL_HTTP_URL`, `LEYWN_EXTERNAL_HTTPS_URL`, `LEYWN_NAMES_FILE` and `LEYWN_EMAIL_DOMAINS_FILE`; documented `/docs`, `/openapi.json`, `/request-collection`, `/random/name`, `/random/email` and `/random/color`; corrected the image size to ~38 MB
+  - `sub-docs/endpoints`: added `chaos.md`, which had no requirement document; corrected `cors.md` (wildcard allow-headers), `format.md` (plain-text case conversion, `snake_case` path), `delay.md` and `stream.md` (reject rather than clamp), `image.md` (build-time WebP) and `health.md` (version example)
+
+---
+
 ## [1.0.0-rc2] - 2026-04-30
 
   ### Changed

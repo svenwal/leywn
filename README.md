@@ -79,7 +79,7 @@ docker run -p 4000:4000 -p 4443:4443 leywn
 
 Port `4000` serves plain HTTP. Port `4443` serves HTTPS with a self-signed server certificate and mTLS support (client certificate optional except on `/auth/mtls`).
 
-The image uses a multi-stage build: only the compiled OTP release is included in the final layer — no Mix, Hex, or source code at runtime (~97 MB).
+The image uses a multi-stage build on an Alpine base: only the compiled OTP release is included in the final layer — no Mix, Hex, or source code at runtime (~38 MB). It runs as a non-root user (UID 1001, GID 0) and is compatible with OpenShift's arbitrary-UID injection.
 
 ### Docker Compose
 
@@ -136,6 +136,16 @@ All settings are controlled through environment variables.
 | `LEYWN_MTLS_KEY` | _(unset)_ | PEM-encoded private key matching `LEYWN_MTLS_CERT` |
 | `LEYWN_TRUST_FORWARD` | _(unset)_ | When set to `true`, derive the caller IP from the `X-Forwarded-For` header instead of the socket address |
 | `LEYWN_ONLY_JSON` | _(unset)_ | When set to `true`, disable XML content negotiation and always return JSON regardless of the `Accept` header |
+| `LEYWN_CORS_ORIGIN` | `*` | Value of the `Access-Control-Allow-Origin` response header. When set to a specific origin, `Vary: Origin` is sent as well |
+| `LEYWN_EXTERNAL_HTTP_URL` | _(unset)_ | Public HTTP base URL when running behind a reverse proxy; used in the OpenAPI `servers` list and the Insomnia collection |
+| `LEYWN_EXTERNAL_HTTPS_URL` | _(unset)_ | Public HTTPS base URL when running behind a reverse proxy; preferred over the HTTP one |
+| `LEYWN_NAMES_FILE` | `priv/names.txt` | Path to the name list backing `/random/name` and `/random/email` (one name per line, `#` comments allowed) |
+| `LEYWN_EMAIL_DOMAINS_FILE` | `priv/email_domains.txt` | Path to the domain list backing `/random/email` (one domain per line) |
+
+`LEYWN_TLS_SERVER_CRT` and `LEYWN_TLS_SERVER_KEY` must be set together — setting
+only one aborts startup rather than silently falling back to a generated
+certificate. The name and domain files are read once at first use and cached, so
+replacing them requires a restart.
 
 Example with custom ports:
 
@@ -152,7 +162,10 @@ All endpoints support JSON (default) and XML responses via content negotiation �
 ### / — Swagger UI
 
 ```
-GET /
+GET /            # home page with embedded Swagger UI
+GET /docs        # alias for /
+GET /openapi.json          # the OpenAPI 3.0 specification
+GET /request-collection    # Insomnia v4 collection covering every endpoint
 ```
 
 Serves an HTML page with a [Swagger UI](https://swagger.io/tools/swagger-ui/) loaded from `/openapi.json`. Use it to explore and try every endpoint interactively.
@@ -160,6 +173,10 @@ Serves an HTML page with a [Swagger UI](https://swagger.io/tools/swagger-ui/) lo
 ```bash
 open http://localhost:4000
 ```
+
+`/openapi.json` lists the origin the page was loaded from as its first server entry, so "Try it out" always calls back to the same host — plus any `LEYWN_EXTERNAL_*` URLs you configure. `/request-collection` is served as a download and its `base_url` environment variable is derived the same way.
+
+Set `LEYWN_ECHO_ON_HOME=true` to serve echo output on `/` instead of the HTML page.
 
 ---
 
@@ -173,7 +190,7 @@ Returns server status, version, and uptime. Suitable for use as a Kubernetes liv
 
 ```bash
 curl http://localhost:4000/health
-# {"status":"ok","version":"1.0.0-beta4","uptime_seconds":42}
+# {"status":"ok","version":"1.0.0","uptime_seconds":42}
 ```
 
 ---
@@ -210,8 +227,8 @@ curl -X POST "http://localhost:4000/echo/foo/bar?hello=world" \
   "query_string": "hello=world",
   "query_params": { "hello": "world" },
   "headers": {
-    "content-type": ["application/json"],
-    "host": ["localhost:4000"]
+    "content-type": "application/json",
+    "host": "localhost:4000"
   },
   "remote_ip": "127.0.0.1",
   "body": {
@@ -226,7 +243,9 @@ curl -X POST "http://localhost:4000/echo/foo/bar?hello=world" \
 }
 ```
 
-Bodies larger than `ECHO_MAX_BODY_BYTES` are acknowledged but not included (`truncated: true`). Binary bodies are detected and excluded (`utf8: false, included: false`).
+A header sent once is reported as a plain string; only a header that genuinely appears more than once becomes an array.
+
+Bodies larger than `LEYWN_ECHO_MAX_BODY_BYTES` are acknowledged but not included (`truncated: true`). Binary bodies are detected and excluded (`utf8: false, included: false`).
 
 ---
 
@@ -555,8 +574,10 @@ GET /image/png
 GET /image/jpeg   (jpg is accepted as alias)
 GET /image/gif
 GET /image/svg    # dynamic SVG with Leywn branding
-GET /image/webp   # PNG re-encoded as WebP (requires cwebp at startup)
+GET /image/webp   # PNG re-encoded as WebP (generated at build time)
 ```
+
+An unknown type returns 400 (`unsupported_image_type`); a known type whose file is not present returns 404 (`image_not_available`).
 
 ```bash
 curl -o logo.png http://localhost:4000/image/png
@@ -635,6 +656,27 @@ curl http://localhost:4000/random/lorem-ipsum
 curl http://localhost:4000/random/lorem-ipsum/5
 ```
 
+#### Name, email and colour
+
+```
+GET /random/name    # random first name
+GET /random/email   # random email address
+GET /random/color   # random RGB colour
+```
+
+Names and email domains are drawn from `priv/names.txt` and `priv/email_domains.txt`. Mount your own files and point `LEYWN_NAMES_FILE` / `LEYWN_EMAIL_DOMAINS_FILE` at them to customise the output.
+
+```bash
+curl http://localhost:4000/random/name
+# {"name":"Alice"}
+
+curl http://localhost:4000/random/email
+# {"email":"alice4821@example.com"}
+
+curl http://localhost:4000/random/color
+# {"hex":"#3a7fc1","r":58,"g":127,"b":193}
+```
+
 ---
 
 ### /ip — Caller IP address
@@ -685,18 +727,18 @@ curl -i http://localhost:4000/date/Invalid/Zone
 ### /format/* — Format and prettify
 
 ```
-POST /format/json           # pretty-print JSON body
-POST /format/yaml           # convert JSON body to YAML
-POST /format/xml            # convert JSON body to XML
-POST /format/camelCase      # convert all JSON keys to camelCase
-POST /format/kebab-case     # convert all JSON keys to kebab-case
-POST /format/snake-case     # convert all JSON keys to snake_case
+POST /format/json           # pretty-print a JSON body
+POST /format/yaml           # re-indent a YAML body
+POST /format/xml            # re-indent an XML body
+POST /format/camelCase      # convert the body text to camelCase
+POST /format/kebab-case     # convert the body text to kebab-case
+POST /format/snake_case     # convert the body text to snake_case
 POST /format/toUpper        # uppercase the body text
 POST /format/toLower        # lowercase the body text
 POST /format/collapse-lines # collapse multiple blank lines into one
 ```
 
-All format endpoints accept a POST body (limited to `LEYWN_ECHO_MAX_BODY_BYTES`). JSON-transforming endpoints return 422 if the body is not valid JSON.
+All format endpoints accept a POST body (limited to `LEYWN_ECHO_MAX_BODY_BYTES`). The three structured endpoints — `json`, `yaml` and `xml` — re-format input of their own type and return 422 if it does not parse. The case and text endpoints operate on the raw body as plain text and return `text/plain`.
 
 ```bash
 # Pretty-print JSON
@@ -704,15 +746,22 @@ curl -s -X POST http://localhost:4000/format/json \
   -H "Content-Type: application/json" \
   -d '{"b":2,"a":1}'
 
-# Convert JSON to YAML
+# Re-indent YAML with consistent 2-space indentation
 curl -s -X POST http://localhost:4000/format/yaml \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Alice","roles":["admin","user"]}'
+  -H "Content-Type: text/plain" \
+  --data-binary $'person:\n    name: Bob\n    age:   25'
 
-# Convert camelCase keys to snake_case
-curl -s -X POST http://localhost:4000/format/snake-case \
-  -H "Content-Type: application/json" \
-  -d '{"firstName":"Alice","lastName":"Smith"}'
+# Re-indent XML and add a declaration header
+curl -s -X POST http://localhost:4000/format/xml \
+  -H "Content-Type: text/plain" \
+  -d '<root><child><name>Alice</name></child></root>'
+
+# Convert text between naming conventions
+curl -s -X POST http://localhost:4000/format/snake_case -d 'myVariableName'
+# my_variable_name
+
+curl -s -X POST http://localhost:4000/format/camelCase -d 'my_variable_name'
+# myVariableName
 ```
 
 ---
@@ -906,10 +955,15 @@ config/
 
 priv/
 ├── openapi.json         # OpenAPI 3.0 specification (served at /openapi.json)
+├── names.txt            # name pool for /random/name and /random/email
+├── email_domains.txt    # domain pool for /random/email
+├── templates/
+│   └── home.html.eex    # home page, compiled into the router at build time
 └── images/
     ├── leywn.png
     ├── leywn.jpeg
-    └── leywn.gif
+    ├── leywn.gif
+    └── leywn.webp       # generated from leywn.png by cwebp during the build
 ```
 
 **Key dependencies:**
@@ -920,6 +974,7 @@ priv/
 | `jason` | JSON encoding/decoding |
 | `xml_builder_ex` | XML serialisation |
 | `tzdata` | IANA timezone database for `/date` and `/time` |
+| `yaml_elixir` / `yamerl` | YAML parsing for `/format/yaml` (pure Erlang, no C NIFs) |
 
 Certificate generation uses Erlang's built-in `:public_key` and `:crypto` modules — no external PKI dependencies.
 

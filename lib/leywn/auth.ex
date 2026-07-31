@@ -46,7 +46,7 @@ defmodule Leywn.Auth do
          true <- String.downcase(scheme) == "basic",
          {:ok, credentials} <- Base.decode64(String.trim(encoded)),
          [user, pass] <- String.split(credentials, ":", parts: 2),
-         true <- user == expected_user and pass == expected_pass do
+         true <- secure_equal?(user, expected_user) and secure_equal?(pass, expected_pass) do
       {:ok, %{authenticated: true, auth_type: "basic-auth", username: expected_user}}
     else
       _ -> {:error, :unauthorized}
@@ -55,13 +55,25 @@ defmodule Leywn.Auth do
 
   defp check_api_key(conn, header_name, key_value) do
     case get_req_header(conn, String.downcase(header_name)) do
-      [^key_value | _] ->
-        {:ok, %{authenticated: true, auth_type: "api-key", header: header_name}}
+      [presented | _] ->
+        if secure_equal?(presented, key_value) do
+          {:ok, %{authenticated: true, auth_type: "api-key", header: header_name}}
+        else
+          {:error, :unauthorized}
+        end
 
       _ ->
         {:error, :unauthorized}
     end
   end
+
+  # Compare secrets in constant time. Hashing first keeps the comparison length-
+  # independent, so neither the value nor its length leaks through timing.
+  defp secure_equal?(a, b) when is_binary(a) and is_binary(b) do
+    :crypto.hash_equals(:crypto.hash(:sha256, a), :crypto.hash(:sha256, b))
+  end
+
+  defp secure_equal?(_, _), do: false
 
   defp check_jwt(conn) do
     with [auth | _] <- get_req_header(conn, "authorization"),
@@ -231,8 +243,10 @@ defmodule Leywn.Auth do
   end
 
   defp get_mtls_cert(conn) do
+    # An empty value means "not configured" — without this an unset-but-exported
+    # variable would send every request down the header path with no header name.
     case System.get_env("LEYWN_MTLS_IN_HEADER") do
-      nil ->
+      blank when blank in [nil, ""] ->
         case Plug.Conn.get_peer_data(conn) do
           %{ssl_cert: cert} when not is_nil(cert) -> {:ok, cert}
           _ -> {:error, "no client certificate presented"}

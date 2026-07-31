@@ -9,7 +9,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leywn – Last Echo You Will Need</title>
   <link rel="icon" type="image/png" href="/image/png">
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+  <!-- Swagger UI is pinned to an exact version and guarded with Subresource Integrity.
+       A floating "@5" tag would let any future release — or anyone who manages to
+       tamper with the CDN — execute arbitrary script in the context of this page. -->
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.32.11/swagger-ui.css"
+        integrity="sha384-9Q2fpS+xeS4ffJy6CagnwoUl+4ldAYhOs9pgZuEKxypVModhmZFzeMlvVsAjf7uT"
+        crossorigin="anonymous">
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     .leywn-header {
@@ -70,12 +75,16 @@
     <p>Every endpoint is purposefully designed: mirror your requests with <code>/echo</code>, simulate network latency with <code>/delay</code>, stream chunked responses with <code>/stream</code>, test all your auth flows, generate random data, hash and encode payloads, and more. Zero dependencies to manage, zero state to worry about, and everything tunable via <code>LEYWN_</code> environment variables.</p>
   </div>
   <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.32.11/swagger-ui-bundle.js"
+          integrity="sha384-vfl/klfTFrIz5urj0HnhcXLAbzPdRHezizfy+XgFB6GqcKkhlk0lS3bIbyB39NLA"
+          crossorigin="anonymous"></script>
   <script>
     SwaggerUIBundle({
       url: '/openapi.json',
       dom_id: '#swagger-ui',
-      presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+      // SwaggerUIStandalonePreset ships in a separate bundle we do not load, so
+      // referencing it here only ever put `undefined` into this array.
+      presets: [SwaggerUIBundle.presets.apis],
       layout: 'BaseLayout',
       deepLinking: true,
       tryItOutEnabled: true,

@@ -16,10 +16,16 @@ defmodule Leywn.Echo do
     }
   end
 
+  # A header sent once is reported as a plain string; only genuinely repeated
+  # headers become a list. Wrapping every value in a single-element array forces
+  # consumers to unwrap the common case for no reason.
   defp headers_map(headers) do
     headers
     |> Enum.group_by(fn {k, _v} -> k end, fn {_k, v} -> v end)
-    |> Enum.into(%{})
+    |> Map.new(fn
+      {k, [single]} -> {k, single}
+      {k, many} -> {k, many}
+    end)
   end
 
   defp ip_to_string(nil), do: nil

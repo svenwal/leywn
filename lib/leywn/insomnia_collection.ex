@@ -5,12 +5,12 @@ defmodule Leywn.InsomniaCollection do
                  ".eyJzdWIiOiJ1c2VyMTIzIiwibmFtZSI6IkFsaWNlIiwiaWF0IjoxNzAwMDAwMDAwfQ" <>
                  ".fakesignature"
 
-  def build(port) do
-    base_url =
-      System.get_env("LEYWN_EXTERNAL_HTTPS_URL") ||
-        System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
-        "http://localhost:#{port}"
-
+  @doc """
+  Build the collection. `base_url` is the URL every request is relative to —
+  the caller derives it from the request so the collection points back at the
+  scheme and host the user actually reached Leywn on.
+  """
+  def build(base_url) when is_binary(base_url) do
     %{
       "_type" => "export",
       "__export_format" => 4,
@@ -83,6 +83,7 @@ defmodule Leywn.InsomniaCollection do
         req("req_img_png", "GET /image/png", "GET", "/image/png", "fld_utility"),
         req("req_img_jpeg", "GET /image/jpeg", "GET", "/image/jpeg", "fld_utility"),
         req("req_img_gif", "GET /image/gif", "GET", "/image/gif", "fld_utility"),
+        req("req_img_webp", "GET /image/webp", "GET", "/image/webp", "fld_utility"),
         req("req_img_svg", "GET /image/svg", "GET", "/image/svg", "fld_utility"),
         req(
           "req_img_color",
@@ -469,7 +470,7 @@ defmodule Leywn.InsomniaCollection do
         ),
         req("req_dec_rot13", "POST /decode/rot13", "POST", "/decode/rot13", "fld_codec",
           headers: [content_type("text/plain")],
-          body: text_body("Uryyb, Yrjla!")
+          body: text_body("Uryyb, Yrlja!")
         ),
         req("req_dec_jwt", "POST /decode/jwt", "POST", "/decode/jwt", "fld_codec",
           headers: [content_type("text/plain")],

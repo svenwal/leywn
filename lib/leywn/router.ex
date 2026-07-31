@@ -2,8 +2,10 @@ defmodule Leywn.Router do
   use Plug.Router
   require EEx
 
-  plug(Leywn.CORS)
+  # The logger runs first: Leywn.CORS halts OPTIONS preflights, so anything
+  # registered after it would never see — and never log — a preflight request.
   plug(Leywn.RequestLogger)
+  plug(Leywn.CORS)
   plug(:set_server_header)
   plug(:match)
   plug(:dispatch)
@@ -30,7 +32,6 @@ defmodule Leywn.Router do
 
   get "/openapi.json" do
     port = Application.get_env(:leywn, :port, 4000)
-    tls_port = Application.get_env(:leywn, :tls_port, 4443)
 
     # Always put "this server" first so Swagger UI's "Try it out" calls back to the
     # same origin the page was loaded from. This prevents mixed-content blocks and
@@ -64,8 +65,7 @@ defmodule Leywn.Router do
   # ---- Insomnia collection ---------------------------------------------------
 
   get "/request-collection" do
-    port = Application.get_env(:leywn, :port, 4000)
-    collection = Leywn.InsomniaCollection.build(port)
+    collection = Leywn.InsomniaCollection.build(base_url(conn))
 
     conn
     |> Plug.Conn.put_resp_header(
@@ -137,8 +137,16 @@ defmodule Leywn.Router do
     max_body = Application.get_env(:leywn, :echo_max_body_bytes, 65_536)
     {body_info, conn} = Leywn.Body.read(conn, max_body)
     echo_data = Leywn.Echo.build(conn, body_info)
-    params = Leywn.Chaos.from_headers(conn)
-    Leywn.Chaos.apply_chaos(conn, params, echo_data)
+
+    case Leywn.Chaos.from_headers(conn) do
+      {:ok, params} ->
+        Leywn.Chaos.apply_chaos(conn, params, echo_data)
+
+      {:error, field, msg} ->
+        Leywn.Respond.send(conn, 400, %{error: "invalid_chaos_params", field: field, detail: msg},
+          root: "error"
+        )
+    end
   end
 
   match "/chaos-engineering/:error_pct/:mangled_pct/:latency_pct/:max_latency" do
@@ -425,16 +433,19 @@ defmodule Leywn.Router do
     case Leywn.Logos.path_for(type) do
       {:ok, :file, path, content_type} ->
         conn
-        |> Plug.Conn.put_resp_content_type(content_type)
+        |> put_binary_content_type(content_type)
         |> Plug.Conn.send_file(200, path)
 
       {:ok, :inline, data, content_type} ->
         conn
-        |> Plug.Conn.put_resp_content_type(content_type)
+        |> put_binary_content_type(content_type)
         |> Plug.Conn.send_resp(200, data)
 
-      {:error, reason} ->
-        Leywn.Respond.send(conn, 400, %{error: reason}, root: "error")
+      {:error, :unsupported, reason} ->
+        Leywn.Respond.send(conn, 400, %{error: reason, type: type}, root: "error")
+
+      {:error, :unavailable, reason} ->
+        Leywn.Respond.send(conn, 404, %{error: reason, type: type}, root: "error")
     end
   end
 
@@ -479,12 +490,18 @@ defmodule Leywn.Router do
     case Leywn.Logos.color_png(rgb, width, height) do
       {:ok, png} ->
         conn
-        |> Plug.Conn.put_resp_content_type("image/png")
+        |> put_binary_content_type("image/png")
         |> Plug.Conn.send_resp(200, png)
 
       {:error, reason} ->
         Leywn.Respond.send(conn, 400, %{error: reason}, root: "error")
     end
+  end
+
+  # put_resp_content_type/2 appends "; charset=utf-8", which is meaningless — and
+  # wrong — on a PNG or WebP payload. Set the header verbatim instead.
+  defp put_binary_content_type(conn, content_type) do
+    Plug.Conn.put_resp_header(conn, "content-type", content_type)
   end
 
   defp handle_format(conn, fun) do
@@ -516,31 +533,47 @@ defmodule Leywn.Router do
     Plug.Conn.put_resp_header(conn, "server", "leywn")
   end
 
-  # Sanitise the Host header before embedding it in URLs or JSON responses.
-  # Accepts only hostname[:port] — rejects anything containing path separators,
-  # whitespace, or other characters that could enable header/URL injection.
+  # Build the authority to embed in self-referencing URLs.
+  #
+  # conn.host / conn.port are used rather than the Host header because HTTP/2 —
+  # which the HTTPS listener negotiates via ALPN — has no Host header at all. Plug
+  # populates conn.host/conn.port from :authority in that case, so reading the raw
+  # header made every HTTPS URL fall back to the plain-HTTP default port.
+  #
+  # The host is still sanitised: it ends up in URLs and JSON, so anything with
+  # path separators, whitespace or other injection-capable characters is rejected.
   defp safe_host(conn, default) do
-    raw = Plug.Conn.get_req_header(conn, "host") |> List.first() || default
-    if Regex.match?(~r/\A[a-zA-Z0-9._\-]+(:\d+)?\z/, raw), do: raw, else: default
+    host = conn.host || ""
+
+    if Regex.match?(~r/\A[a-zA-Z0-9._\-]+\z/, host) do
+      host <> port_suffix(conn.scheme, conn.port)
+    else
+      default
+    end
   end
 
-  defp collection_url(conn) do
+  defp port_suffix(:https, 443), do: ""
+  defp port_suffix(:http, 80), do: ""
+  defp port_suffix(_scheme, nil), do: ""
+  defp port_suffix(_scheme, port), do: ":#{port}"
+
+  # Prefer HTTPS external URL, then HTTP external URL, then derive from the request.
+  # The Insomnia button must point to a URL Insomnia can actually fetch — an HTTP URL
+  # on an HTTPS-only server will fail. Request-derived URL always matches the scheme
+  # the user is actually on.
+  defp base_url(conn) do
     port = Application.get_env(:leywn, :port, 4000)
-    # Prefer HTTPS external URL, then HTTP external URL, then derive from the request.
-    # The Insomnia button must point to a URL Insomnia can actually fetch — an HTTP URL
-    # on an HTTPS-only server will fail. Request-derived URL always matches the scheme
-    # the user is actually on.
-    base =
-      System.get_env("LEYWN_EXTERNAL_HTTPS_URL") ||
-        System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
-        (fn ->
-           scheme = if conn.scheme == :https, do: "https", else: "http"
-           host = safe_host(conn, "localhost:#{port}")
-           "#{scheme}://#{host}"
-         end).()
 
-    base <> "/request-collection"
+    System.get_env("LEYWN_EXTERNAL_HTTPS_URL") ||
+      System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
+      (fn ->
+         scheme = if conn.scheme == :https, do: "https", else: "http"
+         host = safe_host(conn, "localhost:#{port}")
+         "#{scheme}://#{host}"
+       end).()
   end
+
+  defp collection_url(conn), do: base_url(conn) <> "/request-collection"
 
   EEx.function_from_file(
     :defp,

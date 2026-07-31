@@ -1,6 +1,7 @@
 defmodule Leywn.ImageTest do
-  use ExUnit.Case
-  use Plug.Test
+  use ExUnit.Case, async: true
+  import Plug.Test
+  import Plug.Conn
 
   @opts Leywn.Router.init([])
 
@@ -35,6 +36,23 @@ defmodule Leywn.ImageTest do
     assert get_resp_header(conn, "content-type") |> hd() =~ "image/gif"
   end
 
+  test "image/webp returns the pre-generated WebP" do
+    conn = get("/image/webp")
+    assert conn.status == 200
+    assert get_resp_header(conn, "content-type") |> hd() =~ "image/webp"
+  end
+
+  # Binary payloads must not be labelled with a character set.
+  test "binary image responses carry no charset parameter" do
+    for type <- ~w(png jpeg gif webp) do
+      [ct] = get("/image/#{type}") |> get_resp_header("content-type")
+      refute ct =~ "charset", "#{type} content-type should not include a charset: #{ct}"
+    end
+
+    [ct] = get("/image/color/ff0000") |> get_resp_header("content-type")
+    refute ct =~ "charset"
+  end
+
   # ---- SVG -------------------------------------------------------------------
 
   test "image/svg returns an SVG with Leywn content" do
@@ -51,6 +69,14 @@ defmodule Leywn.ImageTest do
   test "image/tiff returns 400" do
     conn = get("/image/tiff")
     assert conn.status == 400
+    assert Jason.decode!(conn.resp_body)["error"] == "unsupported_image_type"
+  end
+
+  # A known type whose file happens to be missing must report that, not crash the
+  # request with a 500 out of send_file/3.
+  test "a known image type with no file on disk returns 404, not a crash" do
+    assert {:error, :unavailable, "image_not_available"} =
+             Leywn.Logos.path_for_in("png", "/nonexistent-image-dir")
   end
 
   # ---- /image/color ----------------------------------------------------------

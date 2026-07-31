@@ -14,20 +14,37 @@ defmodule Leywn.Logos do
   Returns:
     {:ok, :file, path, content_type}   — serve from filesystem
     {:ok, :inline, data, content_type} — serve inline binary/text
-    {:error, reason}
+    {:error, :unsupported, reason}     — not an image type we know
+    {:error, :unavailable, reason}     — known type, but the file is not present
   """
   def path_for(type) when is_binary(type) do
+    path_for_in(type, Application.app_dir(:leywn, "priv/images"))
+  end
+
+  @doc """
+  Same as `path_for/1` but with an explicit image directory. Exposed so the
+  missing-file branch can be exercised without touching the real priv directory.
+  """
+  def path_for_in(type, image_dir) when is_binary(type) and is_binary(image_dir) do
     case String.downcase(type) do
       ext when ext in ["png", "jpeg", "jpg", "gif", "webp"] ->
         real_ext = if ext == "jpg", do: "jpeg", else: ext
-        path = Application.app_dir(:leywn, "priv/images/leywn.#{real_ext}")
-        {:ok, :file, path, mime(real_ext)}
+        path = Path.join(image_dir, "leywn.#{real_ext}")
+
+        # leywn.webp is produced by cwebp during the Docker build; outside that
+        # build it may simply not exist. Reporting that is far better than letting
+        # send_file/3 raise and turn it into a 500.
+        if File.regular?(path) do
+          {:ok, :file, path, mime(real_ext)}
+        else
+          {:error, :unavailable, "image_not_available"}
+        end
 
       "svg" ->
         {:ok, :inline, svg_content(), "image/svg+xml"}
 
       _ ->
-        {:error, "unsupported_image_type"}
+        {:error, :unsupported, "unsupported_image_type"}
     end
   end
 

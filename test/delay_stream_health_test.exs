@@ -1,6 +1,7 @@
 defmodule Leywn.DelayStreamHealthTest do
-  use ExUnit.Case
-  use Plug.Test
+  use ExUnit.Case, async: true
+  import Plug.Test
+  import Plug.Conn
 
   @opts Leywn.Router.init([])
 
@@ -142,11 +143,28 @@ defmodule Leywn.DelayStreamHealthTest do
     assert cd =~ "leywn.insomnia.json"
   end
 
-  test "/request-collection environment has base_url" do
+  # base_url is derived from the request so the collection points back at the
+  # scheme and host the caller actually reached Leywn on, rather than a hardcoded
+  # localhost that would be wrong behind a proxy or on the HTTPS listener.
+  test "/request-collection environment base_url reflects the request" do
     conn = get("/request-collection")
     {:ok, body} = Jason.decode(conn.resp_body)
     env = Enum.find(body["resources"], &(&1["_type"] == "environment"))
-    assert get_in(env, ["data", "base_url"]) =~ "localhost"
+
+    assert get_in(env, ["data", "base_url"]) == "http://#{conn.host}"
+  end
+
+  test "/request-collection requests are all relative to base_url" do
+    conn = get("/request-collection")
+    {:ok, body} = Jason.decode(conn.resp_body)
+
+    requests = Enum.filter(body["resources"], &(&1["_type"] == "request"))
+    assert requests != []
+
+    for req <- requests do
+      assert String.starts_with?(req["url"], "{{ base_url }}/"),
+             "#{req["_id"]} has a non-relative url: #{req["url"]}"
+    end
   end
 
   test "/request-collection covers all endpoint groups" do

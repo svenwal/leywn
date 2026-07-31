@@ -27,7 +27,7 @@ defmodule Leywn.Chaos do
          :ok <- validate_pct(error_pct, "error_percentage"),
          :ok <- validate_pct(mangled_pct, "mangled_percentage"),
          :ok <- validate_pct(latency_pct, "latency_percentage"),
-         :ok <- validate_latency(max_latency) do
+         :ok <- validate_latency(max_latency, "maximum_latency") do
       {:ok,
        %{
          error_pct: error_pct,
@@ -41,14 +41,34 @@ defmodule Leywn.Chaos do
     end
   end
 
-  @doc "Read chaos params from X-Chaos-* request headers, falling back to defaults."
+  @doc """
+  Read chaos params from X-Chaos-* request headers, falling back to defaults.
+
+  Values are validated against the same ranges as the path variant; returns
+  {:ok, params} or {:error, field, msg}. Skipping validation here would let a
+  single request pin a connection for as long as it liked via
+  `X-Chaos-Maximum-Latency`, which is a trivial denial of service against the
+  bounded Cowboy connection pool.
+  """
   def from_headers(conn) do
-    %{
-      error_pct: header_int(conn, "x-chaos-error-percentage", @default_error_pct),
-      mangled_pct: header_int(conn, "x-chaos-mangled-percentage", @default_mangled_pct),
-      latency_pct: header_int(conn, "x-chaos-latency-percentage", @default_latency_pct),
-      max_latency: header_int(conn, "x-chaos-maximum-latency", @default_max_latency)
-    }
+    with {:ok, error_pct} <- header_int(conn, "x-chaos-error-percentage", @default_error_pct),
+         {:ok, mangled_pct} <-
+           header_int(conn, "x-chaos-mangled-percentage", @default_mangled_pct),
+         {:ok, latency_pct} <-
+           header_int(conn, "x-chaos-latency-percentage", @default_latency_pct),
+         {:ok, max_latency} <- header_int(conn, "x-chaos-maximum-latency", @default_max_latency),
+         :ok <- validate_pct(error_pct, "x-chaos-error-percentage"),
+         :ok <- validate_pct(mangled_pct, "x-chaos-mangled-percentage"),
+         :ok <- validate_pct(latency_pct, "x-chaos-latency-percentage"),
+         :ok <- validate_latency(max_latency, "x-chaos-maximum-latency") do
+      {:ok,
+       %{
+         error_pct: error_pct,
+         mangled_pct: mangled_pct,
+         latency_pct: latency_pct,
+         max_latency: max_latency
+       }}
+    end
   end
 
   @doc "Apply chaos to a connection, using the echo_data map as the happy-path body."
@@ -126,19 +146,19 @@ defmodule Leywn.Chaos do
   defp validate_pct(n, _field) when n >= 0 and n <= 100, do: :ok
   defp validate_pct(_, field), do: {:error, field, "must be 0–100"}
 
-  defp validate_latency(n) when n >= 0 and n <= 30_000, do: :ok
-  defp validate_latency(_), do: {:error, "maximum_latency", "must be 0–30000"}
+  defp validate_latency(n, _field) when n >= 0 and n <= 30_000, do: :ok
+  defp validate_latency(_, field), do: {:error, field, "must be 0–30000"}
 
   defp header_int(conn, name, default) do
     case get_req_header(conn, name) do
       [val | _] ->
         case Integer.parse(val) do
-          {n, ""} -> n
-          _ -> default
+          {n, ""} -> {:ok, n}
+          _ -> {:error, name, "must be an integer"}
         end
 
       [] ->
-        default
+        {:ok, default}
     end
   end
 end

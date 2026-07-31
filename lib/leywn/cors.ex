@@ -12,6 +12,7 @@ defmodule Leywn.CORS do
       |> put_resp_header("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
       |> put_resp_header("access-control-allow-headers", "*")
       |> put_resp_header("access-control-max-age", "86400")
+      |> maybe_vary_origin(origin)
 
     if conn.method == "OPTIONS" do
       conn
@@ -21,4 +22,10 @@ defmodule Leywn.CORS do
       conn
     end
   end
+
+  # A wildcard origin is the same for every caller and needs no Vary. A configured
+  # origin does not: without Vary an intermediary cache can hand one origin's
+  # response — and its Access-Control-Allow-Origin — to a different origin.
+  defp maybe_vary_origin(conn, "*"), do: conn
+  defp maybe_vary_origin(conn, _origin), do: put_resp_header(conn, "vary", "Origin")
 end

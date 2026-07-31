@@ -6,6 +6,10 @@ ENV MIX_ENV=test \
 
 WORKDIR /app
 
+# cwebp is needed here for the same reason as in the builder stage: /image/webp
+# serves a pre-generated file, and without it that endpoint could not be tested.
+RUN apk add --no-cache libwebp-tools
+
 RUN mix local.hex --force && \
     mix local.rebar --force
 
@@ -17,6 +21,8 @@ RUN mix deps.get
 COPY priv ./priv
 COPY lib ./lib
 COPY test ./test
+
+RUN cwebp -quiet priv/images/leywn.png -o priv/images/leywn.webp
 
 RUN mix format --check-formatted
 

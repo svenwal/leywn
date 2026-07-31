@@ -1,6 +1,6 @@
 defmodule Leywn.RandomExtTest do
-  use ExUnit.Case
-  use Plug.Test
+  use ExUnit.Case, async: true
+  import Plug.Test
 
   @opts Leywn.Router.init([])
 
