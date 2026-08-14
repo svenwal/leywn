@@ -217,7 +217,7 @@ Returns server status, version, and uptime. Suitable for use as a Kubernetes liv
 
 ```bash
 curl http://localhost:4000/health
-# {"status":"ok","version":"1.1.0-beta1","uptime_seconds":42}
+# {"status":"ok","version":"1.1.0-beta2","uptime_seconds":42}
 ```
 
 ---

@@ -3,7 +3,7 @@
   "info": {
     "title": "Leywn",
     "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).\n\nMock REST APIs are served under `/mocks` from JSON files — one folder per mock. Each renders its own OpenAPI at `/mocks/{mock}/openapi.json` with a Swagger UI page at `/docs/mocks/{mock}`, both linked from the home page.",
-    "version": "1.1.0-beta1"
+    "version": "1.1.0-beta2"
   },
   "tags": [
     {
