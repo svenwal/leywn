@@ -34,7 +34,8 @@ defmodule Leywn.InsomniaCollection do
       folder_info() ++
       folder_format() ++
       folder_codec() ++
-      folder_hash()
+      folder_hash() ++
+      folder_mocks()
   end
 
   defp workspace do
@@ -496,6 +497,132 @@ defmodule Leywn.InsomniaCollection do
         )
       ]
   end
+
+  # ---------------------------------------------------------------------------
+  # Mocks
+  # ---------------------------------------------------------------------------
+
+  # Unlike every folder above, this one is generated from whatever is actually
+  # mounted: a mock a user drops into the mocks directory should arrive in the
+  # collection alongside its Swagger UI page, without anyone editing this file.
+  defp folder_mocks do
+    case Leywn.Mock.Loader.names() do
+      [] ->
+        []
+
+      names ->
+        [folder("fld_mocks", "Mocks", "Mock REST APIs served from JSON files")] ++
+          [
+            req("req_mocks_index", "GET /mocks", "GET", "/mocks", "fld_mocks",
+              description: "List the available mocks"
+            )
+          ] ++ Enum.flat_map(names, &mock_requests/1)
+    end
+  end
+
+  defp mock_requests(name) do
+    case Leywn.Mock.Loader.fetch(name) do
+      {:ok, mock} -> mock_requests(mock, slug(name))
+      :error -> []
+    end
+  end
+
+  defp mock_requests(mock, slug) do
+    overview = [
+      req(
+        "req_mock_#{slug}",
+        "GET /mocks/#{mock.name}",
+        "GET",
+        "/mocks/#{mock.name}",
+        "fld_mocks",
+        description: "Collections, record counts and the write limits in force"
+      ),
+      req(
+        "req_mock_#{slug}_spec",
+        "GET /mocks/#{mock.name}/openapi.json",
+        "GET",
+        "/mocks/#{mock.name}/openapi.json",
+        "fld_mocks",
+        description: "The OpenAPI document generated for this mock"
+      )
+    ]
+
+    overview ++ Enum.flat_map(mock.collection_names, &collection_requests(mock, slug, &1))
+  end
+
+  defp collection_requests(mock, slug, collection) do
+    base = "/mocks/#{mock.name}/#{collection}"
+    id = first_id(mock, collection)
+    prefix = "req_mock_#{slug}_#{slug(collection)}"
+
+    list = [
+      req(prefix, "GET #{base}", "GET", "#{base}?_limit=10", "fld_mocks",
+        description:
+          "First 10 records. Add `_page`, `_sort`, `_order`, or any field name to filter."
+      )
+    ]
+
+    item =
+      if id do
+        [
+          req("#{prefix}_item", "GET #{base}/#{id}", "GET", "#{base}/#{id}", "fld_mocks"),
+          req("#{prefix}_patch", "PATCH #{base}/#{id}", "PATCH", "#{base}/#{id}", "fld_mocks",
+            headers: [content_type("application/json")],
+            body: json_body(patch_example(mock, collection)),
+            description: "Held in memory only, and forgotten once its lease expires"
+          ),
+          req("#{prefix}_delete", "DELETE #{base}/#{id}", "DELETE", "#{base}/#{id}", "fld_mocks",
+            description: "The record reappears once the deletion expires"
+          )
+        ]
+      else
+        []
+      end
+
+    create = [
+      req("#{prefix}_create", "POST #{base}", "POST", base, "fld_mocks",
+        headers: [content_type("application/json")],
+        body: json_body(create_example(mock, collection)),
+        description: "An id is generated when the body does not supply one"
+      )
+    ]
+
+    list ++ item ++ create
+  end
+
+  defp first_id(mock, collection) do
+    case mock.collections[collection].records do
+      [%{"id" => id} | _] -> to_string(id)
+      _ -> nil
+    end
+  end
+
+  # The example body is a real record with its id removed, so the request is
+  # valid against the collection it targets rather than a generic placeholder.
+  defp create_example(mock, collection) do
+    case mock.collections[collection].records do
+      [first | _] -> first |> Map.delete("id") |> Jason.encode!(pretty: true)
+      _ -> "{}"
+    end
+  end
+
+  defp patch_example(mock, collection) do
+    case mock.collections[collection].records do
+      [first | _] ->
+        case first |> Map.delete("id") |> Enum.take(1) do
+          [{key, value}] when is_binary(value) -> Jason.encode!(%{key => value <> " (updated)"})
+          [{key, value}] -> Jason.encode!(%{key => value})
+          [] -> "{}"
+        end
+
+      _ ->
+        "{}"
+    end
+  end
+
+  # Insomnia resource ids have to be unique and stable; collection names may
+  # contain characters that would collide once concatenated.
+  defp slug(name), do: String.replace(name, ~r/[^A-Za-z0-9]/, "_")
 
   # ---------------------------------------------------------------------------
   # Builders

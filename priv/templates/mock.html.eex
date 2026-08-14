@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leywn mock – <%= mock_name %></title>
+  <link rel="icon" type="image/png" href="/image/png">
+  <!-- Swagger UI is pinned to an exact version and guarded with Subresource Integrity,
+       for the same reason as on the home page: a floating "@5" tag would let any future
+       release — or anyone who manages to tamper with the CDN — execute arbitrary script
+       in the context of this page. -->
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.32.11/swagger-ui.css"
+        integrity="sha384-9Q2fpS+xeS4ffJy6CagnwoUl+4ldAYhOs9pgZuEKxypVModhmZFzeMlvVsAjf7uT"
+        crossorigin="anonymous">
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .leywn-header {
+      background: radial-gradient(
+          circle at 50% 55%,
+          rgba(255, 180, 255, 0.15),
+          rgba(120, 80, 255, 0.25) 20%,
+          rgba(40, 80, 160, 0.2) 40%,
+          rgba(10, 15, 35, 0.9) 75%
+        ),
+        linear-gradient(
+          160deg,
+          #04070f,
+          #0a0f1f,
+          #0d1330
+        );
+      background-blend-mode: screen, normal, normal;
+      backdrop-filter: blur(40px);
+      color: #EDE7FF;
+      padding: 1rem 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      }
+    .leywn-header span { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.5px; }
+    .leywn-header .leywn-actions { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+    .leywn-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .leywn-btn-home { background: rgba(255,255,255,0.12); color: #EDE7FF; border: 1px solid rgba(255,255,255,0.2); }
+    .leywn-btn-mock { background: rgba(255,255,255,0.06); color: #EDE7FF; border: 1px solid rgba(255,255,255,0.12); }
+    .leywn-btn-mock.is-current { background: #EDE7FF; color: #0B1020; border-color: #EDE7FF; }
+    .leywn-btn:hover { opacity: 0.85; }
+    .leywn-hero {
+      background: #EDE7FF;
+      color: #0B1020; padding: 1.5rem 3rem 2rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    .leywn-hero p { margin: 0 0 0.6rem; opacity: 0.85; font-size: 1.05rem; }
+    .leywn-hero p:last-child { margin-bottom: 0; }
+    .leywn-hero code { background: rgba(11,16,32,0.08); padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div class="leywn-header">
+    <img src="/image/png" alt="Leywn logo" style="height:56px;">
+    <span>Mock API — <%= mock_name %></span>
+    <div class="leywn-actions">
+      <a href="/docs" class="leywn-btn leywn-btn-home">← All endpoints</a>
+<%= for mock <- mock_links do %>
+      <a href="<%= mock.docs_url %>" class="leywn-btn leywn-btn-mock<%= if mock.name == mock_name, do: " is-current" %>"><%= mock.name %></a>
+<% end %>
+    </div>
+  </div>
+  <div class="leywn-hero">
+    <p>This is a mock REST API served by Leywn from a plain JSON file. Everything below was generated from that file — the paths, the schemas and the examples are the data itself, not a description of it.</p>
+    <p>Mount your own by putting a <code>db.json</code> into a new folder under the mocks directory: it is picked up at startup and gets a page like this one of its own.</p>
+  </div>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5.32.11/swagger-ui-bundle.js"
+          integrity="sha384-vfl/klfTFrIz5urj0HnhcXLAbzPdRHezizfy+XgFB6GqcKkhlk0lS3bIbyB39NLA"
+          crossorigin="anonymous"></script>
+  <script>
+    SwaggerUIBundle({
+      url: '<%= spec_url %>',
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis],
+      layout: 'BaseLayout',
+      deepLinking: true,
+      tryItOutEnabled: true,
+      docExpansion: 'list',
+      operationsSorter: 'alpha'
+    });
+  </script>
+</body>
+</html>

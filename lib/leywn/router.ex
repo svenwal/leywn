@@ -20,52 +20,59 @@ defmodule Leywn.Router do
     else
       conn
       |> Plug.Conn.put_resp_content_type("text/html")
-      |> Plug.Conn.send_resp(200, home_html(collection_url(conn)))
+      |> Plug.Conn.send_resp(200, home_html(collection_url(conn), mock_links(conn)))
     end
   end
 
   get "/docs" do
     conn
     |> Plug.Conn.put_resp_content_type("text/html")
-    |> Plug.Conn.send_resp(200, home_html(collection_url(conn)))
+    |> Plug.Conn.send_resp(200, home_html(collection_url(conn), mock_links(conn)))
+  end
+
+  # Each mock renders its own Swagger UI against its own generated spec. The
+  # page is the same template as the home page, pointed at a different document.
+  get "/docs/mocks/:mock" do
+    case Leywn.Mock.Loader.fetch(mock) do
+      {:ok, loaded} ->
+        conn
+        |> Plug.Conn.put_resp_content_type("text/html")
+        |> Plug.Conn.send_resp(
+          200,
+          mock_html(loaded.name, "/mocks/#{loaded.name}/openapi.json", mock_links(conn))
+        )
+
+      :error ->
+        Leywn.Respond.send(conn, 404, %{error: "mock_not_found", mock: mock}, root: "error")
+    end
   end
 
   get "/openapi.json" do
-    port = Application.get_env(:leywn, :port, 4000)
-
-    # Always put "this server" first so Swagger UI's "Try it out" calls back to the
-    # same origin the page was loaded from. This prevents mixed-content blocks and
-    # CORS errors regardless of how LEYWN_EXTERNAL_* URLs are configured.
-    scheme = if conn.scheme == :https, do: "https", else: "http"
-    host = safe_host(conn, "localhost:#{port}")
-    this_server = %{"url" => "#{scheme}://#{host}", "description" => "This server"}
-
-    extra_servers =
-      [
-        System.get_env("LEYWN_EXTERNAL_HTTP_URL") &&
-          %{"url" => System.get_env("LEYWN_EXTERNAL_HTTP_URL"), "description" => "HTTP"},
-        System.get_env("LEYWN_EXTERNAL_HTTPS_URL") &&
-          %{"url" => System.get_env("LEYWN_EXTERNAL_HTTPS_URL"), "description" => "HTTPS / mTLS"}
-      ]
-      |> Enum.reject(&is_nil/1)
-
-    servers = [this_server | extra_servers]
-
     spec =
       Application.app_dir(:leywn, "priv/openapi.json")
       |> File.read!()
       |> Jason.decode!()
-      |> Map.put("servers", servers)
+      |> Map.put("servers", Leywn.Servers.servers(conn))
 
     conn
     |> Plug.Conn.put_resp_content_type("application/json")
     |> Plug.Conn.send_resp(200, Jason.encode!(spec))
   end
 
+  # ---- Mocks -----------------------------------------------------------------
+
+  match "/mocks" do
+    Leywn.Mock.Handler.handle(conn, [])
+  end
+
+  match "/mocks/*rest" do
+    Leywn.Mock.Handler.handle(conn, rest)
+  end
+
   # ---- Insomnia collection ---------------------------------------------------
 
   get "/request-collection" do
-    collection = Leywn.InsomniaCollection.build(base_url(conn))
+    collection = Leywn.InsomniaCollection.build(Leywn.Servers.base_url(conn))
 
     conn
     |> Plug.Conn.put_resp_header(
@@ -533,52 +540,27 @@ defmodule Leywn.Router do
     Plug.Conn.put_resp_header(conn, "server", "leywn")
   end
 
-  # Build the authority to embed in self-referencing URLs.
-  #
-  # conn.host / conn.port are used rather than the Host header because HTTP/2 —
-  # which the HTTPS listener negotiates via ALPN — has no Host header at all. Plug
-  # populates conn.host/conn.port from :authority in that case, so reading the raw
-  # header made every HTTPS URL fall back to the plain-HTTP default port.
-  #
-  # The host is still sanitised: it ends up in URLs and JSON, so anything with
-  # path separators, whitespace or other injection-capable characters is rejected.
-  defp safe_host(conn, default) do
-    host = conn.host || ""
+  defp collection_url(conn), do: Leywn.Servers.base_url(conn) <> "/request-collection"
 
-    if Regex.match?(~r/\A[a-zA-Z0-9._\-]+\z/, host) do
-      host <> port_suffix(conn.scheme, conn.port)
-    else
-      default
+  # The home page and every mock page carry the same set of links, so a reader
+  # can move between the main API and any mock without going back to the root.
+  defp mock_links(_conn) do
+    for name <- Leywn.Mock.Loader.names() do
+      %{name: name, docs_url: "/docs/mocks/#{name}"}
     end
   end
-
-  defp port_suffix(:https, 443), do: ""
-  defp port_suffix(:http, 80), do: ""
-  defp port_suffix(_scheme, nil), do: ""
-  defp port_suffix(_scheme, port), do: ":#{port}"
-
-  # Prefer HTTPS external URL, then HTTP external URL, then derive from the request.
-  # The Insomnia button must point to a URL Insomnia can actually fetch — an HTTP URL
-  # on an HTTPS-only server will fail. Request-derived URL always matches the scheme
-  # the user is actually on.
-  defp base_url(conn) do
-    port = Application.get_env(:leywn, :port, 4000)
-
-    System.get_env("LEYWN_EXTERNAL_HTTPS_URL") ||
-      System.get_env("LEYWN_EXTERNAL_HTTP_URL") ||
-      (fn ->
-         scheme = if conn.scheme == :https, do: "https", else: "http"
-         host = safe_host(conn, "localhost:#{port}")
-         "#{scheme}://#{host}"
-       end).()
-  end
-
-  defp collection_url(conn), do: base_url(conn) <> "/request-collection"
 
   EEx.function_from_file(
     :defp,
     :home_html,
     Path.join(__DIR__, "../../priv/templates/home.html.eex"),
-    [:collection_url]
+    [:collection_url, :mock_links]
+  )
+
+  EEx.function_from_file(
+    :defp,
+    :mock_html,
+    Path.join(__DIR__, "../../priv/templates/mock.html.eex"),
+    [:mock_name, :spec_url, :mock_links]
   )
 end

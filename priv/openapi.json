@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Leywn",
-    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).",
-    "version": "1.0.0"
+    "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).\n\nMock REST APIs are served under `/mocks` from JSON files — one folder per mock. Each renders its own OpenAPI at `/mocks/{mock}/openapi.json` with a Swagger UI page at `/docs/mocks/{mock}`, both linked from the home page.",
+    "version": "1.1.0-beta1"
   },
   "tags": [
     {
@@ -41,6 +41,10 @@
     {
       "name": "Chaos",
       "description": "Chaos engineering endpoint — injects errors, mangled responses, and latency"
+    },
+    {
+      "name": "Mock",
+      "description": "Mock REST APIs served from JSON files — one per folder under the mocks directory"
     }
   ],
   "paths": {
@@ -6166,6 +6170,1216 @@
           }
         }
       }
+    },
+    "/mocks": {
+      "get": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "List the available mocks",
+        "description": "One entry per folder in the mocks directory, each with links to its data, its generated OpenAPI and its Swagger UI page.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockIndex"
+                },
+                "example": {
+                  "count": 1,
+                  "mocks": [
+                    {
+                      "name": "marketplace",
+                      "url": "/mocks/marketplace",
+                      "openapi_url": "/mocks/marketplace/openapi.json",
+                      "docs_url": "/docs/mocks/marketplace",
+                      "collections": [
+                        "orders",
+                        "users"
+                      ],
+                      "singletons": []
+                    }
+                  ]
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockIndex"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mocks/{mock}": {
+      "get": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "Describe one mock",
+        "description": "Collections, their record counts, and the write limits in force. The dataset itself is not returned here — read the collections individually, which page their output.",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockOverview"
+                },
+                "example": {
+                  "mock": "marketplace",
+                  "source_file": "db.json",
+                  "collections": [
+                    {
+                      "name": "orders",
+                      "records": 27,
+                      "url": "/mocks/marketplace/orders"
+                    },
+                    {
+                      "name": "users",
+                      "records": 10,
+                      "url": "/mocks/marketplace/users"
+                    }
+                  ],
+                  "singletons": [],
+                  "openapi_url": "/mocks/marketplace/openapi.json",
+                  "docs_url": "/docs/mocks/marketplace",
+                  "writes": {
+                    "enabled": true,
+                    "entries_used": 0,
+                    "max_new_entries": 100,
+                    "entry_ttl_seconds": 300,
+                    "rate_limit_per_minute": 60
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockOverview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No mock by that name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mocks/{mock}/openapi.json": {
+      "get": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "The OpenAPI document generated for one mock",
+        "description": "Generated from the mock's own data: paths from its collections, schemas inferred from its records, examples taken from the records themselves. Reflects the running configuration — write operations are absent under `LEYWN_MOCK_READONLY=true`.",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An OpenAPI 3.0.3 document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No mock by that name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mocks/{mock}/{collection}": {
+      "get": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "List the records of a collection",
+        "description": "Paged, sortable, searchable and filterable. The unpaged total is returned in the `X-Total-Count` header, alongside `X-Page`, `X-Page-Size` and `X-Total-Pages`.",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          },
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "description": "A top-level key of the mock's JSON file whose value is an array",
+            "schema": {
+              "type": "string"
+            },
+            "example": "orders"
+          },
+          {
+            "name": "_page",
+            "in": "query",
+            "required": false,
+            "description": "1-based page number",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "_limit",
+            "in": "query",
+            "required": false,
+            "description": "Records per page. Capped by `LEYWN_MOCK_MAX_PAGE_SIZE` (default 200); a larger value is a 400 rather than a silent truncation.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 25
+          },
+          {
+            "name": "_sort",
+            "in": "query",
+            "required": false,
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            },
+            "example": "name"
+          },
+          {
+            "name": "_order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction: `asc` (default) or `desc`",
+            "schema": {
+              "type": "string"
+            },
+            "example": "desc"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Case-insensitive substring search across every field of a record, including inside list fields. Limited to 128 characters.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "barcelona"
+          },
+          {
+            "name": "field",
+            "in": "query",
+            "required": false,
+            "description": "Any other query parameter filters on the field of that name — `?city=Barcelona` returns only matching records. Comparison suffixes also work: `?maxGuests_gte=4` (at least), `_lte`, `_gt`, `_lt`, `_ne`, and `_like` for a case-insensitive substring match that also reaches into list fields (`?amenities_like=pool`). ISO-8601 values order correctly as text, so `?from_gte=2026-09-01&from_lte=2026-09-30` is a date range. At most `LEYWN_MOCK_MAX_FILTERS` (default 10) filters are honoured, `q` included.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Barcelona"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "ord001",
+                    "name": "Sugar (50kg)",
+                    "userId": "a1b2c3d4"
+                  }
+                ]
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid paging, sorting or filter parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such mock or collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "Create a record",
+        "description": "Held in memory only, never written to the file, and forgotten after `LEYWN_MOCK_ENTRY_TTL_SECONDS` (default 300). An `id` is generated when the body does not supply one; a supplied `id` that already exists is a 409.",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          },
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "description": "A top-level key of the mock's JSON file whose value is an array",
+            "schema": {
+              "type": "string"
+            },
+            "example": "orders"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Rice (10kg)",
+                "userId": "a1b2c3d4"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created — the `Location` header addresses the new record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "id": "90abcf84",
+                  "name": "Rice (10kg)",
+                  "userId": "a1b2c3d4"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such mock or collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "`LEYWN_MOCK_READONLY=true` — this mock is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A record with the supplied id already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body larger than `LEYWN_MOCK_MAX_BODY_BYTES` (default 16384)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Body is not a JSON object, is nested deeper than `LEYWN_MOCK_MAX_DEPTH`, or has more keys than `LEYWN_MOCK_MAX_KEYS`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Write rate limit exceeded — see `LEYWN_MOCK_WRITE_RATE_LIMIT`. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "This mock already holds `LEYWN_MOCK_MAX_NEW_ENTRIES` changes, or the total size of all changes is at `LEYWN_MOCK_MAX_OVERLAY_BYTES`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mocks/{mock}/{collection}/{id}": {
+      "get": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "Fetch one record by id",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          },
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "description": "A top-level key of the mock's JSON file whose value is an array",
+            "schema": {
+              "type": "string"
+            },
+            "example": "orders"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The record's `id` field",
+            "schema": {
+              "type": "string"
+            },
+            "example": "ord001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "id": "ord001",
+                  "name": "Sugar (50kg)",
+                  "userId": "a1b2c3d4"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such mock, collection or record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "Replace a record",
+        "description": "The id in the path wins; an `id` in the body is ignored, so a write cannot move or rename the record the URL addressed.",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          },
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "description": "A top-level key of the mock's JSON file whose value is an array",
+            "schema": {
+              "type": "string"
+            },
+            "example": "orders"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The record's `id` field",
+            "schema": {
+              "type": "string"
+            },
+            "example": "ord001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Rice (10kg)",
+                "userId": "a1b2c3d4"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "id": "ord001",
+                  "name": "Sugar (50kg)",
+                  "userId": "a1b2c3d4"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such mock, collection or record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "`LEYWN_MOCK_READONLY=true` — this mock is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body larger than `LEYWN_MOCK_MAX_BODY_BYTES` (default 16384)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Body is not a JSON object, is nested deeper than `LEYWN_MOCK_MAX_DEPTH`, or has more keys than `LEYWN_MOCK_MAX_KEYS`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Write rate limit exceeded — see `LEYWN_MOCK_WRITE_RATE_LIMIT`. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "This mock already holds `LEYWN_MOCK_MAX_NEW_ENTRIES` changes, or the total size of all changes is at `LEYWN_MOCK_MAX_OVERLAY_BYTES`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "Update some fields of a record",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          },
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "description": "A top-level key of the mock's JSON file whose value is an array",
+            "schema": {
+              "type": "string"
+            },
+            "example": "orders"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The record's `id` field",
+            "schema": {
+              "type": "string"
+            },
+            "example": "ord001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Sugar (100kg)"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "id": "ord001",
+                  "name": "Sugar (50kg)",
+                  "userId": "a1b2c3d4"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such mock, collection or record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "`LEYWN_MOCK_READONLY=true` — this mock is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body larger than `LEYWN_MOCK_MAX_BODY_BYTES` (default 16384)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Body is not a JSON object, is nested deeper than `LEYWN_MOCK_MAX_DEPTH`, or has more keys than `LEYWN_MOCK_MAX_KEYS`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Write rate limit exceeded — see `LEYWN_MOCK_WRITE_RATE_LIMIT`. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "This mock already holds `LEYWN_MOCK_MAX_NEW_ENTRIES` changes, or the total size of all changes is at `LEYWN_MOCK_MAX_OVERLAY_BYTES`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "Delete a record",
+        "description": "Returns the record that was removed. The deletion is itself forgotten after `LEYWN_MOCK_ENTRY_TTL_SECONDS`, at which point a record that came from the file reappears.",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          },
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "description": "A top-level key of the mock's JSON file whose value is an array",
+            "schema": {
+              "type": "string"
+            },
+            "example": "orders"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The record's `id` field",
+            "schema": {
+              "type": "string"
+            },
+            "example": "ord001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "id": "ord001",
+                  "name": "Sugar (50kg)",
+                  "userId": "a1b2c3d4"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such mock, collection or record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "`LEYWN_MOCK_READONLY=true` — this mock is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Write rate limit exceeded — see `LEYWN_MOCK_WRITE_RATE_LIMIT`. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "This mock already holds `LEYWN_MOCK_MAX_NEW_ENTRIES` changes, or the total size of all changes is at `LEYWN_MOCK_MAX_OVERLAY_BYTES`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mocks/{mock}/{collection}/{id}/{child}": {
+      "get": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "List the related records of another collection",
+        "description": "Follows the foreign key between two collections: `/mocks/accommodations/properties/prop-gothic-loft/availability` returns the availability rows whose `propertyId` matches. The field is discovered from the data (`propertyId`, `property_id`, …), so a collection with no field referencing the parent is a 404 rather than an empty list. Results accept the same paging, sorting, search and filter parameters as a plain collection read.",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          },
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "description": "A top-level key of the mock's JSON file whose value is an array",
+            "schema": {
+              "type": "string"
+            },
+            "example": "orders"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The record's `id` field",
+            "schema": {
+              "type": "string"
+            },
+            "example": "ord001"
+          },
+          {
+            "name": "child",
+            "in": "path",
+            "required": true,
+            "description": "A sibling collection holding a field that references this record",
+            "schema": {
+              "type": "string"
+            },
+            "example": "orders"
+          },
+          {
+            "name": "_page",
+            "in": "query",
+            "required": false,
+            "description": "1-based page number",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "_limit",
+            "in": "query",
+            "required": false,
+            "description": "Records per page. Capped by `LEYWN_MOCK_MAX_PAGE_SIZE` (default 200); a larger value is a 400 rather than a silent truncation.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 25
+          },
+          {
+            "name": "_sort",
+            "in": "query",
+            "required": false,
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            },
+            "example": "name"
+          },
+          {
+            "name": "_order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction: `asc` (default) or `desc`",
+            "schema": {
+              "type": "string"
+            },
+            "example": "desc"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Case-insensitive substring search across every field of a record, including inside list fields. Limited to 128 characters.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "barcelona"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Related records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "ord001",
+                    "name": "Sugar (50kg)",
+                    "userId": "a1b2c3d4"
+                  }
+                ]
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such mock, collection or record, or no relation between the two collections",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs/mocks/{mock}": {
+      "get": {
+        "tags": [
+          "Mock"
+        ],
+        "summary": "Swagger UI for one mock",
+        "description": "An HTML page rendering the mock's generated OpenAPI. Linked from the home page.",
+        "parameters": [
+          {
+            "name": "mock",
+            "in": "path",
+            "required": true,
+            "description": "Name of the mock — the folder name under the mocks directory",
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketplace"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML page",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No mock by that name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -6648,6 +7862,139 @@
             "example": "alice@example.com"
           }
         }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Machine-readable error code"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Human-readable explanation"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "MockIndex": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "mocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "openapi_url": {
+                  "type": "string"
+                },
+                "docs_url": {
+                  "type": "string"
+                },
+                "collections": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "singletons": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "count",
+          "mocks"
+        ]
+      },
+      "MockOverview": {
+        "type": "object",
+        "properties": {
+          "mock": {
+            "type": "string"
+          },
+          "source_file": {
+            "type": "string"
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "records": {
+                  "type": "integer"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "singletons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "openapi_url": {
+            "type": "string"
+          },
+          "docs_url": {
+            "type": "string"
+          },
+          "writes": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "entries_used": {
+                "type": "integer"
+              },
+              "max_new_entries": {
+                "type": "integer"
+              },
+              "entry_ttl_seconds": {
+                "type": "integer"
+              },
+              "rate_limit_per_minute": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "required": [
+          "mock",
+          "collections",
+          "writes"
+        ]
       }
     },
     "requestBodies": {

@@ -19,7 +19,23 @@ defmodule Leywn.Application do
     "LEYWN_TLS_SERVER_CRT",
     "LEYWN_MTLS_CERT",
     "LEYWN_MTLS_KEY",
-    "LEYWN_MTLS_IN_HEADER"
+    "LEYWN_MTLS_IN_HEADER",
+    "LEYWN_MOCKS_DIR",
+    "LEYWN_MOCK_READONLY",
+    "LEYWN_MOCK_WRITE_RATE_LIMIT",
+    "LEYWN_MOCK_WRITE_RATE_LIMIT_GLOBAL",
+    "LEYWN_MOCK_RATE_BUCKETS",
+    "LEYWN_MOCK_MAX_NEW_ENTRIES",
+    "LEYWN_MOCK_ENTRY_TTL_SECONDS",
+    "LEYWN_MOCK_MAX_BODY_BYTES",
+    "LEYWN_MOCK_MAX_OVERLAY_BYTES",
+    "LEYWN_MOCK_MAX_PAGE_SIZE",
+    "LEYWN_MOCK_MAX_FILE_BYTES",
+    "LEYWN_MOCK_MAX_MOCKS",
+    "LEYWN_MOCK_MAX_COLLECTIONS",
+    "LEYWN_MOCK_MAX_DEPTH",
+    "LEYWN_MOCK_MAX_KEYS",
+    "LEYWN_MOCK_MAX_FILTERS"
   ]
 
   # Values for these vars are PEM blobs — show presence only, never the content.
@@ -31,6 +47,11 @@ defmodule Leywn.Application do
     Application.put_env(:leywn, :jwt_signing_key, :crypto.strong_rand_bytes(32))
     Application.put_env(:leywn, :started_at, System.monotonic_time(:second))
 
+    # Datasets are read once, here, rather than per request — see
+    # Leywn.Mock.Loader. Doing it before the listeners start means the first
+    # request already finds them published.
+    mocks = Leywn.Mock.Loader.load_all()
+
     port = Application.get_env(:leywn, :port, 4000)
     tls_port = Application.get_env(:leywn, :tls_port, 4443)
     tls_opts = Leywn.MTLS.init()
@@ -38,6 +59,8 @@ defmodule Leywn.Application do
     max_connections = 1_000
 
     children = [
+      Leywn.Mock.Store,
+      Leywn.Mock.RateLimit,
       {Plug.Cowboy,
        scheme: :http,
        plug: Leywn.Router,
@@ -51,11 +74,11 @@ defmodule Leywn.Application do
 
     opts = [strategy: :one_for_one, name: Leywn.Supervisor]
     result = Supervisor.start_link(children, opts)
-    if match?({:ok, _}, result), do: print_banner(port, tls_port)
+    if match?({:ok, _}, result), do: print_banner(port, tls_port, mocks)
     result
   end
 
-  defp print_banner(port, tls_port) do
+  defp print_banner(port, tls_port, mocks) do
     version = Application.spec(:leywn, :vsn) |> to_string()
 
     IO.puts(
@@ -76,5 +99,21 @@ defmodule Leywn.Application do
       IO.puts("The following environment variables have been set:")
       Enum.each(set_vars, &IO.puts/1)
     end
+
+    print_mocks(mocks)
+  end
+
+  defp print_mocks([]) do
+    IO.puts("No mocks were loaded from #{Leywn.Mock.Config.mocks_dir()}.")
+  end
+
+  defp print_mocks(mocks) do
+    mode = if Leywn.Mock.Config.readonly?(), do: "read-only", else: "writable"
+
+    IO.puts("#{length(mocks)} mock(s) loaded (#{mode}), served under /mocks:")
+
+    Enum.each(mocks, fn name ->
+      IO.puts("  - /mocks/#{name} (docs at /docs/mocks/#{name})")
+    end)
   end
 end

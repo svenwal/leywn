@@ -1,0 +1,2452 @@
+{
+  "destinations": [
+    {
+      "id": "dest-bcn",
+      "city": "Barcelona",
+      "country": "Spain",
+      "region": "Catalonia",
+      "airportCode": "BCN",
+      "timezone": "Europe/Madrid",
+      "latitude": 41.3874,
+      "longitude": 2.1686
+    },
+    {
+      "id": "dest-lis",
+      "city": "Lisbon",
+      "country": "Portugal",
+      "region": "Lisbon District",
+      "airportCode": "LIS",
+      "timezone": "Europe/Lisbon",
+      "latitude": 38.7223,
+      "longitude": -9.1393
+    },
+    {
+      "id": "dest-ath",
+      "city": "Athens",
+      "country": "Greece",
+      "region": "Attica",
+      "airportCode": "ATH",
+      "timezone": "Europe/Athens",
+      "latitude": 37.9838,
+      "longitude": 23.7275
+    },
+    {
+      "id": "dest-pmi",
+      "city": "Palma de Mallorca",
+      "country": "Spain",
+      "region": "Balearic Islands",
+      "airportCode": "PMI",
+      "timezone": "Europe/Madrid",
+      "latitude": 39.5696,
+      "longitude": 2.6502
+    },
+    {
+      "id": "dest-nce",
+      "city": "Nice",
+      "country": "France",
+      "region": "Provence-Alpes-Côte d'Azur",
+      "airportCode": "NCE",
+      "timezone": "Europe/Paris",
+      "latitude": 43.7102,
+      "longitude": 7.262
+    },
+    {
+      "id": "dest-rom",
+      "city": "Rome",
+      "country": "Italy",
+      "region": "Lazio",
+      "airportCode": "FCO",
+      "timezone": "Europe/Rome",
+      "latitude": 41.9028,
+      "longitude": 12.4964
+    },
+    {
+      "id": "dest-inn",
+      "city": "Innsbruck",
+      "country": "Austria",
+      "region": "Tyrol",
+      "airportCode": "INN",
+      "timezone": "Europe/Vienna",
+      "latitude": 47.2692,
+      "longitude": 11.4041
+    },
+    {
+      "id": "dest-rvk",
+      "city": "Reykjavik",
+      "country": "Iceland",
+      "region": "Capital Region",
+      "airportCode": "KEF",
+      "timezone": "Atlantic/Reykjavik",
+      "latitude": 64.1466,
+      "longitude": -21.9426
+    }
+  ],
+  "properties": [
+    {
+      "id": "prop-gothic-loft",
+      "name": "Gothic Quarter Loft",
+      "destinationId": "dest-bcn",
+      "city": "Barcelona",
+      "country": "Spain",
+      "type": "apartment",
+      "neighbourhood": "Ciutat Vella",
+      "bedrooms": 2,
+      "beds": 3,
+      "bathrooms": 1,
+      "maxGuests": 4,
+      "pricePerNightEur": 145,
+      "cleaningFeeEur": 25,
+      "rating": 4.6,
+      "reviewCount": 173,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "kitchen",
+        "washing_machine"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-eixample-suites",
+      "name": "Eixample Garden Suites",
+      "destinationId": "dest-bcn",
+      "city": "Barcelona",
+      "country": "Spain",
+      "type": "hotel",
+      "neighbourhood": "Eixample",
+      "bedrooms": 1,
+      "beds": 2,
+      "bathrooms": 1,
+      "maxGuests": 2,
+      "pricePerNightEur": 210,
+      "cleaningFeeEur": 40,
+      "rating": 4.8,
+      "reviewCount": 194,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "breakfast",
+        "pool",
+        "gym"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-barceloneta-house",
+      "name": "Barceloneta Beach House",
+      "destinationId": "dest-bcn",
+      "city": "Barcelona",
+      "country": "Spain",
+      "type": "villa",
+      "neighbourhood": "Barceloneta",
+      "bedrooms": 4,
+      "beds": 7,
+      "bathrooms": 3,
+      "maxGuests": 8,
+      "pricePerNightEur": 480,
+      "cleaningFeeEur": 85,
+      "rating": 4.9,
+      "reviewCount": 201,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "kitchen",
+        "pool",
+        "parking",
+        "sea_view"
+      ],
+      "instantBook": false
+    },
+    {
+      "id": "prop-alfama-terrace",
+      "name": "Alfama Terrace Apartment",
+      "destinationId": "dest-lis",
+      "city": "Lisbon",
+      "country": "Portugal",
+      "type": "apartment",
+      "neighbourhood": "Alfama",
+      "bedrooms": 2,
+      "beds": 4,
+      "bathrooms": 1,
+      "maxGuests": 5,
+      "pricePerNightEur": 130,
+      "cleaningFeeEur": 25,
+      "rating": 4.5,
+      "reviewCount": 208,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "balcony",
+        "washing_machine"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-belem-riverside",
+      "name": "Belém Riverside Hotel",
+      "destinationId": "dest-lis",
+      "city": "Lisbon",
+      "country": "Portugal",
+      "type": "hotel",
+      "neighbourhood": "Belém",
+      "bedrooms": 1,
+      "beds": 2,
+      "bathrooms": 1,
+      "maxGuests": 3,
+      "pricePerNightEur": 175,
+      "cleaningFeeEur": 30,
+      "rating": 4.4,
+      "reviewCount": 187,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "breakfast",
+        "gym"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-sintra-quinta",
+      "name": "Quinta da Serra",
+      "destinationId": "dest-lis",
+      "city": "Lisbon",
+      "country": "Portugal",
+      "type": "villa",
+      "neighbourhood": "Sintra",
+      "bedrooms": 5,
+      "beds": 9,
+      "bathrooms": 4,
+      "maxGuests": 10,
+      "pricePerNightEur": 520,
+      "cleaningFeeEur": 95,
+      "rating": 4.9,
+      "reviewCount": 145,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "pool",
+        "parking",
+        "garden",
+        "fireplace"
+      ],
+      "instantBook": false
+    },
+    {
+      "id": "prop-plaka-studio",
+      "name": "Plaka Acropolis Studio",
+      "destinationId": "dest-ath",
+      "city": "Athens",
+      "country": "Greece",
+      "type": "apartment",
+      "neighbourhood": "Plaka",
+      "bedrooms": 1,
+      "beds": 2,
+      "bathrooms": 1,
+      "maxGuests": 2,
+      "pricePerNightEur": 95,
+      "cleaningFeeEur": 15,
+      "rating": 4.3,
+      "reviewCount": 194,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "kitchen"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-kolonaki-residence",
+      "name": "Kolonaki Residence",
+      "destinationId": "dest-ath",
+      "city": "Athens",
+      "country": "Greece",
+      "type": "apartment",
+      "neighbourhood": "Kolonaki",
+      "bedrooms": 3,
+      "beds": 5,
+      "bathrooms": 2,
+      "maxGuests": 6,
+      "pricePerNightEur": 240,
+      "cleaningFeeEur": 45,
+      "rating": 4.7,
+      "reviewCount": 166,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "kitchen",
+        "balcony",
+        "washing_machine"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-glyfada-resort",
+      "name": "Glyfada Coast Resort",
+      "destinationId": "dest-ath",
+      "city": "Athens",
+      "country": "Greece",
+      "type": "hotel",
+      "neighbourhood": "Glyfada",
+      "bedrooms": 1,
+      "beds": 2,
+      "bathrooms": 1,
+      "maxGuests": 4,
+      "pricePerNightEur": 265,
+      "cleaningFeeEur": 50,
+      "rating": 4.6,
+      "reviewCount": 180,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "breakfast",
+        "pool",
+        "sea_view",
+        "gym"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-palma-oldtown",
+      "name": "Old Town Palma Flat",
+      "destinationId": "dest-pmi",
+      "city": "Palma de Mallorca",
+      "country": "Spain",
+      "type": "apartment",
+      "neighbourhood": "Casco Antiguo",
+      "bedrooms": 2,
+      "beds": 3,
+      "bathrooms": 1,
+      "maxGuests": 4,
+      "pricePerNightEur": 155,
+      "cleaningFeeEur": 30,
+      "rating": 4.4,
+      "reviewCount": 173,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "kitchen"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-deia-finca",
+      "name": "Finca Son Deià",
+      "destinationId": "dest-pmi",
+      "city": "Palma de Mallorca",
+      "country": "Spain",
+      "type": "villa",
+      "neighbourhood": "Deià",
+      "bedrooms": 6,
+      "beds": 11,
+      "bathrooms": 5,
+      "maxGuests": 12,
+      "pricePerNightEur": 720,
+      "cleaningFeeEur": 130,
+      "rating": 5.0,
+      "reviewCount": 138,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "pool",
+        "parking",
+        "garden",
+        "sea_view",
+        "air_conditioning"
+      ],
+      "instantBook": false
+    },
+    {
+      "id": "prop-alcudia-family",
+      "name": "Alcúdia Family Apartments",
+      "destinationId": "dest-pmi",
+      "city": "Palma de Mallorca",
+      "country": "Spain",
+      "type": "apartment",
+      "neighbourhood": "Alcúdia",
+      "bedrooms": 3,
+      "beds": 6,
+      "bathrooms": 2,
+      "maxGuests": 7,
+      "pricePerNightEur": 195,
+      "cleaningFeeEur": 35,
+      "rating": 4.5,
+      "reviewCount": 215,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "kitchen",
+        "pool",
+        "parking",
+        "crib"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-promenade-suite",
+      "name": "Promenade des Anglais Suite",
+      "destinationId": "dest-nce",
+      "city": "Nice",
+      "country": "France",
+      "type": "hotel",
+      "neighbourhood": "Promenade",
+      "bedrooms": 1,
+      "beds": 2,
+      "bathrooms": 1,
+      "maxGuests": 2,
+      "pricePerNightEur": 320,
+      "cleaningFeeEur": 60,
+      "rating": 4.8,
+      "reviewCount": 229,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "breakfast",
+        "sea_view",
+        "spa"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-vieux-nice-flat",
+      "name": "Vieux Nice Colour Flat",
+      "destinationId": "dest-nce",
+      "city": "Nice",
+      "country": "France",
+      "type": "apartment",
+      "neighbourhood": "Vieux Nice",
+      "bedrooms": 2,
+      "beds": 4,
+      "bathrooms": 1,
+      "maxGuests": 5,
+      "pricePerNightEur": 175,
+      "cleaningFeeEur": 30,
+      "rating": 4.5,
+      "reviewCount": 194,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "kitchen",
+        "balcony"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-cimiez-villa",
+      "name": "Villa Cimiez",
+      "destinationId": "dest-nce",
+      "city": "Nice",
+      "country": "France",
+      "type": "villa",
+      "neighbourhood": "Cimiez",
+      "bedrooms": 4,
+      "beds": 8,
+      "bathrooms": 3,
+      "maxGuests": 9,
+      "pricePerNightEur": 610,
+      "cleaningFeeEur": 110,
+      "rating": 4.9,
+      "reviewCount": 124,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "pool",
+        "parking",
+        "garden",
+        "air_conditioning"
+      ],
+      "instantBook": false
+    },
+    {
+      "id": "prop-trastevere-attic",
+      "name": "Trastevere Attic",
+      "destinationId": "dest-rom",
+      "city": "Rome",
+      "country": "Italy",
+      "type": "apartment",
+      "neighbourhood": "Trastevere",
+      "bedrooms": 2,
+      "beds": 3,
+      "bathrooms": 1,
+      "maxGuests": 4,
+      "pricePerNightEur": 165,
+      "cleaningFeeEur": 30,
+      "rating": 4.6,
+      "reviewCount": 152,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "kitchen",
+        "washing_machine"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-vaticano-hotel",
+      "name": "Vaticano Boutique Hotel",
+      "destinationId": "dest-rom",
+      "city": "Rome",
+      "country": "Italy",
+      "type": "hotel",
+      "neighbourhood": "Prati",
+      "bedrooms": 1,
+      "beds": 2,
+      "bathrooms": 1,
+      "maxGuests": 3,
+      "pricePerNightEur": 230,
+      "cleaningFeeEur": 40,
+      "rating": 4.7,
+      "reviewCount": 201,
+      "amenities": [
+        "wifi",
+        "air_conditioning",
+        "breakfast",
+        "bar"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-appia-villa",
+      "name": "Villa Antica Appia",
+      "destinationId": "dest-rom",
+      "city": "Rome",
+      "country": "Italy",
+      "type": "villa",
+      "neighbourhood": "Appia Antica",
+      "bedrooms": 5,
+      "beds": 10,
+      "bathrooms": 4,
+      "maxGuests": 11,
+      "pricePerNightEur": 640,
+      "cleaningFeeEur": 115,
+      "rating": 4.8,
+      "reviewCount": 166,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "pool",
+        "parking",
+        "garden"
+      ],
+      "instantBook": false
+    },
+    {
+      "id": "prop-altstadt-chalet",
+      "name": "Altstadt Chalet",
+      "destinationId": "dest-inn",
+      "city": "Innsbruck",
+      "country": "Austria",
+      "type": "apartment",
+      "neighbourhood": "Altstadt",
+      "bedrooms": 3,
+      "beds": 5,
+      "bathrooms": 2,
+      "maxGuests": 6,
+      "pricePerNightEur": 185,
+      "cleaningFeeEur": 35,
+      "rating": 4.7,
+      "reviewCount": 145,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "balcony",
+        "parking",
+        "ski_storage"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-nordkette-lodge",
+      "name": "Nordkette Mountain Lodge",
+      "destinationId": "dest-inn",
+      "city": "Innsbruck",
+      "country": "Austria",
+      "type": "villa",
+      "neighbourhood": "Hungerburg",
+      "bedrooms": 5,
+      "beds": 10,
+      "bathrooms": 3,
+      "maxGuests": 10,
+      "pricePerNightEur": 540,
+      "cleaningFeeEur": 95,
+      "rating": 4.9,
+      "reviewCount": 208,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "sauna",
+        "parking",
+        "fireplace",
+        "ski_storage"
+      ],
+      "instantBook": false
+    },
+    {
+      "id": "prop-igls-hotel",
+      "name": "Igls Panorama Hotel",
+      "destinationId": "dest-inn",
+      "city": "Innsbruck",
+      "country": "Austria",
+      "type": "hotel",
+      "neighbourhood": "Igls",
+      "bedrooms": 1,
+      "beds": 2,
+      "bathrooms": 1,
+      "maxGuests": 4,
+      "pricePerNightEur": 215,
+      "cleaningFeeEur": 40,
+      "rating": 4.5,
+      "reviewCount": 173,
+      "amenities": [
+        "wifi",
+        "breakfast",
+        "spa",
+        "gym",
+        "parking"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-laugavegur-apartment",
+      "name": "Laugavegur City Apartment",
+      "destinationId": "dest-rvk",
+      "city": "Reykjavik",
+      "country": "Iceland",
+      "type": "apartment",
+      "neighbourhood": "Miðborg",
+      "bedrooms": 2,
+      "beds": 4,
+      "bathrooms": 1,
+      "maxGuests": 5,
+      "pricePerNightEur": 205,
+      "cleaningFeeEur": 35,
+      "rating": 4.6,
+      "reviewCount": 215,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "washing_machine",
+        "heating"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-blue-lagoon-suites",
+      "name": "Blue Lagoon Suites",
+      "destinationId": "dest-rvk",
+      "city": "Reykjavik",
+      "country": "Iceland",
+      "type": "hotel",
+      "neighbourhood": "Grindavík",
+      "bedrooms": 1,
+      "beds": 2,
+      "bathrooms": 1,
+      "maxGuests": 2,
+      "pricePerNightEur": 395,
+      "cleaningFeeEur": 70,
+      "rating": 4.8,
+      "reviewCount": 166,
+      "amenities": [
+        "wifi",
+        "breakfast",
+        "spa",
+        "hot_tub",
+        "parking"
+      ],
+      "instantBook": true
+    },
+    {
+      "id": "prop-golden-circle-cabin",
+      "name": "Golden Circle Cabin",
+      "destinationId": "dest-rvk",
+      "city": "Reykjavik",
+      "country": "Iceland",
+      "type": "villa",
+      "neighbourhood": "Selfoss",
+      "bedrooms": 3,
+      "beds": 6,
+      "bathrooms": 2,
+      "maxGuests": 7,
+      "pricePerNightEur": 355,
+      "cleaningFeeEur": 65,
+      "rating": 4.7,
+      "reviewCount": 173,
+      "amenities": [
+        "wifi",
+        "kitchen",
+        "hot_tub",
+        "parking",
+        "fireplace",
+        "northern_lights_view"
+      ],
+      "instantBook": false
+    }
+  ],
+  "availability": [
+    {
+      "id": "avail-gothic-loft-w1",
+      "propertyId": "prop-gothic-loft",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 145
+    },
+    {
+      "id": "avail-gothic-loft-w2",
+      "propertyId": "prop-gothic-loft",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 145
+    },
+    {
+      "id": "avail-gothic-loft-w3",
+      "propertyId": "prop-gothic-loft",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 145
+    },
+    {
+      "id": "avail-gothic-loft-w4",
+      "propertyId": "prop-gothic-loft",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 145
+    },
+    {
+      "id": "avail-gothic-loft-w5",
+      "propertyId": "prop-gothic-loft",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 123
+    },
+    {
+      "id": "avail-gothic-loft-w6",
+      "propertyId": "prop-gothic-loft",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 123
+    },
+    {
+      "id": "avail-gothic-loft-w7",
+      "propertyId": "prop-gothic-loft",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 123
+    },
+    {
+      "id": "avail-gothic-loft-w8",
+      "propertyId": "prop-gothic-loft",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 123
+    },
+    {
+      "id": "avail-eixample-suites-w1",
+      "propertyId": "prop-eixample-suites",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 210
+    },
+    {
+      "id": "avail-eixample-suites-w2",
+      "propertyId": "prop-eixample-suites",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 210
+    },
+    {
+      "id": "avail-eixample-suites-w3",
+      "propertyId": "prop-eixample-suites",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 210
+    },
+    {
+      "id": "avail-eixample-suites-w4",
+      "propertyId": "prop-eixample-suites",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 210
+    },
+    {
+      "id": "avail-eixample-suites-w5",
+      "propertyId": "prop-eixample-suites",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 178
+    },
+    {
+      "id": "avail-eixample-suites-w6",
+      "propertyId": "prop-eixample-suites",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 178
+    },
+    {
+      "id": "avail-eixample-suites-w7",
+      "propertyId": "prop-eixample-suites",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 178
+    },
+    {
+      "id": "avail-eixample-suites-w8",
+      "propertyId": "prop-eixample-suites",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 178
+    },
+    {
+      "id": "avail-barceloneta-house-w1",
+      "propertyId": "prop-barceloneta-house",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 480
+    },
+    {
+      "id": "avail-barceloneta-house-w2",
+      "propertyId": "prop-barceloneta-house",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 480
+    },
+    {
+      "id": "avail-barceloneta-house-w3",
+      "propertyId": "prop-barceloneta-house",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 480
+    },
+    {
+      "id": "avail-barceloneta-house-w4",
+      "propertyId": "prop-barceloneta-house",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 480
+    },
+    {
+      "id": "avail-barceloneta-house-w5",
+      "propertyId": "prop-barceloneta-house",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 408
+    },
+    {
+      "id": "avail-barceloneta-house-w6",
+      "propertyId": "prop-barceloneta-house",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 408
+    },
+    {
+      "id": "avail-barceloneta-house-w7",
+      "propertyId": "prop-barceloneta-house",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 408
+    },
+    {
+      "id": "avail-barceloneta-house-w8",
+      "propertyId": "prop-barceloneta-house",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 408
+    },
+    {
+      "id": "avail-alfama-terrace-w1",
+      "propertyId": "prop-alfama-terrace",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 130
+    },
+    {
+      "id": "avail-alfama-terrace-w2",
+      "propertyId": "prop-alfama-terrace",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 130
+    },
+    {
+      "id": "avail-alfama-terrace-w3",
+      "propertyId": "prop-alfama-terrace",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 130
+    },
+    {
+      "id": "avail-alfama-terrace-w4",
+      "propertyId": "prop-alfama-terrace",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 130
+    },
+    {
+      "id": "avail-alfama-terrace-w5",
+      "propertyId": "prop-alfama-terrace",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 110
+    },
+    {
+      "id": "avail-alfama-terrace-w6",
+      "propertyId": "prop-alfama-terrace",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 110
+    },
+    {
+      "id": "avail-alfama-terrace-w7",
+      "propertyId": "prop-alfama-terrace",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 110
+    },
+    {
+      "id": "avail-alfama-terrace-w8",
+      "propertyId": "prop-alfama-terrace",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 110
+    },
+    {
+      "id": "avail-belem-riverside-w1",
+      "propertyId": "prop-belem-riverside",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 175
+    },
+    {
+      "id": "avail-belem-riverside-w2",
+      "propertyId": "prop-belem-riverside",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 175
+    },
+    {
+      "id": "avail-belem-riverside-w3",
+      "propertyId": "prop-belem-riverside",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 175
+    },
+    {
+      "id": "avail-belem-riverside-w4",
+      "propertyId": "prop-belem-riverside",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 175
+    },
+    {
+      "id": "avail-belem-riverside-w5",
+      "propertyId": "prop-belem-riverside",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 149
+    },
+    {
+      "id": "avail-belem-riverside-w6",
+      "propertyId": "prop-belem-riverside",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 149
+    },
+    {
+      "id": "avail-belem-riverside-w7",
+      "propertyId": "prop-belem-riverside",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 149
+    },
+    {
+      "id": "avail-belem-riverside-w8",
+      "propertyId": "prop-belem-riverside",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 149
+    },
+    {
+      "id": "avail-sintra-quinta-w1",
+      "propertyId": "prop-sintra-quinta",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 520
+    },
+    {
+      "id": "avail-sintra-quinta-w2",
+      "propertyId": "prop-sintra-quinta",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 520
+    },
+    {
+      "id": "avail-sintra-quinta-w3",
+      "propertyId": "prop-sintra-quinta",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 520
+    },
+    {
+      "id": "avail-sintra-quinta-w4",
+      "propertyId": "prop-sintra-quinta",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 520
+    },
+    {
+      "id": "avail-sintra-quinta-w5",
+      "propertyId": "prop-sintra-quinta",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 442
+    },
+    {
+      "id": "avail-sintra-quinta-w6",
+      "propertyId": "prop-sintra-quinta",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 442
+    },
+    {
+      "id": "avail-sintra-quinta-w7",
+      "propertyId": "prop-sintra-quinta",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 442
+    },
+    {
+      "id": "avail-sintra-quinta-w8",
+      "propertyId": "prop-sintra-quinta",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 442
+    },
+    {
+      "id": "avail-plaka-studio-w1",
+      "propertyId": "prop-plaka-studio",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 95
+    },
+    {
+      "id": "avail-plaka-studio-w2",
+      "propertyId": "prop-plaka-studio",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 95
+    },
+    {
+      "id": "avail-plaka-studio-w3",
+      "propertyId": "prop-plaka-studio",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 95
+    },
+    {
+      "id": "avail-plaka-studio-w4",
+      "propertyId": "prop-plaka-studio",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 95
+    },
+    {
+      "id": "avail-plaka-studio-w5",
+      "propertyId": "prop-plaka-studio",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 81
+    },
+    {
+      "id": "avail-plaka-studio-w6",
+      "propertyId": "prop-plaka-studio",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 81
+    },
+    {
+      "id": "avail-plaka-studio-w7",
+      "propertyId": "prop-plaka-studio",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 81
+    },
+    {
+      "id": "avail-plaka-studio-w8",
+      "propertyId": "prop-plaka-studio",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 81
+    },
+    {
+      "id": "avail-kolonaki-residence-w1",
+      "propertyId": "prop-kolonaki-residence",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 240
+    },
+    {
+      "id": "avail-kolonaki-residence-w2",
+      "propertyId": "prop-kolonaki-residence",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 240
+    },
+    {
+      "id": "avail-kolonaki-residence-w3",
+      "propertyId": "prop-kolonaki-residence",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 240
+    },
+    {
+      "id": "avail-kolonaki-residence-w4",
+      "propertyId": "prop-kolonaki-residence",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 240
+    },
+    {
+      "id": "avail-kolonaki-residence-w5",
+      "propertyId": "prop-kolonaki-residence",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 204
+    },
+    {
+      "id": "avail-kolonaki-residence-w6",
+      "propertyId": "prop-kolonaki-residence",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 204
+    },
+    {
+      "id": "avail-kolonaki-residence-w7",
+      "propertyId": "prop-kolonaki-residence",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 204
+    },
+    {
+      "id": "avail-kolonaki-residence-w8",
+      "propertyId": "prop-kolonaki-residence",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 204
+    },
+    {
+      "id": "avail-glyfada-resort-w1",
+      "propertyId": "prop-glyfada-resort",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 265
+    },
+    {
+      "id": "avail-glyfada-resort-w2",
+      "propertyId": "prop-glyfada-resort",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 265
+    },
+    {
+      "id": "avail-glyfada-resort-w3",
+      "propertyId": "prop-glyfada-resort",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 265
+    },
+    {
+      "id": "avail-glyfada-resort-w4",
+      "propertyId": "prop-glyfada-resort",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 265
+    },
+    {
+      "id": "avail-glyfada-resort-w5",
+      "propertyId": "prop-glyfada-resort",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 225
+    },
+    {
+      "id": "avail-glyfada-resort-w6",
+      "propertyId": "prop-glyfada-resort",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 225
+    },
+    {
+      "id": "avail-glyfada-resort-w7",
+      "propertyId": "prop-glyfada-resort",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 225
+    },
+    {
+      "id": "avail-glyfada-resort-w8",
+      "propertyId": "prop-glyfada-resort",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 225
+    },
+    {
+      "id": "avail-palma-oldtown-w1",
+      "propertyId": "prop-palma-oldtown",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 155
+    },
+    {
+      "id": "avail-palma-oldtown-w2",
+      "propertyId": "prop-palma-oldtown",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 155
+    },
+    {
+      "id": "avail-palma-oldtown-w3",
+      "propertyId": "prop-palma-oldtown",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 155
+    },
+    {
+      "id": "avail-palma-oldtown-w4",
+      "propertyId": "prop-palma-oldtown",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 155
+    },
+    {
+      "id": "avail-palma-oldtown-w5",
+      "propertyId": "prop-palma-oldtown",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 132
+    },
+    {
+      "id": "avail-palma-oldtown-w6",
+      "propertyId": "prop-palma-oldtown",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 132
+    },
+    {
+      "id": "avail-palma-oldtown-w7",
+      "propertyId": "prop-palma-oldtown",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 132
+    },
+    {
+      "id": "avail-palma-oldtown-w8",
+      "propertyId": "prop-palma-oldtown",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 132
+    },
+    {
+      "id": "avail-deia-finca-w1",
+      "propertyId": "prop-deia-finca",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 720
+    },
+    {
+      "id": "avail-deia-finca-w2",
+      "propertyId": "prop-deia-finca",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 720
+    },
+    {
+      "id": "avail-deia-finca-w3",
+      "propertyId": "prop-deia-finca",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 720
+    },
+    {
+      "id": "avail-deia-finca-w4",
+      "propertyId": "prop-deia-finca",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 720
+    },
+    {
+      "id": "avail-deia-finca-w5",
+      "propertyId": "prop-deia-finca",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 612
+    },
+    {
+      "id": "avail-deia-finca-w6",
+      "propertyId": "prop-deia-finca",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 612
+    },
+    {
+      "id": "avail-deia-finca-w7",
+      "propertyId": "prop-deia-finca",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 612
+    },
+    {
+      "id": "avail-deia-finca-w8",
+      "propertyId": "prop-deia-finca",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 612
+    },
+    {
+      "id": "avail-alcudia-family-w1",
+      "propertyId": "prop-alcudia-family",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 195
+    },
+    {
+      "id": "avail-alcudia-family-w2",
+      "propertyId": "prop-alcudia-family",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 195
+    },
+    {
+      "id": "avail-alcudia-family-w3",
+      "propertyId": "prop-alcudia-family",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 195
+    },
+    {
+      "id": "avail-alcudia-family-w4",
+      "propertyId": "prop-alcudia-family",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 195
+    },
+    {
+      "id": "avail-alcudia-family-w5",
+      "propertyId": "prop-alcudia-family",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 166
+    },
+    {
+      "id": "avail-alcudia-family-w6",
+      "propertyId": "prop-alcudia-family",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 166
+    },
+    {
+      "id": "avail-alcudia-family-w7",
+      "propertyId": "prop-alcudia-family",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 166
+    },
+    {
+      "id": "avail-alcudia-family-w8",
+      "propertyId": "prop-alcudia-family",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 166
+    },
+    {
+      "id": "avail-promenade-suite-w1",
+      "propertyId": "prop-promenade-suite",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 320
+    },
+    {
+      "id": "avail-promenade-suite-w2",
+      "propertyId": "prop-promenade-suite",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 320
+    },
+    {
+      "id": "avail-promenade-suite-w3",
+      "propertyId": "prop-promenade-suite",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 320
+    },
+    {
+      "id": "avail-promenade-suite-w4",
+      "propertyId": "prop-promenade-suite",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 320
+    },
+    {
+      "id": "avail-promenade-suite-w5",
+      "propertyId": "prop-promenade-suite",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 272
+    },
+    {
+      "id": "avail-promenade-suite-w6",
+      "propertyId": "prop-promenade-suite",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 272
+    },
+    {
+      "id": "avail-promenade-suite-w7",
+      "propertyId": "prop-promenade-suite",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 272
+    },
+    {
+      "id": "avail-promenade-suite-w8",
+      "propertyId": "prop-promenade-suite",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 272
+    },
+    {
+      "id": "avail-vieux-nice-flat-w1",
+      "propertyId": "prop-vieux-nice-flat",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 175
+    },
+    {
+      "id": "avail-vieux-nice-flat-w2",
+      "propertyId": "prop-vieux-nice-flat",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 175
+    },
+    {
+      "id": "avail-vieux-nice-flat-w3",
+      "propertyId": "prop-vieux-nice-flat",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 175
+    },
+    {
+      "id": "avail-vieux-nice-flat-w4",
+      "propertyId": "prop-vieux-nice-flat",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 175
+    },
+    {
+      "id": "avail-vieux-nice-flat-w5",
+      "propertyId": "prop-vieux-nice-flat",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 149
+    },
+    {
+      "id": "avail-vieux-nice-flat-w6",
+      "propertyId": "prop-vieux-nice-flat",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 149
+    },
+    {
+      "id": "avail-vieux-nice-flat-w7",
+      "propertyId": "prop-vieux-nice-flat",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 149
+    },
+    {
+      "id": "avail-vieux-nice-flat-w8",
+      "propertyId": "prop-vieux-nice-flat",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 149
+    },
+    {
+      "id": "avail-cimiez-villa-w1",
+      "propertyId": "prop-cimiez-villa",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 610
+    },
+    {
+      "id": "avail-cimiez-villa-w2",
+      "propertyId": "prop-cimiez-villa",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 610
+    },
+    {
+      "id": "avail-cimiez-villa-w3",
+      "propertyId": "prop-cimiez-villa",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 610
+    },
+    {
+      "id": "avail-cimiez-villa-w4",
+      "propertyId": "prop-cimiez-villa",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 610
+    },
+    {
+      "id": "avail-cimiez-villa-w5",
+      "propertyId": "prop-cimiez-villa",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 518
+    },
+    {
+      "id": "avail-cimiez-villa-w6",
+      "propertyId": "prop-cimiez-villa",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 518
+    },
+    {
+      "id": "avail-cimiez-villa-w7",
+      "propertyId": "prop-cimiez-villa",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 518
+    },
+    {
+      "id": "avail-cimiez-villa-w8",
+      "propertyId": "prop-cimiez-villa",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 518
+    },
+    {
+      "id": "avail-trastevere-attic-w1",
+      "propertyId": "prop-trastevere-attic",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 165
+    },
+    {
+      "id": "avail-trastevere-attic-w2",
+      "propertyId": "prop-trastevere-attic",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 165
+    },
+    {
+      "id": "avail-trastevere-attic-w3",
+      "propertyId": "prop-trastevere-attic",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 165
+    },
+    {
+      "id": "avail-trastevere-attic-w4",
+      "propertyId": "prop-trastevere-attic",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 165
+    },
+    {
+      "id": "avail-trastevere-attic-w5",
+      "propertyId": "prop-trastevere-attic",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 140
+    },
+    {
+      "id": "avail-trastevere-attic-w6",
+      "propertyId": "prop-trastevere-attic",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 140
+    },
+    {
+      "id": "avail-trastevere-attic-w7",
+      "propertyId": "prop-trastevere-attic",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 140
+    },
+    {
+      "id": "avail-trastevere-attic-w8",
+      "propertyId": "prop-trastevere-attic",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 140
+    },
+    {
+      "id": "avail-vaticano-hotel-w1",
+      "propertyId": "prop-vaticano-hotel",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 230
+    },
+    {
+      "id": "avail-vaticano-hotel-w2",
+      "propertyId": "prop-vaticano-hotel",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 230
+    },
+    {
+      "id": "avail-vaticano-hotel-w3",
+      "propertyId": "prop-vaticano-hotel",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 230
+    },
+    {
+      "id": "avail-vaticano-hotel-w4",
+      "propertyId": "prop-vaticano-hotel",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 230
+    },
+    {
+      "id": "avail-vaticano-hotel-w5",
+      "propertyId": "prop-vaticano-hotel",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 196
+    },
+    {
+      "id": "avail-vaticano-hotel-w6",
+      "propertyId": "prop-vaticano-hotel",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 196
+    },
+    {
+      "id": "avail-vaticano-hotel-w7",
+      "propertyId": "prop-vaticano-hotel",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 196
+    },
+    {
+      "id": "avail-vaticano-hotel-w8",
+      "propertyId": "prop-vaticano-hotel",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 196
+    },
+    {
+      "id": "avail-appia-villa-w1",
+      "propertyId": "prop-appia-villa",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 640
+    },
+    {
+      "id": "avail-appia-villa-w2",
+      "propertyId": "prop-appia-villa",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 640
+    },
+    {
+      "id": "avail-appia-villa-w3",
+      "propertyId": "prop-appia-villa",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 640
+    },
+    {
+      "id": "avail-appia-villa-w4",
+      "propertyId": "prop-appia-villa",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 640
+    },
+    {
+      "id": "avail-appia-villa-w5",
+      "propertyId": "prop-appia-villa",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 544
+    },
+    {
+      "id": "avail-appia-villa-w6",
+      "propertyId": "prop-appia-villa",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 544
+    },
+    {
+      "id": "avail-appia-villa-w7",
+      "propertyId": "prop-appia-villa",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 544
+    },
+    {
+      "id": "avail-appia-villa-w8",
+      "propertyId": "prop-appia-villa",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 544
+    },
+    {
+      "id": "avail-altstadt-chalet-w1",
+      "propertyId": "prop-altstadt-chalet",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 185
+    },
+    {
+      "id": "avail-altstadt-chalet-w2",
+      "propertyId": "prop-altstadt-chalet",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 185
+    },
+    {
+      "id": "avail-altstadt-chalet-w3",
+      "propertyId": "prop-altstadt-chalet",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 185
+    },
+    {
+      "id": "avail-altstadt-chalet-w4",
+      "propertyId": "prop-altstadt-chalet",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 185
+    },
+    {
+      "id": "avail-altstadt-chalet-w5",
+      "propertyId": "prop-altstadt-chalet",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 157
+    },
+    {
+      "id": "avail-altstadt-chalet-w6",
+      "propertyId": "prop-altstadt-chalet",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 157
+    },
+    {
+      "id": "avail-altstadt-chalet-w7",
+      "propertyId": "prop-altstadt-chalet",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 157
+    },
+    {
+      "id": "avail-altstadt-chalet-w8",
+      "propertyId": "prop-altstadt-chalet",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 157
+    },
+    {
+      "id": "avail-nordkette-lodge-w1",
+      "propertyId": "prop-nordkette-lodge",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 540
+    },
+    {
+      "id": "avail-nordkette-lodge-w2",
+      "propertyId": "prop-nordkette-lodge",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 540
+    },
+    {
+      "id": "avail-nordkette-lodge-w3",
+      "propertyId": "prop-nordkette-lodge",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 540
+    },
+    {
+      "id": "avail-nordkette-lodge-w4",
+      "propertyId": "prop-nordkette-lodge",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 540
+    },
+    {
+      "id": "avail-nordkette-lodge-w5",
+      "propertyId": "prop-nordkette-lodge",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 459
+    },
+    {
+      "id": "avail-nordkette-lodge-w6",
+      "propertyId": "prop-nordkette-lodge",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 459
+    },
+    {
+      "id": "avail-nordkette-lodge-w7",
+      "propertyId": "prop-nordkette-lodge",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 459
+    },
+    {
+      "id": "avail-nordkette-lodge-w8",
+      "propertyId": "prop-nordkette-lodge",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 459
+    },
+    {
+      "id": "avail-igls-hotel-w1",
+      "propertyId": "prop-igls-hotel",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 215
+    },
+    {
+      "id": "avail-igls-hotel-w2",
+      "propertyId": "prop-igls-hotel",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 215
+    },
+    {
+      "id": "avail-igls-hotel-w3",
+      "propertyId": "prop-igls-hotel",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 215
+    },
+    {
+      "id": "avail-igls-hotel-w4",
+      "propertyId": "prop-igls-hotel",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 215
+    },
+    {
+      "id": "avail-igls-hotel-w5",
+      "propertyId": "prop-igls-hotel",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 183
+    },
+    {
+      "id": "avail-igls-hotel-w6",
+      "propertyId": "prop-igls-hotel",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 183
+    },
+    {
+      "id": "avail-igls-hotel-w7",
+      "propertyId": "prop-igls-hotel",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 183
+    },
+    {
+      "id": "avail-igls-hotel-w8",
+      "propertyId": "prop-igls-hotel",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 183
+    },
+    {
+      "id": "avail-laugavegur-apartment-w1",
+      "propertyId": "prop-laugavegur-apartment",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 205
+    },
+    {
+      "id": "avail-laugavegur-apartment-w2",
+      "propertyId": "prop-laugavegur-apartment",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 205
+    },
+    {
+      "id": "avail-laugavegur-apartment-w3",
+      "propertyId": "prop-laugavegur-apartment",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 205
+    },
+    {
+      "id": "avail-laugavegur-apartment-w4",
+      "propertyId": "prop-laugavegur-apartment",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 205
+    },
+    {
+      "id": "avail-laugavegur-apartment-w5",
+      "propertyId": "prop-laugavegur-apartment",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 174
+    },
+    {
+      "id": "avail-laugavegur-apartment-w6",
+      "propertyId": "prop-laugavegur-apartment",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 174
+    },
+    {
+      "id": "avail-laugavegur-apartment-w7",
+      "propertyId": "prop-laugavegur-apartment",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 174
+    },
+    {
+      "id": "avail-laugavegur-apartment-w8",
+      "propertyId": "prop-laugavegur-apartment",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 174
+    },
+    {
+      "id": "avail-blue-lagoon-suites-w1",
+      "propertyId": "prop-blue-lagoon-suites",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 395
+    },
+    {
+      "id": "avail-blue-lagoon-suites-w2",
+      "propertyId": "prop-blue-lagoon-suites",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 395
+    },
+    {
+      "id": "avail-blue-lagoon-suites-w3",
+      "propertyId": "prop-blue-lagoon-suites",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 395
+    },
+    {
+      "id": "avail-blue-lagoon-suites-w4",
+      "propertyId": "prop-blue-lagoon-suites",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 395
+    },
+    {
+      "id": "avail-blue-lagoon-suites-w5",
+      "propertyId": "prop-blue-lagoon-suites",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": false,
+      "minimumNights": 3,
+      "pricePerNightEur": 336
+    },
+    {
+      "id": "avail-blue-lagoon-suites-w6",
+      "propertyId": "prop-blue-lagoon-suites",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 336
+    },
+    {
+      "id": "avail-blue-lagoon-suites-w7",
+      "propertyId": "prop-blue-lagoon-suites",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 336
+    },
+    {
+      "id": "avail-blue-lagoon-suites-w8",
+      "propertyId": "prop-blue-lagoon-suites",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 3,
+      "pricePerNightEur": 336
+    },
+    {
+      "id": "avail-golden-circle-cabin-w1",
+      "propertyId": "prop-golden-circle-cabin",
+      "from": "2026-09-01",
+      "to": "2026-09-08",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 355
+    },
+    {
+      "id": "avail-golden-circle-cabin-w2",
+      "propertyId": "prop-golden-circle-cabin",
+      "from": "2026-09-08",
+      "to": "2026-09-15",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 355
+    },
+    {
+      "id": "avail-golden-circle-cabin-w3",
+      "propertyId": "prop-golden-circle-cabin",
+      "from": "2026-09-15",
+      "to": "2026-09-22",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 355
+    },
+    {
+      "id": "avail-golden-circle-cabin-w4",
+      "propertyId": "prop-golden-circle-cabin",
+      "from": "2026-09-22",
+      "to": "2026-09-29",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 355
+    },
+    {
+      "id": "avail-golden-circle-cabin-w5",
+      "propertyId": "prop-golden-circle-cabin",
+      "from": "2026-09-29",
+      "to": "2026-10-06",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 302
+    },
+    {
+      "id": "avail-golden-circle-cabin-w6",
+      "propertyId": "prop-golden-circle-cabin",
+      "from": "2026-10-06",
+      "to": "2026-10-13",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 302
+    },
+    {
+      "id": "avail-golden-circle-cabin-w7",
+      "propertyId": "prop-golden-circle-cabin",
+      "from": "2026-10-13",
+      "to": "2026-10-20",
+      "available": false,
+      "minimumNights": 7,
+      "pricePerNightEur": 302
+    },
+    {
+      "id": "avail-golden-circle-cabin-w8",
+      "propertyId": "prop-golden-circle-cabin",
+      "from": "2026-10-20",
+      "to": "2026-10-27",
+      "available": true,
+      "minimumNights": 7,
+      "pricePerNightEur": 302
+    }
+  ],
+  "bookings": [
+    {
+      "id": "abk-1001",
+      "propertyId": "prop-gothic-loft",
+      "guestName": "Marta Nowak",
+      "guests": 3,
+      "checkIn": "2026-09-08",
+      "checkOut": "2026-09-15",
+      "nights": 7,
+      "totalEur": 1041,
+      "status": "confirmed",
+      "bookedAt": "2026-07-02T09:14:00Z"
+    },
+    {
+      "id": "abk-1002",
+      "propertyId": "prop-deia-finca",
+      "guestName": "Thomas Berger",
+      "guests": 10,
+      "checkIn": "2026-09-01",
+      "checkOut": "2026-09-08",
+      "nights": 7,
+      "totalEur": 5170,
+      "status": "confirmed",
+      "bookedAt": "2026-06-18T16:40:00Z"
+    },
+    {
+      "id": "abk-1003",
+      "propertyId": "prop-nordkette-lodge",
+      "guestName": "Aoife Byrne",
+      "guests": 8,
+      "checkIn": "2026-10-06",
+      "checkOut": "2026-10-13",
+      "nights": 7,
+      "totalEur": 3312,
+      "status": "pending",
+      "bookedAt": "2026-08-03T11:05:00Z"
+    }
+  ]
+}

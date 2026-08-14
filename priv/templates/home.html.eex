@@ -50,6 +50,11 @@
       color: #0B1020; padding: 1.5rem 3rem 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
     .leywn-hero p { margin: 0 0 0.6rem; opacity: 0.85; font-size: 1.05rem; }
     .leywn-hero code { background: rgba(255,255,255,0.12); padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9em; }
+    .leywn-mocks { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(11,16,32,0.15); }
+    .leywn-mocks h2 { margin: 0 0 0.5rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
+    .leywn-mocks ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .leywn-mocks a { display: inline-block; padding: 0.35rem 0.8rem; border-radius: 6px; background: #1a1a2e; color: #EDE7FF; text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+    .leywn-mocks a:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
@@ -73,6 +78,17 @@
   <div class="leywn-hero">
     <p>Leywn is the last demo backend you will ever need. Whether you are building a new API client, stress-testing a retry strategy, demonstrating an integration, or just need a quick echo server for a workshop — Leywn has you covered with a single <code>docker run</code>.</p>
     <p>Every endpoint is purposefully designed: mirror your requests with <code>/echo</code>, simulate network latency with <code>/delay</code>, stream chunked responses with <code>/stream</code>, test all your auth flows, generate random data, hash and encode payloads, and more. Zero dependencies to manage, zero state to worry about, and everything tunable via <code>LEYWN_</code> environment variables.</p>
+    <p>Need a REST API with data behind it? Drop a JSON file into a folder under <code>/mocks</code> and Leywn serves it as a full CRUD API — with its own generated OpenAPI, linked below.</p>
+<%= if mock_links != [] do %>
+    <div class="leywn-mocks">
+      <h2>Mock APIs</h2>
+      <ul>
+<%= for mock <- mock_links do %>
+        <li><a href="<%= mock.docs_url %>"><%= mock.name %></a></li>
+<% end %>
+      </ul>
+    </div>
+<% end %>
   </div>
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist@5.32.11/swagger-ui-bundle.js"

@@ -4,7 +4,7 @@
 [![Docker Hub](https://img.shields.io/docker/pulls/svenwal/leywn)](https://hub.docker.com/r/svenwal/leywn)
 [![Live](https://img.shields.io/badge/live-leywn.org-blue)](https://leywn.org)
 
-Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives you a single deployable service that echoes requests, enforces every common authentication scheme, returns arbitrary HTTP status codes, generates random data, and serves a live Swagger UI — so you can test clients, proxies, load balancers, and API gateways without standing up any real backend.
+Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives you a single deployable service that echoes requests, enforces every common authentication scheme, returns arbitrary HTTP status codes, generates random data, serves mock REST APIs from plain JSON files, and hosts a live Swagger UI — so you can test clients, proxies, load balancers, and API gateways without standing up any real backend.
 
 ---
 
@@ -40,6 +40,7 @@ Leywn is an all-in-one demo/test backend for APIs and HTTP services. It gives yo
   - [/format/* — Format and prettify](#format--format-and-prettify)
   - [/encode and /decode — Codec](#encode-and-decode--codec)
   - [/hash/* — Hashing](#hash--hashing)
+  - [/mocks — Mock REST APIs](#mocks--mock-rest-apis)
 - [Content negotiation](#content-negotiation)
 - [Use cases](#use-cases)
 - [Code structure](#code-structure)
@@ -147,6 +148,32 @@ only one aborts startup rather than silently falling back to a generated
 certificate. The name and domain files are read once at first use and cached, so
 replacing them requires a restart.
 
+### Mock configuration
+
+The mock endpoints are the only part of Leywn that accepts writes and keeps
+state between requests, so they carry their own limits. The defaults are sized
+for a demo backend: enough room to show a CRUD flow, not enough to store a
+workload. See [/mocks](#mocks--mock-rest-apis) for what they do in practice.
+
+| Variable | Default | Description |
+|---|---|---|
+| `LEYWN_MOCKS_DIR` | `priv/mocks` | Directory scanned at startup; each subfolder becomes one mock |
+| `LEYWN_MOCK_READONLY` | _(unset)_ | When set to `true`, only `GET` is served and no state is ever created |
+| `LEYWN_MOCK_ENTRY_TTL_SECONDS` | `300` | Seconds after which a written record — or a deletion — is forgotten |
+| `LEYWN_MOCK_MAX_NEW_ENTRIES` | `100` | Maximum changes held per mock; further writes return `507` |
+| `LEYWN_MOCK_MAX_OVERLAY_BYTES` | `1048576` | Total bytes of held changes across all mocks (1 MiB) |
+| `LEYWN_MOCK_WRITE_RATE_LIMIT` | `60` | Mutating requests per minute, per client IP |
+| `LEYWN_MOCK_WRITE_RATE_LIMIT_GLOBAL` | `600` | Mutating requests per minute across all clients |
+| `LEYWN_MOCK_RATE_BUCKETS` | `10000` | Per-IP rate-limit rows tracked before falling back to the global budget alone |
+| `LEYWN_MOCK_MAX_BODY_BYTES` | `16384` | Maximum body accepted by a mutating mock request (16 KB) |
+| `LEYWN_MOCK_MAX_DEPTH` | `16` | Maximum nesting depth of a write body |
+| `LEYWN_MOCK_MAX_KEYS` | `100` | Maximum keys in any single object of a write body |
+| `LEYWN_MOCK_MAX_PAGE_SIZE` | `200` | Maximum records returned by one collection read |
+| `LEYWN_MOCK_MAX_FILTERS` | `10` | Maximum query parameters honoured as field filters |
+| `LEYWN_MOCK_MAX_FILE_BYTES` | `8388608` | Maximum size of a mock's JSON file (8 MiB); larger files are skipped with a warning |
+| `LEYWN_MOCK_MAX_MOCKS` | `50` | Maximum number of mocks loaded from the directory |
+| `LEYWN_MOCK_MAX_COLLECTIONS` | `100` | Maximum collections within a single mock |
+
 Example with custom ports:
 
 ```bash
@@ -190,7 +217,7 @@ Returns server status, version, and uptime. Suitable for use as a Kubernetes liv
 
 ```bash
 curl http://localhost:4000/health
-# {"status":"ok","version":"1.0.0","uptime_seconds":42}
+# {"status":"ok","version":"1.1.0-beta1","uptime_seconds":42}
 ```
 
 ---
@@ -830,6 +857,176 @@ curl http://localhost:4000/time/Asia/Tokyo
 
 ---
 
+### /mocks — Mock REST APIs
+
+```
+GET    /mocks                                        # every loaded mock
+GET    /mocks/{mock}                                 # collections, counts, write limits
+GET    /mocks/{mock}/openapi.json                    # generated OpenAPI for this mock
+GET    /docs/mocks/{mock}                            # Swagger UI for this mock
+
+GET    /mocks/{mock}/{collection}                    # list, paged / sorted / filtered
+POST   /mocks/{mock}/{collection}                    # create
+GET    /mocks/{mock}/{collection}/{id}               # fetch one
+PUT    /mocks/{mock}/{collection}/{id}               # replace
+PATCH  /mocks/{mock}/{collection}/{id}               # update some fields
+DELETE /mocks/{mock}/{collection}/{id}               # delete
+GET    /mocks/{mock}/{collection}/{id}/{child}       # related records
+```
+
+A mock is a folder holding a `db.json` in the shape [JSONPlaceholder](https://jsonplaceholder.typicode.com/) and [json-server](https://github.com/typicode/json-server) use — top-level keys whose values are arrays of records:
+
+```json
+{
+  "users":  [{ "id": "a1b2c3d4", "fullName": "Alice Johnson" }],
+  "orders": [{ "id": "ord001", "name": "Sugar (50kg)", "userId": "a1b2c3d4" }]
+}
+```
+
+Every folder under the mocks directory is picked up at startup and served under its own name. Three are bundled:
+
+| Mock | Collections | What it is for |
+|---|---|---|
+| `marketplace` | `users`, `orders` | The smallest possible example — the dataset from [rest-demo-services](https://github.com/svenwal/rest-demo-services/blob/main/db.json) |
+| `accommodations` | `destinations`, `properties`, `availability`, `bookings` | Vacation accommodation search: 24 properties across 8 destinations, with per-week availability and pricing |
+| `flightbooking` | `airports`, `flights`, `bookings` | Flight search and booking: 92 flights between 12 airports, with times, seats and fares |
+
+```bash
+curl http://localhost:4000/mocks/marketplace/orders/ord001
+# {"id":"ord001","name":"Sugar (50kg)","userId":"a1b2c3d4"}
+```
+
+`accommodations` and `flightbooking` are separate mocks but are built to work together: every destination carries an `airportCode` that exists as an airport in `flightbooking`, so a travel-agency demo can go from "where" to "how do we get there" across the two. See [the worked example](#a-worked-example-booking-a-vacation) below.
+
+**Adding your own** — no rebuild, no configuration:
+
+```bash
+mkdir -p ./mymocks/inventory
+echo '{"items":[{"id":1,"sku":"ABC-1","qty":42}]}' > ./mymocks/inventory/db.json
+
+docker run -p 4000:4000 -v "$PWD/mymocks:/app/mocks" \
+  -e LEYWN_MOCKS_DIR=/app/mocks svenwal/leywn:latest
+```
+
+`inventory` is then served at `/mocks/inventory/items`, with its own OpenAPI at `/mocks/inventory/openapi.json` and a Swagger UI page at `/docs/mocks/inventory` — both linked from the home page. Nothing is generated by hand: the paths come from the collections in the file, the schemas are inferred from the records, and the examples are the records themselves.
+
+A key whose value is a single object rather than an array becomes a read-only single-object resource at `/mocks/{mock}/{key}`.
+
+**Reading** — `_page` and `_limit` page the result, `_sort` and `_order` order it, and any other query parameter filters on the field of that name:
+
+```bash
+# Orders belonging to one user
+curl 'http://localhost:4000/mocks/marketplace/orders?userId=a1b2c3d4'
+
+# Second page of five, newest name first
+curl 'http://localhost:4000/mocks/marketplace/orders?_limit=5&_page=2&_sort=name&_order=desc'
+
+# The same relation, followed automatically
+curl http://localhost:4000/mocks/marketplace/users/a1b2c3d4/orders
+```
+
+Equality is rarely enough for a real search, so filters also take comparison suffixes — the same ones json-server uses:
+
+| Suffix | Meaning | Example |
+|---|---|---|
+| `_gte` / `_lte` | at least / at most | `?maxGuests_gte=4` |
+| `_gt` / `_lt` | strictly greater / less | `?priceEur_lt=200` |
+| `_ne` | not equal | `?type_ne=villa` |
+| `_like` | case-insensitive substring | `?name_like=villa` |
+| `q` | substring across *every* field | `?q=barcelona` |
+
+Numbers compare numerically and everything else as text — which is what makes `?maxGuests_gte=9` correctly exclude a value of 8, and `?from_gte=2026-09-01&from_lte=2026-09-30` work as a date range, since ISO-8601 values already order lexicographically. `_like` and `q` reach into list fields too, so `?amenities_like=pool` matches a property whose `amenities` array contains it. Neither ever compiles a regex from user input.
+
+Collection reads return at most `LEYWN_MOCK_MAX_PAGE_SIZE` records (default 200); the unpaged total comes back in `X-Total-Count`, alongside `X-Page`, `X-Page-Size` and `X-Total-Pages`. Asking for more than the maximum is a `400` rather than a silent truncation.
+
+Nested routes discover the foreign key from the data (`userId`, `user_id`, `propertyId`, …) and accept exactly the same paging, sorting, search and filter parameters as a plain collection read. A child collection with no field referencing the parent returns `404 relation_not_found` rather than a misleading empty list.
+
+**Writing** — writes work out of the box and behave the way a real REST API does:
+
+```bash
+curl -X POST http://localhost:4000/mocks/marketplace/orders \
+  -H 'content-type: application/json' \
+  -d '{"name":"Rice (10kg)","userId":"a1b2c3d4"}'
+# 201, Location: /mocks/marketplace/orders/90abcf84
+# {"id":"90abcf84","name":"Rice (10kg)","userId":"a1b2c3d4"}
+
+curl -X PATCH http://localhost:4000/mocks/marketplace/orders/ord001 \
+  -H 'content-type: application/json' -d '{"name":"Sugar (100kg)"}'
+
+curl -X DELETE http://localhost:4000/mocks/marketplace/orders/ord002
+# returns the record that was removed
+```
+
+An `id` is generated when the body does not supply one — continuing the sequence where the file uses integer ids, and a random hex string otherwise. A supplied id that already exists is a `409`. On `PUT` and `PATCH` the id in the path wins, so a body cannot move or rename the record the URL addressed.
+
+> [!IMPORTANT]
+> **Writes are a lease, not a store.** Nothing is ever written to the JSON file. Changes are held in memory and **forgotten after `LEYWN_MOCK_ENTRY_TTL_SECONDS`** (default 300), after which the file data reads back unchanged — including deletions, so a deleted record reappears. Restarting Leywn discards everything. This is what makes the endpoints safe to expose: state is reclaimed without anyone having to intervene.
+
+Alongside the expiry, four limits bound what writes can cost. Each has its own status code, so a client can tell them apart:
+
+| Limit | Response | Meaning |
+|---|---|---|
+| `LEYWN_MOCK_WRITE_RATE_LIMIT` / `..._GLOBAL` | `429` + `Retry-After` | Too many mutating requests, per client and overall |
+| `LEYWN_MOCK_MAX_NEW_ENTRIES` / `LEYWN_MOCK_MAX_OVERLAY_BYTES` | `507` | This mock, or the server as a whole, already holds its maximum |
+| `LEYWN_MOCK_MAX_BODY_BYTES` | `413` | Body too large |
+| `LEYWN_MOCK_MAX_DEPTH` / `LEYWN_MOCK_MAX_KEYS` | `422` | Body nested too deeply, or too wide — a small payload can still be expensive to walk |
+
+Set `LEYWN_MOCK_READONLY=true` to serve `GET` only. Every other method then returns `405` with `Allow: GET`, and the generated OpenAPI omits the write operations entirely rather than documenting endpoints that would refuse.
+
+```bash
+docker run -p 4000:4000 -e LEYWN_MOCK_READONLY=true svenwal/leywn:latest
+```
+
+#### A worked example: booking a vacation
+
+A travel agency has a party of eight who want a week in Spain in September. The two bundled travel mocks cover the whole flow.
+
+**1. Where can they go?**
+
+```bash
+curl 'http://localhost:4000/mocks/accommodations/destinations?country=Spain'
+# Barcelona (BCN), Palma de Mallorca (PMI)
+```
+
+**2. What sleeps eight in Barcelona?**
+
+```bash
+curl 'http://localhost:4000/mocks/accommodations/properties?city=Barcelona&maxGuests_gte=8'
+# Barceloneta Beach House — 8 guests, 7 beds, 480 EUR/night
+```
+
+**3. Is it free, and what does that week cost?**
+
+```bash
+curl 'http://localhost:4000/mocks/accommodations/properties/prop-barceloneta-house/availability?available=true&from_gte=2026-09-08&_limit=4'
+# 2026-09-08 → 2026-09-15 | 480 EUR | min 7 nights
+```
+
+**4. How do they get there?** The destination's `airportCode` is `BCN`, which is an airport in the other mock:
+
+```bash
+curl 'http://localhost:4000/mocks/flightbooking/flights?origin=HAM&destination=BCN&departureDate=2026-09-05&seatsAvailable_gte=8&_sort=priceEur'
+# EW7412 Eurowings | 07:15 → 09:50 | 129 EUR | 45 seats
+```
+
+**5. Book both.**
+
+```bash
+curl -X POST http://localhost:4000/mocks/accommodations/bookings \
+  -H 'content-type: application/json' \
+  -d '{"propertyId":"prop-barceloneta-house","guestName":"Sven Walther","guests":8,
+       "checkIn":"2026-09-08","checkOut":"2026-09-15","nights":7,"totalEur":3445,"status":"confirmed"}'
+
+curl -X POST http://localhost:4000/mocks/flightbooking/bookings \
+  -H 'content-type: application/json' \
+  -d '{"flightId":"flt-EW7412-20260905","bookingReference":"AG9XK2","passengerName":"Sven Walther",
+       "passengers":8,"cabin":"economy","totalEur":1032,"status":"ticketed"}'
+```
+
+Both bookings are immediately visible through their relations — `/mocks/flightbooking/flights/flt-EW7412-20260905/bookings` and `/mocks/accommodations/properties/prop-barceloneta-house/bookings` — and both are forgotten again after `LEYWN_MOCK_ENTRY_TTL_SECONDS`, so the demo resets itself for the next run.
+
+---
+
 ## Content negotiation
 
 Every endpoint defaults to JSON. Pass `Accept: application/xml` to receive an XML response instead.
@@ -947,7 +1144,17 @@ lib/
     ├── cors.ex          # CORS plug — adds Access-Control-* headers
     ├── request_logger.ex# Structured request logging to stdout
     ├── respond.ex       # Content negotiation and JSON/XML serialisation
-    └── insomnia_collection.ex  # Generates the Insomnia v4 collection export
+    ├── servers.ex       # Self-referencing URLs for OpenAPI servers and Insomnia
+    ├── insomnia_collection.ex  # Generates the Insomnia v4 collection export
+    └── mock/            # Mock REST APIs served from JSON files
+        ├── config.ex    # Every LEYWN_MOCK_* limit, in one place
+        ├── loader.ex    # Reads the mocks directory once at startup
+        ├── store.ex     # In-memory write overlay: TTL leases, entry and byte caps
+        ├── rate_limit.ex# Per-IP and global write rate limiting
+        ├── data.ex      # Read model: file data with the overlay applied
+        ├── inflect.ex   # Collection name -> singular, for foreign keys and schema names
+        ├── handler.ex   # Every route under /mocks
+        └── openapi.ex   # Renders a mock's OpenAPI from its own data
 
 config/
 ├── config.exs           # Compile-time defaults
@@ -957,8 +1164,13 @@ priv/
 ├── openapi.json         # OpenAPI 3.0 specification (served at /openapi.json)
 ├── names.txt            # name pool for /random/name and /random/email
 ├── email_domains.txt    # domain pool for /random/email
+├── mocks/               # built-in mocks; mount more folders alongside them
+│   ├── marketplace/db.json
+│   ├── accommodations/db.json
+│   └── flightbooking/db.json
 ├── templates/
-│   └── home.html.eex    # home page, compiled into the router at build time
+│   ├── home.html.eex    # home page, compiled into the router at build time
+│   └── mock.html.eex    # per-mock Swagger UI page
 └── images/
     ├── leywn.png
     ├── leywn.jpeg
@@ -988,6 +1200,7 @@ Contributions are welcome. Please follow these guidelines:
 2. **All code in Elixir** — the project is intentionally pure Elixir/OTP for portability and minimal footprint.
 3. **Build and test via Docker** — do not assume a local Elixir installation. Always verify with `docker build` and a `docker run` smoke test.
 4. **New endpoints** — add the route to `router.ex`, implement logic in a dedicated module under `lib/leywn/`, and add the path to `priv/openapi.json` and the home page listing in `router.ex`.
+   Adding a *mock* needs none of that: drop a folder with a `db.json` into the mocks directory and it is served, documented and linked on its own.
 5. **Content negotiation** — every endpoint that returns structured data must support both JSON and XML via `Leywn.Respond.send/4`.
 6. **Keep it focused** — Leywn is a demo/test tool, not a framework. Avoid adding runtime dependencies unless strictly necessary.
 
