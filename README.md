@@ -1185,10 +1185,12 @@ priv/
 | `plug_cowboy` | HTTP/HTTPS server |
 | `jason` | JSON encoding/decoding |
 | `xml_builder_ex` | XML serialisation |
-| `tzdata` | IANA timezone database for `/date` and `/time` |
+| `tz` | IANA timezone database for `/date` and `/time` (pure Elixir, no runtime dependencies) |
 | `yaml_elixir` / `yamerl` | YAML parsing for `/format/yaml` (pure Erlang, no C NIFs) |
 
 Certificate generation uses Erlang's built-in `:public_key` and `:crypto` modules — no external PKI dependencies.
+
+Including everything those pull in transitively, the whole tree is 14 packages. `plug`, `cowboy` and `cowlib` are pinned in `mix.exs` above the floor `plug_cowboy` itself requires, because that floor sits below the releases that carry the 2026 denial-of-service fixes; `mix deps.get` audits the lock against the OSV advisory feed on every build, so a dependency slipping below a fixed version is visible in the build log rather than only in a scanner.
 
 ---
 
