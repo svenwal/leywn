@@ -74,8 +74,21 @@ defmodule Leywn.Chaos do
   @doc "Apply chaos to a connection, using the echo_data map as the happy-path body."
   def apply_chaos(conn, params, echo_data) do
     latency_ms = maybe_latency(params)
-    if latency_ms > 0, do: :timer.sleep(latency_ms)
 
+    if latency_ms > 0 and Leywn.Sleepers.sleep(latency_ms) == :busy do
+      conn
+      |> put_resp_header("retry-after", "1")
+      |> Leywn.Respond.send(
+        503,
+        %{error: "too_many_concurrent_delays", maximum: Leywn.Sleepers.max_concurrent()},
+        root: "error"
+      )
+    else
+      respond(conn, params, echo_data, latency_ms)
+    end
+  end
+
+  defp respond(conn, params, echo_data, latency_ms) do
     chaos_meta = %{
       error_percentage: params.error_pct,
       mangled_percentage: params.mangled_pct,

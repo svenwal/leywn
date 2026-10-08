@@ -82,7 +82,8 @@ defmodule Leywn.Auth do
          {:ok, header_json} <- base64url_decode(header_b64),
          {:ok, payload_json} <- base64url_decode(payload_b64),
          {:ok, jwt_header} <- Jason.decode(header_json),
-         {:ok, claims} <- Jason.decode(payload_json) do
+         {:ok, claims} <- Jason.decode(payload_json),
+         true <- is_map(claims) and is_map(jwt_header) do
       {:ok, %{authenticated: true, auth_type: "jwt", jwt_header: jwt_header, claims: claims}}
     else
       _ -> {:error, :unauthorized}
@@ -128,7 +129,7 @@ defmodule Leywn.Auth do
   # https://datatracker.ietf.org/doc/html/rfc8693
   defp handle_rfc8693_exchange(conn) do
     with {:ok, body, conn} <- Plug.Conn.read_body(conn, length: 65_536),
-         params <- URI.decode_query(body),
+         {:ok, params} <- decode_form(body),
          {:grant_type, "urn:ietf:params:oauth:grant-type:token-exchange"} <-
            {:grant_type, Map.get(params, "grant_type")},
          {:subject_token, st} when is_binary(st) and st != "" <-
@@ -188,6 +189,14 @@ defmodule Leywn.Auth do
     end
   end
 
+  # URI.decode_query/1 raises on malformed percent-encoding; that is a bad
+  # request, not a server error.
+  defp decode_form(body) do
+    {:ok, URI.decode_query(body)}
+  rescue
+    ArgumentError -> :malformed
+  end
+
   defp rfc8693_error(conn, error, description) do
     conn
     |> put_resp_content_type("application/json")
@@ -217,7 +226,8 @@ defmodule Leywn.Auth do
   defp decode_jwt_claims(token) do
     with [_header_b64, payload_b64, _sig] <- String.split(token, "."),
          {:ok, payload_json} <- base64url_decode(payload_b64),
-         {:ok, claims} <- Jason.decode(payload_json) do
+         {:ok, claims} <- Jason.decode(payload_json),
+         true <- is_map(claims) do
       {:ok, claims}
     else
       _ -> {:error, :invalid_jwt}
@@ -261,15 +271,27 @@ defmodule Leywn.Auth do
             {:error, "certificate header too large"}
 
           [pem | _] ->
-            pem
-            |> URI.decode()
-            |> :public_key.pem_decode()
-            |> case do
-              [{:Certificate, der, :not_encrypted} | _] -> {:ok, der}
-              _ -> {:error, "invalid PEM certificate in header #{header_name}"}
-            end
+            decode_pem_header(pem, header_name)
         end
     end
+  end
+
+  # A forwarded certificate is attacker-supplied text: malformed percent-encoding
+  # or PEM must produce a 401, never an exception.
+  defp decode_pem_header(pem, header_name) do
+    # pem_decode/1 skips base64 it cannot read, so a block of garbage between the
+    # BEGIN/END lines still yields a "certificate". Only DER that actually parses
+    # as one counts as having presented a certificate.
+    case pem |> URI.decode() |> :public_key.pem_decode() do
+      [{:Certificate, der, :not_encrypted} | _] ->
+        _ = :public_key.pkix_decode_cert(der, :otp)
+        {:ok, der}
+
+      _ ->
+        {:error, "invalid PEM certificate in header #{header_name}"}
+    end
+  rescue
+    _ -> {:error, "invalid PEM certificate in header #{header_name}"}
   end
 
   defp base64url_decode(str) do

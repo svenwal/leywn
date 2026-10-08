@@ -3,7 +3,7 @@
   "info": {
     "title": "Leywn",
     "description": "Last Echo You Will Need — an all-in-one demo backend for APIs and services.\n\nAll endpoints support content negotiation: include `Accept: application/xml` to receive XML instead of the default JSON. Set `LEYWN_ONLY_JSON=true` to disable XML and always return JSON.\n\nCORS headers are added to every response. Set `LEYWN_CORS_ORIGIN` to restrict the allowed origin (default: `*`).\n\nMock REST APIs are served under `/mocks` from JSON files — one folder per mock. Each renders its own OpenAPI at `/mocks/{mock}/openapi.json` with a Swagger UI page at `/docs/mocks/{mock}`, both linked from the home page.",
-    "version": "1.1.0-beta2"
+    "version": "1.1.0"
   },
   "tags": [
     {
@@ -3660,6 +3660,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -3699,6 +3718,25 @@
               "application/json": {
                 "example": {
                   "error": "invalid_request"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
                 }
               }
             }
@@ -3744,6 +3782,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -3786,6 +3843,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -3825,6 +3901,25 @@
               "application/json": {
                 "example": {
                   "error": "invalid_request"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
                 }
               }
             }
@@ -4425,6 +4520,16 @@
                 "example": "{\n  \"a\": 1,\n  \"b\": 2,\n  \"c\": {\n    \"nested\": true\n  }\n}"
               }
             }
+          },
+          "422": {
+            "description": "Not valid JSON, or nested deeper than 64 levels",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "invalid JSON input"
+                }
+              }
+            }
           }
         }
       }
@@ -4606,6 +4711,16 @@
                 "example": "<person>\n  <name>Alice</name>\n  <age>30</age>\n</person>"
               }
             }
+          },
+          "422": {
+            "description": "Not well-formed XML, or nested deeper than 100 levels",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "invalid XML input"
+                }
+              }
+            }
           }
         }
       }
@@ -4639,6 +4754,16 @@
                   "type": "string"
                 },
                 "example": "name: Alice\nroles:\n- admin\n- user\nage: 30"
+              }
+            }
+          },
+          "422": {
+            "description": "Not valid YAML, or more complex than 10 000 nodes / 64 levels once aliases are expanded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "invalid YAML input"
+                }
               }
             }
           }
@@ -4750,6 +4875,16 @@
                     "name": "Alice",
                     "iat": 1745481600
                   }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Not a decodable JWT, or its contents nest deeper than 64 levels",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "invalid JWT format"
                 }
               }
             }
@@ -5152,6 +5287,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -5257,6 +5411,25 @@
               "application/json": {
                 "example": {
                   "error": "invalid_request"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
                 }
               }
             }
@@ -5368,6 +5541,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -5476,6 +5668,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -5581,6 +5792,25 @@
               "application/json": {
                 "example": {
                   "error": "invalid_request"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
                 }
               }
             }
@@ -5689,6 +5919,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -5789,6 +6038,25 @@
               "application/json": {
                 "example": {
                   "error": "invalid_request"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
                 }
               }
             }
@@ -5895,6 +6163,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -5998,6 +6285,25 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
+                }
+              }
+            }
           }
         }
       },
@@ -6098,6 +6404,25 @@
               "application/json": {
                 "example": {
                   "error": "invalid_request"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests are already being delayed (LEYWN_MAX_CONCURRENT_DELAYS); retry after the interval in Retry-After",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "too_many_concurrent_delays",
+                  "maximum": 250
                 }
               }
             }

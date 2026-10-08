@@ -34,11 +34,12 @@ defmodule Leywn.Info do
     end
   end
 
+  # X-Forwarded-For is caller-supplied text that is echoed back; only a string
+  # that parses as an IP address is passed on.
   defp classify_ip_string(ip_str) do
-    cond do
-      String.contains?(ip_str, ":") -> {nil, ip_str}
-      String.contains?(ip_str, ".") -> {ip_str, nil}
-      true -> {nil, nil}
+    case :inet.parse_strict_address(:binary.bin_to_list(ip_str)) do
+      {:ok, ip} -> classify_ip(ip)
+      _ -> {nil, nil}
     end
   end
 

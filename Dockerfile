@@ -1,5 +1,5 @@
 # ---- Test Stage ----
-FROM hexpm/elixir:1.18.3-erlang-27.3.3-alpine-3.21.3 AS test
+FROM hexpm/elixir:1.20.4-erlang-28.5.0.7-alpine-3.24.2 AS test
 
 ENV MIX_ENV=test \
     LANG=C.UTF-8
@@ -29,7 +29,7 @@ RUN mix format --check-formatted
 CMD ["mix", "test"]
 
 # ---- Build Stage ----
-FROM hexpm/elixir:1.18.3-erlang-27.3.3-alpine-3.21.3 AS builder
+FROM hexpm/elixir:1.20.4-erlang-28.5.0.7-alpine-3.24.2 AS builder
 
 ENV MIX_ENV=prod \
     LANG=C.UTF-8
@@ -55,9 +55,10 @@ RUN mix release && \
     chmod -R g=u /app/_build/prod/rel/leywn
 
 # ---- Runtime Stage ----
-FROM alpine:3.21.3
+FROM alpine:3.24.2
 
-RUN apk add --no-cache openssl ncurses-libs libstdc++ libgcc && \
+RUN apk upgrade --no-cache && \
+    apk add --no-cache openssl ncurses-libs libstdc++ libgcc && \
     adduser -D -u 1001 leywn
 
 ENV LANG=C.UTF-8 \

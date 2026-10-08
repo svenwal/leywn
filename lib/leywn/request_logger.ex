@@ -22,10 +22,19 @@ defmodule Leywn.RequestLogger do
       ts = DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.to_iso8601()
 
       IO.puts(
-        "#{ts} #{conn.method} #{conn.request_path} remote=#{remote_ip} status=#{conn.status} duration=#{duration_ms}ms"
+        "#{ts} #{printable(conn.method)} #{printable(conn.request_path)} remote=#{remote_ip} status=#{conn.status} duration=#{duration_ms}ms"
       )
 
       conn
     end)
+  end
+
+  # The path is caller-controlled and goes straight into a log line. Anything
+  # outside printable ASCII (a newline above all) could forge extra log entries,
+  # so it is replaced, and the length is bounded.
+  defp printable(value) do
+    value
+    |> binary_part(0, min(byte_size(value), 1_024))
+    |> String.replace(~r/[^\x20-\x7E]/, "?")
   end
 end

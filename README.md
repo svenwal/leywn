@@ -135,9 +135,10 @@ All settings are controlled through environment variables.
 | `LEYWN_TLS_SERVER_KEY` | _(unset)_ | PEM-encoded private key matching `LEYWN_TLS_SERVER_CRT` |
 | `LEYWN_MTLS_CERT` | _(unset)_ | PEM-encoded client certificate (and optional CA chain) to use instead of the auto-generated one; served at `/auth/mtls/get-client-cert` and automatically trusted by the mTLS listener |
 | `LEYWN_MTLS_KEY` | _(unset)_ | PEM-encoded private key matching `LEYWN_MTLS_CERT` |
-| `LEYWN_TRUST_FORWARD` | _(unset)_ | When set to `true`, derive the caller IP from the `X-Forwarded-For` header instead of the socket address |
+| `LEYWN_TRUST_FORWARD` | _(unset)_ | When set to `true`, derive the caller IP from the `X-Forwarded-For` header instead of the socket address (a value that is not a valid IP address is ignored). Only enable behind a proxy that sets this header — it is also what the mock write rate limit is keyed on |
 | `LEYWN_ONLY_JSON` | _(unset)_ | When set to `true`, disable XML content negotiation and always return JSON regardless of the `Accept` header |
 | `LEYWN_CORS_ORIGIN` | `*` | Value of the `Access-Control-Allow-Origin` response header. When set to a specific origin, `Vary: Origin` is sent as well |
+| `LEYWN_MAX_CONCURRENT_DELAYS` | `250` | Maximum number of requests that may be deliberately sleeping at once (`/delay` and the latency of `/chaos-engineering`). Requests over the ceiling get `503` with `Retry-After`. Each listener accepts 1 000 connections, so the default leaves most of them free for everything else |
 | `LEYWN_EXTERNAL_HTTP_URL` | _(unset)_ | Public HTTP base URL when running behind a reverse proxy; used in the OpenAPI `servers` list and the Insomnia collection |
 | `LEYWN_EXTERNAL_HTTPS_URL` | _(unset)_ | Public HTTPS base URL when running behind a reverse proxy; preferred over the HTTP one |
 | `LEYWN_NAMES_FILE` | `priv/names.txt` | Path to the name list backing `/random/name` and `/random/email` (one name per line, `#` comments allowed) |
@@ -217,7 +218,7 @@ Returns server status, version, and uptime. Suitable for use as a Kubernetes liv
 
 ```bash
 curl http://localhost:4000/health
-# {"status":"ok","version":"1.1.0-beta2","uptime_seconds":42}
+# {"status":"ok","version":"1.1.0","uptime_seconds":42}
 ```
 
 ---
@@ -321,7 +322,7 @@ curl -iL http://localhost:4000/status/301
 ANY /delay/{ms}
 ```
 
-Delays the response by the requested number of milliseconds (0–30 000). Useful for testing timeouts, retry logic, and client-side loading states.
+Delays the response by the requested number of milliseconds (0–30 000). Useful for testing timeouts, retry logic, and client-side loading states. At most `LEYWN_MAX_CONCURRENT_DELAYS` (default 250) delays run at the same time; beyond that the answer is `503` with `Retry-After: 1`, so a flood of slow requests cannot take every connection from the other endpoints.
 
 ```bash
 # Delay by 2 seconds
@@ -562,6 +563,8 @@ CERT=$(python3 -c "import urllib.parse; print(urllib.parse.quote(open('client.pe
 curl http://localhost:4000/auth/mtls -H "X-Client-Cert: $CERT"
 ```
 
+The header must contain a certificate that actually parses; a malformed or garbage PEM is answered with `401`. Leywn does **not** verify the certificate against any CA in this mode — it trusts the proxy to have done so. Only enable it behind a proxy that overwrites (or strips) this header on every inbound request, and never on an instance reachable directly, since any caller could otherwise present a certificate of their choosing.
+
 ---
 
 ### /uuid — UUID v4
@@ -765,7 +768,7 @@ POST /format/toLower        # lowercase the body text
 POST /format/collapse-lines # collapse multiple blank lines into one
 ```
 
-All format endpoints accept a POST body (limited to `LEYWN_ECHO_MAX_BODY_BYTES`). The three structured endpoints — `json`, `yaml` and `xml` — re-format input of their own type and return 422 if it does not parse. The case and text endpoints operate on the raw body as plain text and return `text/plain`.
+All format endpoints accept a POST body (limited to `LEYWN_ECHO_MAX_BODY_BYTES`). The three structured endpoints — `json`, `yaml` and `xml` — re-format input of their own type and return 422 if it does not parse. Because re-indenting makes output grow with the square of the nesting depth, nesting is limited — 64 levels for JSON (and for the JWT contents `/decode/jwt` pretty-prints), 100 for XML, and for YAML a budget of 10 000 nodes and 64 levels counted *after* aliases are expanded, which defuses "billion laughs" documents — and anything beyond it is a 422 as well. The case and text endpoints operate on the raw body as plain text and return `text/plain`.
 
 ```bash
 # Pretty-print JSON
@@ -1141,6 +1144,8 @@ lib/
     ├── codec.ex         # POST body encode/decode operations
     ├── hash.ex          # POST body hashing (SHA-256, MD5)
     ├── yaml.ex          # Minimal pure-Elixir YAML emitter
+    ├── shape.ex         # Depth limits for caller-supplied structures
+    ├── sleepers.ex      # Caps how many requests may be sleeping (/delay, chaos latency) at once
     ├── cors.ex          # CORS plug — adds Access-Control-* headers
     ├── request_logger.ex# Structured request logging to stdout
     ├── respond.ex       # Content negotiation and JSON/XML serialisation
@@ -1189,6 +1194,8 @@ priv/
 | `yaml_elixir` / `yamerl` | YAML parsing for `/format/yaml` (pure Erlang, no C NIFs) |
 
 Certificate generation uses Erlang's built-in `:public_key` and `:crypto` modules — no external PKI dependencies.
+
+Docker images are built on Elixir 1.20 / Erlang/OTP 28 on Alpine 3.24, and the runtime stage runs `apk upgrade` so the image carries current Alpine security patches. Two `cowlib` advisories (CVE-2026-43966, CVE-2026-43969) have no fixed release upstream; both are in encoders Leywn never calls.
 
 Including everything those pull in transitively, the whole tree is 14 packages. `plug`, `cowboy` and `cowlib` are pinned in `mix.exs` above the floor `plug_cowboy` itself requires, because that floor sits below the releases that carry the 2026 denial-of-service fixes; `mix deps.get` audits the lock against the OSV advisory feed on every build, so a dependency slipping below a fixed version is visible in the build log rather than only in a scanner.
 

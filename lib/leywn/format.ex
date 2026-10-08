@@ -4,12 +4,23 @@ defmodule Leywn.Format do
   Each function returns {:ok, content_type, body} or {:error, message}.
   """
 
-  @doc "Pretty-print a JSON body."
+  # Pretty-printing indents every level, so output grows with the square of the
+  # nesting depth: a 64 KiB body of [[[[...]]]] would otherwise expand to
+  # hundreds of megabytes. Real JSON is nowhere near this deep.
+  @max_depth 64
+
+  @doc "Pretty-print a JSON body (nesting up to #{@max_depth} levels)."
   def json(body) do
-    with {:ok, data} <- Jason.decode(body) do
-      {:ok, "application/json", Jason.encode!(data, pretty: true)}
-    else
-      {:error, _} -> {:error, "invalid JSON input"}
+    case Jason.decode(body) do
+      {:ok, data} ->
+        if Leywn.Shape.deeper_than?(data, @max_depth) do
+          {:error, "JSON nested too deeply (max #{@max_depth} levels)"}
+        else
+          {:ok, "application/json", Jason.encode!(data, pretty: true)}
+        end
+
+      {:error, _} ->
+        {:error, "invalid JSON input"}
     end
   end
 
@@ -22,7 +33,7 @@ defmodule Leywn.Format do
     else
       try do
         case YamlElixir.read_from_string(body) do
-          {:ok, data} -> {:ok, "application/yaml", Leywn.YAML.encode(data)}
+          {:ok, data} -> yaml_result(data)
           {:error, _} -> {:error, "invalid YAML input"}
         end
       rescue
@@ -32,6 +43,38 @@ defmodule Leywn.Format do
       end
     end
   end
+
+  # YAML aliases let a few kilobytes describe an enormous document (each level
+  # of `*a` references the previous one several times over). The parser shares
+  # the structure, but re-emitting it expands every reference, so the parsed
+  # result is measured under a node budget before anything is written out.
+  @yaml_max_nodes 10_000
+  @yaml_max_depth 64
+
+  defp yaml_result(data) do
+    if match?({:ok, _}, spend(data, 0, @yaml_max_nodes)) do
+      {:ok, "application/yaml", Leywn.YAML.encode(data)}
+    else
+      {:error, "YAML input too complex (max #{@yaml_max_nodes} nodes, #{@yaml_max_depth} levels)"}
+    end
+  end
+
+  defp spend(_value, depth, budget) when budget <= 0 or depth > @yaml_max_depth, do: :over
+
+  defp spend(value, depth, budget) when is_map(value) do
+    spend(Enum.flat_map(value, fn {k, v} -> [k, v] end), depth, budget)
+  end
+
+  defp spend(value, depth, budget) when is_list(value) do
+    Enum.reduce_while(value, {:ok, budget - 1}, fn child, {:ok, left} ->
+      case spend(child, depth + 1, left) do
+        {:ok, _} = ok -> {:cont, ok}
+        :over -> {:halt, :over}
+      end
+    end)
+  end
+
+  defp spend(_scalar, _depth, budget), do: {:ok, budget - 1}
 
   @doc "Pretty-format an XML body with consistent 2-space indentation."
   def xml(body) do
@@ -93,13 +136,46 @@ defmodule Leywn.Format do
   # Pure-string XML pretty-printer (no external parser required)
   # ---------------------------------------------------------------------------
 
-  @xml_token ~r/(<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<[^>]*>|[^<]+)/
+  # `<[^<>]*>` rather than `<[^>]*>`: a run of "<" with one ">" at the end would
+  # otherwise rescan to the end from every "<", quadratic in the input.
+  @xml_token ~r/(<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<[^<>]*>|[^<]+)/
+
+  # Nesting indents every line, so the output is quadratic in the depth.
+  @xml_max_depth 100
+
+  # An opener without a closer anywhere after it makes the lazy patterns above
+  # scan to the end of the input once per opener. If the last opener of each
+  # kind has a closer after it, every earlier one does too.
+  @xml_pairs [{"<!--", "-->"}, {"<![CDATA[", "]]>"}, {"<?", "?>"}]
+
+  defp unterminated?(input) do
+    Enum.any?(@xml_pairs, fn {open, close} ->
+      case :binary.matches(input, open) do
+        [] ->
+          false
+
+        opens ->
+          {last_open, _} = List.last(opens)
+
+          case :binary.matches(input, close) do
+            [] -> true
+            closes -> elem(List.last(closes), 0) < last_open
+          end
+      end
+    end)
+  end
 
   defp pretty_xml(input) do
+    if unterminated?(input), do: raise("unterminated markup")
+
+    raw_tokens = Regex.scan(@xml_token, input, capture: :first) |> List.flatten()
+
+    # Anything the tokenizer skipped (a stray "<") means the input is not XML.
+    if Enum.sum(Enum.map(raw_tokens, &byte_size/1)) != byte_size(input),
+      do: raise("stray markup")
+
     tokens =
-      @xml_token
-      |> Regex.scan(input, capture: :first)
-      |> List.flatten()
+      raw_tokens
       |> Enum.map(&String.trim/1)
       |> Enum.reject(&(&1 == ""))
 
@@ -125,6 +201,7 @@ defmodule Leywn.Format do
             {[xmlpad(d) <> token | acc], d}
 
           String.starts_with?(token, "<") ->
+            if depth >= @xml_max_depth, do: raise("nested too deeply")
             {[xmlpad(depth) <> token | acc], depth + 1}
 
           true ->

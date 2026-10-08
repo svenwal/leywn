@@ -20,6 +20,7 @@ defmodule Leywn.Application do
     "LEYWN_MTLS_CERT",
     "LEYWN_MTLS_KEY",
     "LEYWN_MTLS_IN_HEADER",
+    "LEYWN_MAX_CONCURRENT_DELAYS",
     "LEYWN_MOCKS_DIR",
     "LEYWN_MOCK_READONLY",
     "LEYWN_MOCK_WRITE_RATE_LIMIT",
@@ -59,6 +60,7 @@ defmodule Leywn.Application do
     max_connections = 1_000
 
     children = [
+      Leywn.Sleepers,
       Leywn.Mock.Store,
       Leywn.Mock.RateLimit,
       {Plug.Cowboy,

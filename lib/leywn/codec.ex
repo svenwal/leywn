@@ -47,7 +47,8 @@ defmodule Leywn.Codec do
         with {:ok, hdr_json} <- b64url_decode(header_b64),
              {:ok, pay_json} <- b64url_decode(payload_b64),
              {:ok, header} <- Jason.decode(hdr_json),
-             {:ok, payload} <- Jason.decode(pay_json) do
+             {:ok, payload} <- Jason.decode(pay_json),
+             false <- Leywn.Shape.deeper_than?([header, payload], 64) do
           out = Jason.encode!(%{"header" => header, "payload" => payload}, pretty: true)
           {:ok, "application/json", out}
         else

@@ -80,26 +80,40 @@ defmodule Leywn.Logos do
   # ---------------------------------------------------------------------------
 
   defp solid_png(r, g, b, 255, width, height) do
-    pixel = <<r::8, g::8, b::8>>
-    row = <<0::8, :binary.copy(pixel, width)::binary>>
-    raw = :binary.copy(row, height)
-    encode_png(<<width::32, height::32, 8, 2, 0, 0, 0>>, raw)
+    row = <<0::8, :binary.copy(<<r::8, g::8, b::8>>, width)::binary>>
+    encode_png(<<width::32, height::32, 8, 2, 0, 0, 0>>, row, height)
   end
 
   defp solid_png(r, g, b, a, width, height) do
-    pixel = <<r::8, g::8, b::8, a::8>>
-    row = <<0::8, :binary.copy(pixel, width)::binary>>
-    raw = :binary.copy(row, height)
-    encode_png(<<width::32, height::32, 8, 6, 0, 0, 0>>, raw)
+    row = <<0::8, :binary.copy(<<r::8, g::8, b::8, a::8>>, width)::binary>>
+    encode_png(<<width::32, height::32, 8, 6, 0, 0, 0>>, row, height)
   end
 
   @png_signature <<137, 80, 78, 71, 13, 10, 26, 10>>
 
-  defp encode_png(ihdr_data, raw_pixels) do
+  # Every row of a solid image is identical, so the pixel data is deflated one
+  # row at a time instead of being built whole. A 4096x256 image would otherwise
+  # allocate several megabytes per request before compressing a byte of it, which
+  # a few hundred concurrent requests turn into an out-of-memory kill.
+  defp encode_png(ihdr_data, row, height) do
     @png_signature <>
       png_chunk("IHDR", ihdr_data) <>
-      png_chunk("IDAT", :zlib.compress(raw_pixels)) <>
+      png_chunk("IDAT", deflate_rows(row, height)) <>
       png_chunk("IEND", <<>>)
+  end
+
+  defp deflate_rows(row, height) do
+    z = :zlib.open()
+
+    try do
+      :ok = :zlib.deflateInit(z)
+      body = for _ <- 1..height, do: :zlib.deflate(z, row)
+      last = :zlib.deflate(z, [], :finish)
+      :ok = :zlib.deflateEnd(z)
+      IO.iodata_to_binary([body, last])
+    after
+      :zlib.close(z)
+    end
   end
 
   defp png_chunk(type, data) when is_binary(type) and is_binary(data) do

@@ -178,8 +178,15 @@ defmodule Leywn.Router do
   match "/delay/:ms" do
     case Integer.parse(ms) do
       {delay, ""} when delay >= 0 and delay <= 30_000 ->
-        :timer.sleep(delay)
-        Leywn.Respond.send(conn, 200, %{requested_ms: delay, delayed_ms: delay}, root: "delay")
+        case Leywn.Sleepers.sleep(delay) do
+          :busy ->
+            busy(conn)
+
+          _ ->
+            Leywn.Respond.send(conn, 200, %{requested_ms: delay, delayed_ms: delay},
+              root: "delay"
+            )
+        end
 
       {delay, ""} when delay > 30_000 ->
         Leywn.Respond.send(
@@ -536,8 +543,23 @@ defmodule Leywn.Router do
 
   defp handle_codec(conn, fun), do: handle_format(conn, fun)
 
+  # nosniff matters because several endpoints hand back caller-controlled bytes
+  # as text/plain (/decode/base64, /format/*): without it a browser may sniff
+  # such a body as HTML and run it in the origin of this server.
   defp set_server_header(conn, _opts) do
-    Plug.Conn.put_resp_header(conn, "server", "leywn")
+    conn
+    |> Plug.Conn.put_resp_header("server", "leywn")
+    |> Plug.Conn.put_resp_header("x-content-type-options", "nosniff")
+  end
+
+  defp busy(conn) do
+    conn
+    |> Plug.Conn.put_resp_header("retry-after", "1")
+    |> Leywn.Respond.send(
+      503,
+      %{error: "too_many_concurrent_delays", maximum: Leywn.Sleepers.max_concurrent()},
+      root: "error"
+    )
   end
 
   defp collection_url(conn), do: Leywn.Servers.base_url(conn) <> "/request-collection"

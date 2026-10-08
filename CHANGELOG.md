@@ -2,6 +2,41 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [1.1.0] - 2026-10-08
+
+The first stable release of the `1.1` line: the mocking feature set from the betas, a full security review of the code that existed so far, and every dependency and base image brought to its latest release. Everything in `1.1.0-beta1` and `1.1.0-beta2` is included.
+
+  ### Security
+  A review of every endpoint and module for attack vectors. Nothing below needed credentials or a special configuration to reach.
+  - **Authentication bypass in `/auth/mtls` header mode (`LEYWN_MTLS_IN_HEADER`)** — `:public_key.pem_decode/1` silently skips base64 it cannot read, so any header containing `-----BEGIN CERTIFICATE-----`, arbitrary text and `-----END CERTIFICATE-----` produced a "certificate" with garbage DER and the request was answered `200 authenticated`. The DER is now required to parse as an X.509 certificate. A malformed percent-encoding in the header, which previously raised and returned `500`, is now a `401` as well. The README now spells out that this mode trusts the proxy to have verified the certificate and must only be used behind one that overwrites the header
+  - **Quadratic output from nesting — `/format/json`, `/format/xml`, `/decode/jwt`** — re-indenting writes a line per level, each indented by its depth, so a 64 KiB body of `[[[[…]]]]` (32 000 levels) or `<a><a>…` expanded to hundreds of megabytes of response and memory per request. JSON and JWT contents are now limited to 64 levels, XML to 100, each answered with `422`. New module `Leywn.Shape` holds the depth check
+  - **YAML alias expansion (`/format/yaml`)** — the 16 KiB size cap does not bound a document whose aliases reference earlier aliases: the parser shares the structure, but writing it back out expands every reference, so a few hundred bytes could describe billions of nodes. The parsed result is now measured against a budget of 10 000 nodes and 64 levels, counted after expansion, before anything is emitted; over budget is a `422`
+  - **Quadratic regex time in the XML formatter** — the tokenizer rescanned to the end of the input from every unterminated `<!--`, `<![CDATA[`, `<?` and from every `<` in a run of them, so 64 KiB of `<` characters cost seconds of CPU. Unterminated constructs are now rejected up front (if the last opener of a kind has a closer after it, every earlier one does), the tag pattern no longer spans a `<`, and input the tokenizer had to skip is rejected rather than silently dropped
+  - **Connection exhaustion through sleeping requests** — `/delay` and the latency half of `/chaos-engineering` hold a connection for up to 30 seconds by design, and each listener accepts 1 000 connections, so a thousand cheap requests could starve every other endpoint. A new ceiling, `LEYWN_MAX_CONCURRENT_DELAYS` (default 250), answers the excess with `503` and `Retry-After: 1`. Slots are tracked per request process in ETS and a full table is purged of dead pids before anyone is turned away, because Cowboy kills the request process when a client disconnects and a counter that relied on cleanup code would leak. New module `Leywn.Sleepers`
+  - **Memory spike in the solid-colour PNG generator (`/image/color`)** — the whole raw image (up to 4 MiB for the permitted 1 048 576 pixels, with copies) was built before compression, so a few hundred concurrent requests could exhaust a small container. Rows are now deflated one at a time; the allowed dimensions are unchanged
+  - **Log forging** — the request path was written to the access log verbatim, so a path carrying a newline could plant a fabricated log line. Method and path are now reduced to printable ASCII and capped at 1 024 bytes
+  - **`X-Content-Type-Options: nosniff` on every response** — `/decode/*` and `/format/*` return caller-controlled bytes as `text/plain`, which a browser may otherwise sniff as HTML and render in this server's origin
+  - **`X-Forwarded-For` is only reflected when it parses as an IP address** (with `LEYWN_TRUST_FORWARD=true`) — previously any string containing a `:` or `.` was echoed in `/ip` responses
+  - **Malformed input is a `4xx`, not a `500`** — a token-exchange body with broken percent-encoding, and a JWT whose claims are not a JSON object (an array or a number), previously raised inside the handler
+
+  ### Dependencies
+  - **`cowboy` 2.18.0 → 2.20.0, `cowlib` 2.19.0 → 2.21.0** — closes CVE-2026-43971 (link header directive smuggling in `cow_link:link/1`)
+  - **`tz` 0.28.2 → 0.28.4**; `ranch` 2.2.1 → 2.3.0
+  - `plug` 1.20.3, `plug_cowboy` 2.9.0, `jason` 1.4.5, `yaml_elixir` 2.12.2, `yamerl` 0.10.0 and `xml_builder_ex` 3.1.4159 were already the latest releases
+  - **Docker base images** — build stages move from Elixir 1.18.3 / OTP 27.3.3 / Alpine 3.21.3 to Elixir 1.20.4 / OTP 28.5.0.7 / Alpine 3.24.2; the runtime stage is Alpine 3.24.2 and runs `apk upgrade` so it carries current patches. OTP 29 is deliberately not used yet
+  - **Two `cowlib` advisories remain open upstream** with no fixed release: CVE-2026-43966 and CVE-2026-43969. Both are in encoders Leywn never calls (see `1.1.0-beta2`)
+
+  ### Changed
+  - Version bumped to `1.1.0` in `mix.exs`, `openapi.json`, `CLAUDE.md` and the health documentation
+  - New variable `LEYWN_MAX_CONCURRENT_DELAYS` (also listed in the startup banner)
+  - Test suite expanded from 287 to 306 tests; `test/security_test.exs` covers every item above, including timing bounds for the XML tokenizer
+
+  ### Documentation
+  - OpenAPI: version `1.1.0`; `503` documented on `/delay` and both `/chaos-engineering` paths; `422` documented on `/format/json`, `/format/yaml`, `/format/xml` and `/decode/jwt`
+  - README: new `LEYWN_MAX_CONCURRENT_DELAYS` row and `/delay` note, nesting limits for the format endpoints, proxy-mode trust warning for `LEYWN_MTLS_IN_HEADER` and `LEYWN_TRUST_FORWARD`, base-image and advisory note, code-structure listing
+
+---
+
 ## [1.1.0-beta2] - 2026-08-14
 
 A dependency-only release on top of `1.1.0-beta1`: every package the OSV advisory feed flagged is now on a fixed version, and the release carries no vulnerable dependency that has a fix available upstream. No endpoint behaviour changes.
