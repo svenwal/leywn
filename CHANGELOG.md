@@ -23,7 +23,7 @@ The first stable release of the `1.1` line: the mocking feature set from the bet
   - **`cowboy` 2.18.0 → 2.20.0, `cowlib` 2.19.0 → 2.21.0** — closes CVE-2026-43971 (link header directive smuggling in `cow_link:link/1`)
   - **`tz` 0.28.2 → 0.28.4**; `ranch` 2.2.1 → 2.3.0
   - `plug` 1.20.3, `plug_cowboy` 2.9.0, `jason` 1.4.5, `yaml_elixir` 2.12.2, `yamerl` 0.10.0 and `xml_builder_ex` 3.1.4159 were already the latest releases
-  - **Docker base images** — build stages move from Elixir 1.18.3 / OTP 27.3.3 / Alpine 3.21.3 to Elixir 1.20.4 / OTP 28.5.0.7 / Alpine 3.24.2; the runtime stage is Alpine 3.24.2 and runs `apk upgrade` so it carries current patches. OTP 29 is deliberately not used yet
+  - **Docker base images** — build stages move from Elixir 1.18.3 / OTP 27.3.3 / Alpine 3.21.3 to Elixir 1.20.4 / OTP 27.3.4.18 / Alpine 3.24.2; the runtime stage is Alpine 3.24.2 and runs `apk upgrade` so it carries current patches. OTP 28 and 29 are deliberately not used: OTP 28.5.0.7 on Alpine 3.24 aborts at startup on GitHub Actions runners (`sys_sigaltstack(): Failed to set alternate signal stack`), so CI could not build it
   - **Two `cowlib` advisories remain open upstream** with no fixed release: CVE-2026-43966 and CVE-2026-43969. Both are in encoders Leywn never calls (see `1.1.0-beta2`)
 
   ### Changed
