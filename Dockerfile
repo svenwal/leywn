@@ -1,5 +1,5 @@
 # ---- Test Stage ----
-FROM hexpm/elixir:1.20.4-erlang-28.5.0.7-alpine-3.24.2 AS test
+FROM hexpm/elixir:1.20.4-erlang-27.3.4.18-alpine-3.24.2 AS test
 
 ENV MIX_ENV=test \
     LANG=C.UTF-8
@@ -29,7 +29,7 @@ RUN mix format --check-formatted
 CMD ["mix", "test"]
 
 # ---- Build Stage ----
-FROM hexpm/elixir:1.20.4-erlang-28.5.0.7-alpine-3.24.2 AS builder
+FROM hexpm/elixir:1.20.4-erlang-27.3.4.18-alpine-3.24.2 AS builder
 
 ENV MIX_ENV=prod \
     LANG=C.UTF-8
