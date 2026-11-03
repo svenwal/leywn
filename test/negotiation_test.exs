@@ -101,6 +101,46 @@ defmodule Leywn.NegotiationTest do
     end
   end
 
+  # ---- Pretty-printing ---------------------------------------------------------
+
+  test "JSON responses are pretty-printed with two-space indentation" do
+    conn = get("/echo?a=1")
+    assert String.starts_with?(conn.resp_body, "{\n  \"")
+    assert conn.resp_body =~ ~s(\n  "query_params": {\n    "a": "1"\n  })
+    # Still exactly the same document, only laid out differently.
+    assert conn.resp_body ==
+             Jason.encode!(Jason.decode!(conn.resp_body, objects: :ordered_objects), pretty: true)
+  end
+
+  test "XML responses are pretty-printed with two-space indentation" do
+    conn = get("/echo?a=1", [{"accept", "application/xml"}])
+
+    assert conn.resp_body =~
+             ~r/\A<\?xml [^>]+\?>\n<echo>\n  <.*\n  <query_params>\n    <a>1<\/a>\n  <\/query_params>\n/s
+
+    assert String.ends_with?(conn.resp_body, "</echo>")
+  end
+
+  test "error bodies are pretty-printed too" do
+    conn = get("/does-not-exist")
+    assert conn.resp_body == ~s({\n  "error": "not_found"\n})
+
+    conn = get("/does-not-exist", [{"accept", "application/xml"}])
+    assert conn.resp_body =~ "<error>\n  <error>not_found</error>\n</error>"
+  end
+
+  test "the OpenAPI document is pretty-printed" do
+    conn = get("/openapi.json")
+    assert String.starts_with?(conn.resp_body, "{\n  \"")
+    assert {:ok, %{"openapi" => _}} = Jason.decode(conn.resp_body)
+  end
+
+  test "the stream endpoint keeps one compact JSON object per line (NDJSON)" do
+    lines = get("/stream/3").resp_body |> String.split("\n", trim: true)
+    assert length(lines) == 3
+    for line <- lines, do: assert({:ok, %{"line" => _}} = Jason.decode(line))
+  end
+
   # ---- LEYWN_ONLY_JSON ---------------------------------------------------------
 
   describe "with LEYWN_ONLY_JSON=true" do

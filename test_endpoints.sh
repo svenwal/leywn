@@ -14,7 +14,10 @@ FAIL=0
 check() {
   local label="$1"
   local expected="$2"
-  local actual="$3"
+  # Responses are pretty-printed; collapse them to compact JSON so the
+  # single-line '"key":"value"' patterns below still match.
+  local actual
+  actual=$(printf '%s' "$3" | tr -d '\n' | sed -E 's/"[[:space:]]*:[[:space:]]*/":/g; s/[[:space:]]*([][{},])[[:space:]]*/\1/g')
   if echo "$actual" | grep -q "$expected"; then
     echo "  PASS: $label"
     ((PASS++))

@@ -56,7 +56,7 @@ defmodule Leywn.Router do
 
     conn
     |> Plug.Conn.put_resp_content_type("application/json")
-    |> Plug.Conn.send_resp(200, Jason.encode!(spec))
+    |> Plug.Conn.send_resp(200, Jason.encode!(spec, pretty: true))
   end
 
   # ---- Mocks -----------------------------------------------------------------

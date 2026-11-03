@@ -13,6 +13,14 @@ defmodule Leywn.HashTest do
 
   # ---- /hash/sha256 ----------------------------------------------------------
 
+  test "hash results are pretty-printed JSON" do
+    for path <- ["/hash/sha256", "/hash/md5"] do
+      body = post(path, "hello").resp_body
+      assert String.starts_with?(body, "{\n  \"")
+      assert body == Jason.encode!(Jason.decode!(body, objects: :ordered_objects), pretty: true)
+    end
+  end
+
   test "sha256 of known input matches expected digest" do
     conn = post("/hash/sha256", "hello")
     assert conn.status == 200

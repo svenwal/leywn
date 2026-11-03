@@ -156,12 +156,15 @@ defmodule Leywn.Auth do
       |> put_resp_content_type("application/json")
       |> send_resp(
         200,
-        Jason.encode!(%{
-          "access_token" => token,
-          "issued_token_type" => "urn:ietf:params:oauth:token-type:jwt",
-          "token_type" => "Bearer",
-          "expires_in" => 3600
-        })
+        Jason.encode!(
+          %{
+            "access_token" => token,
+            "issued_token_type" => "urn:ietf:params:oauth:token-type:jwt",
+            "token_type" => "Bearer",
+            "expires_in" => 3600
+          },
+          pretty: true
+        )
       )
     else
       {:grant_type, _} ->
@@ -200,7 +203,10 @@ defmodule Leywn.Auth do
   defp rfc8693_error(conn, error, description) do
     conn
     |> put_resp_content_type("application/json")
-    |> send_resp(400, Jason.encode!(%{"error" => error, "error_description" => description}))
+    |> send_resp(
+      400,
+      Jason.encode!(%{"error" => error, "error_description" => description}, pretty: true)
+    )
   end
 
   defp mint_jwt(incoming_claims) do

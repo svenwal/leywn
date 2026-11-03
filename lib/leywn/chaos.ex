@@ -119,7 +119,8 @@ defmodule Leywn.Chaos do
               echo_data,
               :_chaos,
               Map.merge(chaos_meta, %{error_injected: false, mangled: true})
-            )
+            ),
+            pretty: true
           )
 
         # Truncate mid-stream so the JSON is syntactically invalid

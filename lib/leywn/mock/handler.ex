@@ -129,7 +129,7 @@ defmodule Leywn.Mock.Handler do
 
     conn
     |> put_resp_content_type("application/json")
-    |> send_resp(200, Jason.encode!(spec))
+    |> send_resp(200, Jason.encode!(spec, pretty: true))
   end
 
   defp openapi(conn, _mock), do: method_not_allowed(conn, ["GET"])
