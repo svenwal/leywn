@@ -2,6 +2,19 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [1.1.1] - 2026-11-03
+
+A fix release: the `1.1.0` Docker image aborts at startup on Intel CPUs with AMX (Sapphire Rapids and later, which includes GitHub Actions runners and many current cloud VMs).
+
+  ### Fixed
+  - **Container fails to start on AMX hosts** — `svenwal/leywn:1.1.0` exits immediately with `sys_sigaltstack(): Internal error: Failed to set alternate signal stack`. The cause is not OTP 28, as the `1.1.0` notes assumed, but Alpine 3.24: its musl 1.2.6 rejects the alternate signal stack size that OTP 27 and 28 request when the kernel reports a large signal frame (`AT_MINSIGSTKSZ` 11952 on AMX). OTP 27.3.4.18 is affected exactly like OTP 28; CI only passed when it landed on a runner without AMX. Upstream: erlang/otp#11248, fixed by erlang/otp#11376, first released in OTP 29.1 (no OTP 28 backport yet; the OTP 27 backport is pending)
+
+  ### Dependencies
+  - **Docker base images** — build stages move from Elixir 1.20.4 / OTP 27.3.4.18 / Alpine 3.24.2 to Elixir 1.20.4 / OTP 29.1.2 / Alpine 3.24.3; the runtime stage moves to Alpine 3.24.3
+
+  ### Changed
+  - Version bumped to `1.1.1` in `mix.exs`, `openapi.json` and the README
+
 ## [1.1.0] - 2026-10-08
 
 The first stable release of the `1.1` line: the mocking feature set from the betas, a full security review of the code that existed so far, and every dependency and base image brought to its latest release. Everything in `1.1.0-beta1` and `1.1.0-beta2` is included.
