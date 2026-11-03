@@ -2,14 +2,9 @@
 
 All notable changes to Leywn are documented in this file.
 
-## [Unreleased]
-
-  ### Changed
-  - **Pretty-printed responses** — every generated JSON and XML body now comes with line breaks and two-space indentation instead of a single line. This is done centrally in `Leywn.Respond`, so it covers all content-negotiated endpoints (echo, status, info, random, auth, chaos, mocks, errors, …), and also the bodies that bypass it: `/hash/*`, the RFC 8693 token exchange (success and error), `/openapi.json`, `/mocks/:name/openapi.json` and the deliberately broken chaos response (indented, then truncated). `/stream/:n` stays compact because NDJSON needs one object per line; the codec, text-format and image endpoints return their input or binary data unchanged. Clients that parse the body are unaffected; anything comparing raw bytes against the old single-line output needs updating
-
 ## [1.1.1] - 2026-11-03
 
-A fix release: the `1.1.0` Docker image aborts at startup on Intel CPUs with AMX (Sapphire Rapids and later, which includes GitHub Actions runners and many current cloud VMs).
+A fix release: the `1.1.0` Docker image aborts at startup on Intel CPUs with AMX (Sapphire Rapids and later, which includes GitHub Actions runners and many current cloud VMs). It also makes every generated JSON and XML response pretty-printed.
 
   ### Fixed
   - **Container fails to start on AMX hosts** — `svenwal/leywn:1.1.0` exits immediately with `sys_sigaltstack(): Internal error: Failed to set alternate signal stack`. The cause is not OTP 28, as the `1.1.0` notes assumed, but Alpine 3.24: its musl 1.2.6 rejects the alternate signal stack size that OTP 27 and 28 request when the kernel reports a large signal frame (`AT_MINSIGSTKSZ` 11952 on AMX). OTP 27.3.4.18 is affected exactly like OTP 28; CI only passed when it landed on a runner without AMX. Upstream: erlang/otp#11248, fixed by erlang/otp#11376, first released in OTP 29.1 (no OTP 28 backport yet; the OTP 27 backport is pending)
@@ -18,6 +13,7 @@ A fix release: the `1.1.0` Docker image aborts at startup on Intel CPUs with AMX
   - **Docker base images** — build stages move from Elixir 1.20.4 / OTP 27.3.4.18 / Alpine 3.24.2 to Elixir 1.20.4 / OTP 29.1.2 / Alpine 3.24.3; the runtime stage moves to Alpine 3.24.3
 
   ### Changed
+  - **Pretty-printed responses** — every generated JSON and XML body now comes with line breaks and two-space indentation instead of a single line. This is done centrally in `Leywn.Respond`, so it covers all content-negotiated endpoints (echo, status, info, random, auth, chaos, mocks, errors, …), and also the bodies that bypass it: `/hash/*`, the RFC 8693 token exchange (success and error), `/openapi.json`, `/mocks/:name/openapi.json` and the deliberately broken chaos response (indented, then truncated). `/stream/:n` stays compact because NDJSON needs one object per line; the codec, text-format and image endpoints return their input or binary data unchanged. Clients that parse the body are unaffected; anything comparing raw bytes against the old single-line output needs updating
   - Version bumped to `1.1.1` in `mix.exs`, `openapi.json` and the README
 
 ## [1.1.0] - 2026-10-08
