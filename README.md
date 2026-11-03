@@ -218,7 +218,7 @@ Returns server status, version, and uptime. Suitable for use as a Kubernetes liv
 
 ```bash
 curl http://localhost:4000/health
-# {"status":"ok","version":"1.1.0","uptime_seconds":42}
+# {"status":"ok","version":"1.1.1","uptime_seconds":42}
 ```
 
 ---
@@ -1195,7 +1195,7 @@ priv/
 
 Certificate generation uses Erlang's built-in `:public_key` and `:crypto` modules — no external PKI dependencies.
 
-Docker images are built on Elixir 1.20 / Erlang/OTP 27 on Alpine 3.24, and the runtime stage runs `apk upgrade` so the image carries current Alpine security patches. Two `cowlib` advisories (CVE-2026-43966, CVE-2026-43969) have no fixed release upstream; both are in encoders Leywn never calls.
+Docker images are built on Elixir 1.20 / Erlang/OTP 29.1 on Alpine 3.24 (OTP 29.1 is the first release that starts on Alpine 3.24 hosts with Intel AMX CPUs; older releases abort with `Failed to set alternate signal stack`), and the runtime stage runs `apk upgrade` so the image carries current Alpine security patches. Two `cowlib` advisories (CVE-2026-43966, CVE-2026-43969) have no fixed release upstream; both are in encoders Leywn never calls.
 
 Including everything those pull in transitively, the whole tree is 14 packages. `plug`, `cowboy` and `cowlib` are pinned in `mix.exs` above the floor `plug_cowboy` itself requires, because that floor sits below the releases that carry the 2026 denial-of-service fixes; `mix deps.get` audits the lock against the OSV advisory feed on every build, so a dependency slipping below a fixed version is visible in the build log rather than only in a scanner.
 
