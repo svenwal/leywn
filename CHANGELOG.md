@@ -2,6 +2,11 @@
 
 All notable changes to Leywn are documented in this file.
 
+## [Unreleased]
+
+  ### Changed
+  - **Pretty-printed responses** — every generated JSON and XML body now comes with line breaks and two-space indentation instead of a single line. This is done centrally in `Leywn.Respond`, so it covers all content-negotiated endpoints (echo, status, info, random, auth, chaos, mocks, errors, …), and also the bodies that bypass it: `/hash/*`, the RFC 8693 token exchange (success and error), `/openapi.json`, `/mocks/:name/openapi.json` and the deliberately broken chaos response (indented, then truncated). `/stream/:n` stays compact because NDJSON needs one object per line; the codec, text-format and image endpoints return their input or binary data unchanged. Clients that parse the body are unaffected; anything comparing raw bytes against the old single-line output needs updating
+
 ## [1.1.1] - 2026-11-03
 
 A fix release: the `1.1.0` Docker image aborts at startup on Intel CPUs with AMX (Sapphire Rapids and later, which includes GitHub Actions runners and many current cloud VMs).

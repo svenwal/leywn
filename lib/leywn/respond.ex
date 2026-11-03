@@ -30,8 +30,13 @@ defmodule Leywn.Respond do
     end
   end
 
+  # Generated bodies are pretty-printed (line breaks, two-space indentation) in
+  # both formats, so responses are readable straight from curl or a browser.
+  # Nesting is bounded wherever caller data is reflected (Plug caps query
+  # nesting at 32 levels, mock bodies are depth-checked on write), so the
+  # indentation cannot blow up the response size.
   defp send_json(conn, status, data) do
-    body = Jason.encode!(data)
+    body = Jason.encode!(data, pretty: true)
 
     conn
     |> put_resp_content_type("application/json")
@@ -42,7 +47,7 @@ defmodule Leywn.Respond do
     xml =
       root
       |> XmlBuilder.document(Leywn.Respond.XML.to_elements(data))
-      |> XmlBuilder.generate(format: :none)
+      |> XmlBuilder.generate(format: :indent, whitespace: "  ")
 
     conn
     |> put_resp_content_type("application/xml")

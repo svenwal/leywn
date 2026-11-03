@@ -1034,6 +1034,8 @@ Both bookings are immediately visible through their relations — `/mocks/flight
 
 Every endpoint defaults to JSON. Pass `Accept: application/xml` to receive an XML response instead.
 
+Response bodies Leywn generates are pretty-printed in both formats: line breaks and two-space indentation, so they read well straight from `curl` or a browser. The exceptions are bodies whose shape is the point: `/stream/:n` stays NDJSON (one compact object per line), the `/decode/*`, `/encode/*` and text `/format/*` endpoints return the transformed input as is, and images are binary.
+
 ```bash
 # JSON (default)
 curl http://localhost:4000/echo

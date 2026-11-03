@@ -69,6 +69,22 @@ defmodule Leywn.AuthJwtExchangeTest do
     assert body["expires_in"] == 3600
   end
 
+  test "RFC 8693: success and error bodies are pretty-printed" do
+    params =
+      URI.encode_query(%{
+        "grant_type" => "urn:ietf:params:oauth:grant-type:token-exchange",
+        "subject_token" => make_jwt(),
+        "subject_token_type" => "urn:ietf:params:oauth:token-type:jwt"
+      })
+
+    ok = post_form("/auth/jwt/exchange", params)
+    assert String.starts_with?(ok.resp_body, "{\n  \"")
+
+    bad = post_form("/auth/jwt/exchange", "grant_type=nope")
+    assert bad.status == 400
+    assert String.starts_with?(bad.resp_body, "{\n  \"")
+  end
+
   test "RFC 8693: access_token type accepted as subject_token_type" do
     params =
       URI.encode_query(%{
